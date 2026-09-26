@@ -129,4 +129,4 @@ Before claiming “this will work”:
 | **PRD-as-EPR custody network + mid-size compliance SaaS** | Feasible |
 | **Will it work?** | **Yes if you build the second thing and fix cash/density/legal naming. No if you launch the first thing as written.** |
 
-Related: [Tier-2/3 field issues](./tier2-tier3-field-issues.md)
+Related: [Tier-2/3 field issues](./tier2-tier3-field-issues.md) · [Unit economics (ILLUSTRATIVE)](./unit-economics-illustrative.md)

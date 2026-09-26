@@ -44,5 +44,13 @@ Each role feature includes description, user stories, acceptance criteria, data 
 
 ## Related research
 
-- [Tier-2 / Tier-3 India field issues](../research/tier2-tier3-field-issues.md) — persona-based friction from Nashik, Gwalior, Bhagalpur, Coimbatore, Indore, Kolhapur–Sangli
-- [Idea feasibility (no UI/UX)](../research/idea-feasibility-no-ui.md) — 2 analysts × 6 roles; will the idea work?
+- [**Senior PM / research synthesis**](../research/00-senior-pm-research-synthesis.md) — multi-angle validation, pivot decision
+- [Tier-2 / Tier-3 India field issues](../research/tier2-tier3-field-issues.md)
+- [Idea feasibility (no UI/UX)](../research/idea-feasibility-no-ui.md)
+- [Scenario matrix 24mo](../research/scenario-matrix-24mo.md)
+- [Competitive / substitute analysis](../research/competitive-substitute-analysis.md)
+- [Unit economics (illustrative)](../research/unit-economics-illustrative.md)
+- [Regulatory / political scenarios](../research/regulatory-political-scenarios-memo.md)
+- [Pilot design (WoZ)](../research/pilot-design.md)
+- [GTM decision memo](../research/gtm-decision-memo.md)
+- [12-week pilot / test design](../research/pilot-design.md) — learning-first Indore WoZ plan; kill criteria; no product build yet

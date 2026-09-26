@@ -9,13 +9,15 @@
 
 ## 1. The researcher’s punchline
 
-If this landed on a Fortune-100 stage-gate committee tomorrow, the recommendation would be:
+> **UPDATE (2026-09-27):** EcoSure is a **government initiative**, not a private SaaS startup. See [`gov-initiative-reframe.md`](./gov-initiative-reframe.md). Institutional form flips ICP, monetization, and gov-dashboard priority — field physics (kabadi cash, shop liquidity, density, cert naming) still hold.
+
+If this landed on a Fortune-100 stage-gate committee tomorrow *as a private venture*, the recommendation would have been:
 
 > **PERSEVERE on the problem** (formal e-waste custody + EPR evidence in India).  
 > **PIVOT the product** away from consumer EcoPoints marketplace.  
 > **KILL** PRD defaults that assume kabadi replacement, SPCB SaaS, and Phase-4-only manufacturers.
 
-The idea is not fantasy. The **packaging of the idea** in the original PRD is.
+**As a government initiative**, the recommendation shifts to: design as **Digital Public Infrastructure (DPI) or state pilot with statutory hooks** — not a consumer rewards app and not “gov as optional Phase-4 viewer.” Full type scores in the reframe memo.
 
 ---
 

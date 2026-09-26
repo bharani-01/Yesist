@@ -44,6 +44,7 @@ Each role feature includes description, user stories, acceptance criteria, data 
 
 ## Related research
 
+- [**Gov initiative reframe**](../research/gov-initiative-reframe.md) — **READ FIRST if EcoSure is a government programme**
 - [**Senior PM / research synthesis**](../research/00-senior-pm-research-synthesis.md) — multi-angle validation, pivot decision
 - [Tier-2 / Tier-3 India field issues](../research/tier2-tier3-field-issues.md)
 - [Idea feasibility (no UI/UX)](../research/idea-feasibility-no-ui.md)

@@ -45,3 +45,4 @@ Each role feature includes description, user stories, acceptance criteria, data 
 ## Related research
 
 - [Tier-2 / Tier-3 India field issues](../research/tier2-tier3-field-issues.md) — persona-based friction from Nashik, Gwalior, Bhagalpur, Coimbatore, Indore, Kolhapur–Sangli
+- [Idea feasibility (no UI/UX)](../research/idea-feasibility-no-ui.md) — 2 analysts × 6 roles; will the idea work?

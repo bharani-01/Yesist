@@ -3,6 +3,9 @@ import { env } from '../config/env.js';
 import { logger } from './logger.js';
 
 // numeric stays a string (pg default) to keep money and weight exact.
+// Calendar dates stay 'YYYY-MM-DD'; parsing them into Date shifts the day across time zones.
+pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
+
 export const pool = new pg.Pool({
   connectionString: env.databaseUrl,
   max: 10,

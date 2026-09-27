@@ -9,7 +9,7 @@
     "start": "node --env-file-if-exists=../../.env src/server.js",
     "db:setup": "node --env-file-if-exists=../../.env scripts/db-setup.js",
     "onboard:pilot": "node --env-file-if-exists=../../.env scripts/onboard-pilot.js",
-    "test": "node --env-file-if-exists=../../.env --test --test-concurrency=1 \"test/**/*.test.js\""
+    "test": "node --env-file-if-exists=../../.env scripts/test.js"
   },
   "dependencies": {
     "cookie-parser": "^1.4.7",

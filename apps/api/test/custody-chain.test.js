@@ -1,4 +1,5 @@
-// End-to-end custody chain against the real database (requires `npm run db:setup` and `npm run onboard:pilot`).
+// End-to-end custody chain against a real PostgreSQL database. Run through `npm test`,
+// which provisions the isolated `<database>_test` schema and test accounts first.
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { after, before, describe, test } from 'node:test';

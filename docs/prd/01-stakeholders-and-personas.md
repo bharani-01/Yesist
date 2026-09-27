@@ -1,92 +1,74 @@
 # EcoSure — Stakeholders and Personas
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-09-27 (v2)  
+Personas are grounded in the Tier-2/3 field research in [`../research/tier2-tier3-field-issues.md`](../research/tier2-tier3-field-issues.md).
 
 ---
 
 ## 1. Stakeholder map
 
-| # | Stakeholder | Org type | Dashboard | Phase |
-|---|-------------|----------|-----------|-------|
-| 1 | Consumer | Individual | Consumer | 1 |
-| 2 | Local Recycle Shop | Organization | Local Shop | 1 |
-| 3 | Regional Hub | Organization | Regional Hub | 1 |
-| 4 | Professional Recycler | Organization | Professional Recycler | 3 |
-| 5 | Manufacturer (Business) | Organization | Manufacturer | 4 |
-| 6 | Government Agency | Organization | Government | 4 |
-| 7 | Platform Admin | Internal | Admin | 0 |
+| Stakeholder | Role code | Programme role | Pilot phase |
+|-------------|-----------|----------------|-------------|
+| Citizen / household | `citizen` | Supplies material; receives UPI incentive | 1 |
+| Society (RWA) / small office | `citizen` or `producer`-style bulk requester | Density wedge for collection drives | 1 |
+| Local collection shop | `local_shop` | First custody point | 1 |
+| Regional hub | `regional_hub` | Consolidates trips to the recycler | 1 |
+| Authorized recycler | `pro_recycler` | Root of trust; issues custody attestations | 1 |
+| Producer (manufacturer) | `producer` | Uses evidence for EPR filing | 2 |
+| SPCB office | `spcb_officer` | Monitors the formal chain | 1 (verification), 2 (monitoring) |
+| Programme operator | `programme_operator` | Runs onboarding, float, disputes | 0 |
+
+Change from v1: the recycler moves into phase 1 because nothing is verifiable without it, and the SPCB is a core stakeholder because this is a government programme.
 
 ---
 
 ## 2. Personas
 
-### 2.1 Consumer — “Priya, urban household”
+### Priya — teacher, Nashik (citizen)
+- **Wants:** get two old phones, a laptop, and a broken mixer out safely on a Saturday.
+- **Blocks her today:** fear of data on phones, society gate rules, English-only forms, "points later" instead of money.
+- **Needs from EcoSure:** Marathi/Hindi WhatsApp flow, category-and-count booking, wipe checklist, UPI on collection, reschedule by message.
 
-- **Goals:** Dispose of old phones/laptops safely; earn rewards; learn correct segregation.
-- **Pains:** Doesn’t know where to drop e-waste; distrusts informal scrap; no proof of recycling.
-- **Jobs:** Register devices, schedule pickup, track status, redeem EcoPoints, read tips.
-- **Success:** Pickup completed; EcoPoints credited; WhatsApp update received.
+### Aditya — student, Gwalior (citizen)
+- **Wants:** clear chargers and an old phone for cash before moving out.
+- **Blocks him:** OTP failures on Jio, PG owner bans pickup staff, distrust of giving an address.
+- **Needs:** WhatsApp OTP with SMS fallback, drop-at-shop mode, instant UPI.
 
-### 2.2 Local Recycle Shop — “Ramesh, neighbourhood collector”
+### Ramesh — shop owner, Bhagalpur (local shop)
+- **Wants:** steady volume and money within days.
+- **Blocks him:** GSTIN demands, waiting weeks for approval, monthly settlement, English screens, hub freight costs.
+- **Needs:** micro KYC tier with provisional operation, weekly payment, advances, Hindi, hub-paid or shared freight.
 
-- **Goals:** Steady inbound volume; fair payout from hub; simple schedule management.
-- **Pains:** Paper-based requests; no visibility into settlements; limited training.
-- **Jobs:** Accept pickups, collect, weigh, transfer to hub, view payouts/education.
-- **Success:** High completion rate; transparent settlements; trained staff.
+### Meera — hub operations lead, Coimbatore (regional hub)
+- **Wants:** full trucks, low dwell time, and fewer weighing fights.
+- **Blocks her:** power cuts, one truck carrying several shops' lots, fixed 5% tolerance in monsoon, no guaranteed buyer.
+- **Needs:** offline receipt, multi-shop trips, seasonal tolerance, offtake agreement with the recycler.
 
-### 2.3 Regional Hub — “Meera, hub operations lead”
+### Arjun — authorized recycler operations (pro recycler)
+- **Wants:** more compliant feedstock that is sorted and honestly weighed.
+- **Blocks him:** mixed-quality lots, being blamed for fake paperwork, slow upstream settlements.
+- **Needs:** grade and reject rights, attestation issuing tied to his CPCB authorization, capacity checks.
 
-- **Goals:** Aggregate from shops; efficient outbound to recyclers; accurate regional stats.
-- **Pains:** Fragmented shop partners; settlement disputes; weak inventory visibility.
-- **Jobs:** Manage inbound from shops/businesses; create lots/transfers; settle with shops.
-- **Success:** Low dwell time of inventory; settled books; clean chain-of-custody.
+### Neha — EPR compliance executive, Indore (producer)
+- **Wants:** evidence she can defend in an audit, without rebuilding spreadsheets every quarter.
+- **Blocks her:** unclear attribution of mixed lots, templates that do not match portal fields, juniors downloading the wrong file.
+- **Needs:** attestation library, conservative attribution with review, approval before download, bilingual exports, target-gap view.
 
-### 2.4 Professional Recycler — “Arjun, authorized recycler ops”
+### Suresh — SPCB officer, Kolhapur–Sangli (SPCB)
+- **Wants:** honest numbers and a way to check paperwork.
+- **Blocks him:** self-reported totals, platform approval confused with Board authorization, English-only reports, no offline field pack.
+- **Needs:** "formal network only" labels, public verification, compliance flags, inspection notes, state-language offline pack.
 
-- **Goals:** Compliant processing; issue certificates; support EPR documentation.
-- **Pains:** Incomplete inbound manifests; manual cert generation; regulator audit stress.
-- **Jobs:** Receive hub lots; process; certify; settle; supply EPR packs to manufacturers/shops.
-- **Success:** Certified lots; audit-ready trail; timely settlements.
-
-### 2.5 Manufacturer — “Neha, EPR compliance manager”
-
-- **Goals:** Meet EPR targets; produce CPCB/SPCB-ready reports; prove responsible recycling.
-- **Pains:** Scattered recycler data; report assembly is manual; product-level visibility missing.
-- **Jobs:** Track product e-waste footprint; find recyclers/hubs; download compliance reports.
-- **Success:** Exportable reports; linked certificates; clear product disposal patterns.
-
-### 2.6 Government Agency — “Officer Patel, SPCB analyst”
-
-- **Goals:** Monitor regional e-waste flows; spot non-compliance; improve awareness.
-- **Pains:** Incomplete informal sector data; delayed reports; no live platform view.
-- **Jobs:** View aggregates; access education; submit platform feedback; monitor compliance signals.
-- **Success:** Trusted aggregate dashboards; actionable non-compliance flags (read-only Phase 4).
-
-### 2.7 Platform Admin — “EcoSure ops”
-
-- **Goals:** Approve orgs; configure rate cards; resolve disputes; keep system healthy.
-- **Pains:** Fake shops; settlement conflicts; integration failures.
-- **Jobs:** KYC review, role assignment, config, audit inspection, support.
-- **Success:** Only verified orgs operate; disputes closed within SLA.
+### Programme operator — department ops team
+- **Wants:** a corridor that runs without constant firefighting.
+- **Needs:** launch checklist, rate card control, dispute queue, float dashboard, audit access.
 
 ---
 
-## 3. Relationships
+## 3. Shared needs
 
-```text
-Consumer ──pickup──► Local Shop ──transfer──► Regional Hub ──transfer──► Professional Recycler
-                                                                              │
-Manufacturer ───────────────────────────────────────── bulk / EPR ───────────┘
-                                                                              │
-Certificates / reports ──────────────────────────────────────► Manufacturer + Government
-```
-
----
-
-## 4. Shared needs across personas
-
-- Clear status of material and money
-- Trust via audit trail and certificates
-- Education appropriate to role
-- Mobile-friendly access for field collection
-- Transparent permissions (no surprise data exposure)
+- Money that arrives on time
+- Proof that material went where it was meant to go
+- WhatsApp and local-language access
+- Works with poor signal
+- Clear separation between platform approval and statutory authorization

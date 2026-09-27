@@ -1,84 +1,100 @@
 # EcoSure — Non-Functional Requirements and Security
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-09-27 (v2)
 
 ---
 
-## 1. Architecture constraints (future build)
+## 1. Architecture
 
 | Layer | Choice |
 |-------|--------|
-| Database | Local PostgreSQL |
+| Database | PostgreSQL, single idempotent `schema.sql` |
 | API | Node.js, validated requests, structured errors |
-| Auth | Custom sessions or JWT; password hashing (argon2/bcrypt) |
-| Authorization | Server-side RBAC per [02-roles-rbac.md](./02-roles-rbac.md) |
-| Schema | Single idempotent `schema.sql` |
-| Client | No privileged credentials or service secrets |
+| Auth | Phone OTP; server-side sessions; org roles |
+| Authorization | Server-side, per [02-roles-rbac.md](./02-roles-rbac.md) |
+| Hosting | State data centre or government-empanelled cloud; data in India |
+| Clients | Mobile-first web (installable), works offline for field roles |
 
 ---
 
-## 2. Security requirements
+## 2. Security
 
-1. **Authentication** — Secure password storage; session expiry; logout; lockout after repeated failures.
-2. **Authorization** — Enforce on every mutating and sensitive read endpoint.
-3. **Transport** — TLS in deployed environments; secure cookies if cookie sessions.
-4. **Input validation** — Schema validation (e.g., Zod) on all writes.
-5. **Injection safety** — Parameterized SQL only.
-6. **Audit** — Mutations on pickups, lots, settlements, certificates, points, org approvals logged.
-7. **Secrets** — Env-based; never committed.
-8. **File uploads** — Type/size limits; malware scanning later; private storage.
-9. **Admin access** — Invite-only; elevated actions double-logged.
-
----
-
-## 3. Privacy (DPDP-aligned principles)
-
-- Collect only data needed for e-waste operations and compliance.
-- Purpose limitation: marketing WhatsApp separate from transactional opt-in.
-- Access control on PII (phone, address, email).
-- Retention: operational vs compliance artifacts (default 7 years for compliance — OQ-32).
-- Consumer data export/delete request process (Phase 5); anonymize custody records where legally required rather than breaking chain integrity.
+1. Least-privilege authorization on every endpoint.
+2. Parameterised SQL only; schema validation on all input.
+3. TLS everywhere; secure, HTTP-only session cookies.
+4. Secrets in server environment only; rotated.
+5. Rate limits on OTP, verification lookups, and exports.
+6. File uploads: type and size limits, malware scan, private storage.
+7. Append-only audit log for custody, money, attestations, approvals, and all access to personal data by SPCB and operator users.
+8. Security audit by a CERT-In empanelled auditor before go-live, as expected for government applications.
 
 ---
 
-## 4. Reliability and performance
+## 3. Offline operation
+
+- Field roles (shop, hub, recycler receiving) can collect, weigh, receive, and photograph without signal.
+- Records are queued locally with capture time and device ID and synced when online.
+- Conflicts (for example, the same lot received twice) are shown to the receiving party and logged.
+- The app shows the number of records waiting to sync.
+
+---
+
+## 4. Language and accessibility
+
+- Hindi and English at launch; each new corridor adds its state language before going live.
+- All citizen and shop messages, templates, and screens are translated; compliance exports offer bilingual output.
+- Plain language; icons plus text for staff with limited reading.
+- WCAG 2.1 AA target for web screens.
+- Works on low-end Android phones and 2G/3G connections.
+
+---
+
+## 5. Privacy (DPDP Act)
+
+- Data fiduciary: the sponsoring department. The contracted operator is a data processor under contract.
+- Collect only what operations need. Citizen address is shared only with the assigned shop.
+- Consent recorded for WhatsApp messages; separate from transactional notices.
+- Retention: operational personal data 3 years after last activity; custody and compliance records 7 years. Personal fields are anonymised at the end of retention without breaking the custody chain.
+- Citizens can request access, correction, and deletion; deletion anonymises rather than removes custody events.
+
+---
+
+## 6. Transparency and RTI
+
+- Published aggregates always carry the coverage label "Formal EcoSure network only".
+- A documented disclosure policy defines what can be released under RTI and how it is redacted.
+- Public verification exposes no personal data or prices.
+
+---
+
+## 7. Integrity and fraud controls
+
+- Attestations only from organizations with verified CPCB authorization.
+- Attested weight ≤ accepted weight; period total ≤ authorized capacity.
+- Duplicate document hashes raise flags.
+- Citizen incentive limits per person per month; anomaly detection on repeated addresses, devices, or UPI IDs.
+- Dual weighing with photos at every hand-off.
+
+---
+
+## 8. Reliability and performance
 
 | Requirement | Target |
 |-------------|--------|
-| API availability (deployed) | 99.5% monthly (initial) |
-| Pickup list p95 | < 500 ms local network |
-| Report generation | Async for large periods; status polling |
-| Backup | Daily Postgres backup (ops runbook Phase 0) |
-| Idempotency | Required for payments-like and messaging side effects |
+| Availability | 99.5% monthly |
+| Pickup list p95 | < 800 ms on 3G |
+| Offline sync | Within 5 minutes of signal returning |
+| Backups | Daily, with a tested restore each quarter |
+| Payout reconciliation | Daily |
 
 ---
 
-## 5. Auditability for compliance
+## 9. Observability
 
-- Certificates immutable; corrections = new certificate linked to previous.
-- Compliance report generation parameters stored for reproducibility.
-- Chain of custody reconstructible for any `material_lot_id`.
-- Government views prefer aggregates; drill-down only within policy.
+Structured logs with request IDs; metrics for payout success, message delivery, sync backlog, dispute rate, and dwell breaches; alerts to the operator.
 
 ---
 
-## 6. Accessibility and UX quality
+## 10. Legal statement
 
-- Light-theme, premium SaaS UI (implementation phase).
-- WCAG 2.1 AA aspirational for interactive flows.
-- Responsive: desktop, tablet, mobile for consumer and field collection.
-- Every important screen: loading / empty / success / error / unauthorized / forbidden.
-
----
-
-## 7. Observability
-
-- Structured API logs with request id.
-- Metrics: error rate, latency, notification success, pickup completion.
-- Alerting on webhook failures and settlement job failures.
-
----
-
-## 8. Compliance documentation disclaimer
-
-EcoSure provides workflows and structured exports to **support** EPR / CPCB / SPCB obligations. Final legal sufficiency of filings is the responsibility of the obligated entity and their advisors. Platform does not replace statutory portals unless an approved integration exists.
+EcoSure records custody and supports EPR filing. It does not issue EPR certificates and does not replace the CPCB EPR portal. Producers remain responsible for their statutory filings.

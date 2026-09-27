@@ -1,128 +1,76 @@
-# EcoSure — Manufacturer Dashboard PRD
+# EcoSure — Producer (Manufacturer) PRD
 
-**Role:** `manufacturer`  
-**Organization type:** `manufacturer`  
-**Phase focus:** Phase 4  
-**Last updated:** 2026-09-26
+**Role:** `producer`  
+**Phase:** 2 (moved up from phase 4, available as soon as attestations exist)  
+**Last updated:** 2026-09-27 (v2)
 
 ---
 
 ## 1. Summary
 
-Manufacturers track e-waste attributed to their products, discover recycling partners, obtain EPR support documentation, view impact analytics, and export CPCB/SPCB-oriented compliance reports.
+Producers use EcoSure to collect custody evidence for their EPR obligations: attestation library, target-gap view, and exports that help them file on the CPCB / SPCB portal. EcoSure supports filing; it does not file and does not issue EPR certificates.
+
+What changed from v1: moved to phase 2; attribution is conservative with a review queue; exports need internal approval; bilingual exports; target-gap view added; footprint charts deprioritised.
 
 ---
 
 ## 2. Features
 
-### F-M1 Registration and profile — Phase 0 / enable Phase 4
+### P1 Onboarding — Phase 2
+**Acceptance criteria**
+- CPCB EPR registration number verified by the operator.
+- Brands and product categories recorded for attribution.
+- Org roles: owner, compliance approver, operator, viewer.
 
-**Description:** Register manufacturer profile, brands/product categories, EPR registration identifiers (as available).
+### P2 Attestation library — Phase 2
+**Acceptance criteria**
+- Lists attestations for lots with weight attributed to the producer.
+- Filters: period, state, category, recycler.
+- Each item links to public verification.
 
-**Acceptance criteria:**
-- Admin approval before compliance modules unlock.
-- Profile can list product categories/SKUs for attribution (metadata).
+### P3 Attribution with review — Phase 2
+**Story:** As an EPR manager, I want only defensible weight counted toward my evidence.
 
-**Data:** `Organization` (+ product catalog table in implementation)  
-**Permissions:** Org + admin approve
+**Acceptance criteria**
+- Each attribution records method (brand match, bulk declaration, take-back programme, manual review), confidence, evidence, and ruleset version.
+- Low-confidence attributions go to a review queue and are excluded from exports until reviewed.
+- Producer can dispute an attribution with evidence.
 
----
+### P4 Target-gap view — Phase 2
+**Acceptance criteria**
+- Producer enters its EPR target per category for the period.
+- Shows attested and attributed weight against target, and the gap.
+- Early warnings: lots attributed to the producer that are past dwell or missing attestation.
 
-### F-M2 Product e-waste footprint and disposal patterns — Phase 4
+### P5 Exports — Phase 2
+**Acceptance criteria**
+- Types: evidence summary, CPCB portal worksheet, SPCB portal worksheet (per state).
+- Languages: English, Hindi, or bilingual.
+- Each export stores template version, attribution ruleset version, and inputs, so it can be reproduced.
+- Template versions are reviewed by a compliance expert before release. Outdated templates block generation with a clear message.
+- Download requires approval by the producer's compliance approver.
+- Every file states: "Supports filing on the CPCB / SPCB portal. The producer is responsible for submission. EcoSure does not issue EPR certificates."
+- Retained for 7 years.
 
-**Description:** View kg and counts of e-waste attributed to manufacturer products over time.
+### P6 Recycler and hub directory — Phase 2
+Approved recyclers and hubs filtered by state and category, with statutory registration shown separately from platform approval.
 
-**User story:** As an EPR manager, I want product-level disposal visibility so I can plan take-back.
+### P7 Take-back programme — Phase 2
+**Acceptance criteria**
+- Producer can fund citizen incentives for its brand or category in a corridor (producer take-back pool).
+- Lots from funded pickups are attributed with the `take_back_programme` method.
 
-**Acceptance criteria:**
-- Charts/tables by category, period, geography (state) from attributed lots/certificates.
-- Attribution rules documented (device brand match, bulk declaration, or explicit link).
-- No raw consumer PII.
-- Empty state when no attributed volume.
-
-**Data:** Attributed `MaterialLot`, `Certificate`, aggregates  
-**Permissions:** Own manufacturer org
-
----
-
-### F-M3 Nearby professional recyclers and hubs — Phase 4
-
-**Description:** Discover approved recyclers/hubs for responsible management.
-
-**Acceptance criteria:**
-- Search by location/capability.
-- Public profile fields only.
-- CTA to request partnership / bulk pickup (creates business pickup or partnership request record).
-
-**Data:** `Organization`, `Location`  
-**Permissions:** Read approved orgs
-
----
-
-### F-M4 EPR compliance and documentation — Phase 4
-
-**Description:** Access certificates and recycler-provided EPR support packs for the manufacturer’s attributed volume.
-
-**Acceptance criteria:**
-- List certificates linked to attributed lots.
-- Download support packs when shared by recycler.
-- Audit downloads of compliance artifacts.
-
-**Data:** `Certificate`, `ComplianceReport`  
-**Permissions:** Owner org
+### P8 Bulk pickup requests — Phase 1
+Producers and offices can request bulk collection through shops and hubs.
 
 ---
 
-### F-M5 Platform impact insights — Phase 4
-
-**Description:** Safe platform aggregates + manufacturer’s own contribution share.
-
-**Acceptance criteria:**
-- Own vs platform aggregate clearly labeled.
-- No competitor confidential data.
+## 3. Screen states
+Loading, empty (no attributed weight yet), success, error, 401, 403, awaiting approval, template outdated.
 
 ---
 
-### F-M6 CPCB and SPCB report downloads — Phase 4
-
-**Description:** Generate structured exports to support CPCB/SPCB filings.
-
-**User story:** As a compliance manager, I want exportable reports so I can file faster.
-
-**Acceptance criteria:**
-- Select report type (`cpcb_export`|`spcb_export`|`epr_summary`), period, state (for SPCB).
-- Job generates file; status visible; download when ready.
-- Store generation params for reproducibility.
-- Field set includes at minimum: period, org identifiers, category-wise quantities, certificate references, recycler partners.
-- Exact official template mapping tracked in OQ-30; expert review required before claiming portal parity.
-- Error if insufficient attributed data.
-
-**Data:** `ComplianceReport`  
-**Permissions:** Manufacturer org members
-
----
-
-### F-M7 Business pickup requests — Phase 1–4 (available when org approved)
-
-**Description:** Request bulk pickup via hub/shop/recycler network.
-
-**Acceptance criteria:**
-- Creates `PickupRequest` with `requester_org_id`.
-- Track status like consumer pickups.
-- Phase 1 may route to Local Shop / Hub only.
-
-**Data:** `PickupRequest`  
-**Permissions:** Manufacturer org
-
----
-
-## 3. Screen checklist
-
-Profile, footprint analytics, partner discovery, certificates/packs, report generator, report history, pickups — L/E/S/Err/401/403.
-
----
-
-## 4. Clarifications vs original draft
-
-- Manufacturer does **not** see unrelated consumers’ device inventories.
-- CPCB/SPCB “make all reports” means **platform-supported exports**, not guaranteed automated statutory submission.
+## 4. Out of scope
+- Automatic portal submission
+- EPR certificate trading
+- Viewing citizen identities

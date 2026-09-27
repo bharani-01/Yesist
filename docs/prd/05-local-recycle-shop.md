@@ -1,163 +1,92 @@
-# EcoSure — Local Recycle Shop Dashboard PRD
+# EcoSure — Local Collection Shop PRD
 
 **Role:** `local_shop`  
-**Organization type:** `local_shop`  
-**Phase focus:** Phase 1 (ops), Phase 3 (settlements depth)  
-**Last updated:** 2026-09-26
+**Phase:** 1  
+**Last updated:** 2026-09-27 (v2)
 
 ---
 
 ## 1. Summary
 
-Local recycle shops onboard, manage inbound consumer/business pickups, record collection, transfer lots to regional hubs, view operational stats, access training, and see their own payout/settlement data.
+Shops collect from citizens and societies, weigh and group material into lots, send lots to the hub on shared trips, and get paid weekly. They can start working before full document review under a capped provisional tier.
+
+What changed from v1: micro KYC with provisional operation, weekly settlement and advances in phase 1, Hindi and offline support in phase 1, hub-paid or shared freight, and impact stats moved below money.
 
 ---
 
 ## 2. Features
 
-### F-S1 Org registration and profile — Phase 0–1
+### S1 Onboarding with micro tier — Phase 1
+**Story:** As a small shop owner without GST registration, I want to start collecting this week.
 
-**Description:** Apply as a Local Recycle Shop; showcase services/capabilities; await approval.
+**Acceptance criteria**
+- Micro tier needs: Aadhaar-verified owner phone, shop photo with signboard, address with landmark, UPI ID.
+- GSTIN optional; required only for the standard tier.
+- Provisional status allows operation up to 500 kg per month while documents are reviewed.
+- Operator decides within 3 working days; the shop gets a WhatsApp message with the outcome and any missing items in plain Hindi.
 
-**User story:** As a shop owner, I want a verified profile so consumers and hubs can find me.
+### S2 Pickup queue — Phase 1
+**Acceptance criteria**
+- Shows requests in range with locality, categories, counts, and window. Full address appears after accepting.
+- Accept, schedule, mark on the way, mark failed visit with reason.
+- Queue caches for offline use and syncs actions when signal returns.
 
-**Acceptance criteria:**
-- Registration captures name, GSTIN (if applicable), address/location, capabilities, docs.
-- Status `pending` until Platform Admin approves → `approved`.
-- Pending orgs cannot accept pickups.
-- Profile editable; critical identity changes may re-trigger review.
+### S3 Collect and weigh — Phase 1
+**Acceptance criteria**
+- Records weight per pickup with a photo of the sealed bag.
+- Blocks collection of data-bearing items without a wipe confirmation (citizen or collector assisted).
+- Works fully offline; records keep their capture time.
+- Large buttons and icons with Hindi labels for staff with limited reading.
 
-**Data:** `Organization`, `Location`, `OrganizationMember`  
-**Permissions:** Org members; approval by `platform_admin`
+### S4 Lots and trips — Phase 1
+**Acceptance criteria**
+- Groups collected pickups into a lot.
+- Joins a hub-planned trip, including trips shared with other shops.
+- Records sender weight with a photo when loading.
+- Sees the hub's receipt weight and any dispute.
 
----
+### S5 Money — Phase 1
+**Story:** As a shop owner, I want to see what I'm owed and get it within a week.
 
-### F-S2 Nearby pickup demand — Phase 1
+**Acceptance criteria**
+- Home screen leads with: amount due, next payment date, advance outstanding.
+- Weekly settlement paid within 7 days of hub receipt, to UPI or bank.
+- Undisputed weight paid even when part of a lot is disputed.
+- No minimum amount; small balances carry forward.
+- Advance request up to 40% of average weekly received value over 4 weeks (smaller cap for new shops); recovered automatically.
+- Downloadable statement per week.
 
-**Description:** View pickup requests in service radius (and assigned to this shop).
+### S6 Rates — Phase 1
+**Acceptance criteria**
+- Current rate card for the corridor visible, with version and effective date.
+- Rate card reviewed weekly by the operator.
+- Morning WhatsApp message when rates change.
 
-**User story:** As a shop operator, I want to see nearby pickup requests so I can grow volume.
+### S7 Freight — Phase 1
+**Acceptance criteria**
+- Shops do not pay freight for hub trips by default. Freight payer (hub or shared) is shown on each trip.
+- If a shop is outside the hub's route, it can request a pickup trip or use a nearby collection point set by the operator.
 
-**Acceptance criteria:**
-- List `requested` pickups within radius + all assigned to this org.
-- Show category summary, preferred window, approximate locality (not full address until accepted — preferred privacy default).
-- After accept, full address visible to assigned shop.
-- Empty state when none available.
+### S8 Disputes — Phase 1
+**Acceptance criteria**
+- Weight disputes raised within 72 hours of hub receipt, with photos.
+- Operator resolves within 5 working days.
+- Status shown on the lot and in WhatsApp.
 
-**Data:** `PickupRequest`  
-**Permissions:** Radius + assigned only; never other shops’ accepted jobs
+### S9 Stats — Phase 1
+Own pickups completed, kilograms collected, completion rate, failed-visit reasons. Shown below the money section.
 
----
-
-### F-S3 Manage pickups and schedule — Phase 1
-
-**Description:** Accept, schedule, collect, cancel (with rules), record weight.
-
-**User story:** As a shop operator, I want to manage my pickup board so routes stay efficient.
-
-**Acceptance criteria:**
-- Transitions per [10-workflows.md](./10-workflows.md).
-- Record `net_weight_kg` (or item weights) on `collected`.
-- Create `CollectionEvent` for each transition.
-- Cannot modify another org’s pickups (403).
-
-**Data:** `PickupRequest`, `CollectionEvent`, `PickupItem`  
-**Permissions:** Assigned org operators
-
----
-
-### F-S4 Collection and processing stats + recommendations — Phase 1
-
-**Description:** Own-org KPIs: pickups completed, kg collected, completion rate; rule-based tips.
-
-**User story:** As a shop owner, I want operational stats so I can improve.
-
-**Acceptance criteria:**
-- Metrics computed from this org’s data only.
-- Recommendations e.g. “High cancel rate — tighten scheduling windows”.
-- Loading/empty/error states; no other-org leakage.
-
-**Data:** Aggregates scoped to `organization_id`  
-**Permissions:** Org members
+### S10 Training — Phase 1
+Short Hindi (and corridor language) videos and guides: weighing, wipe help, handling batteries.
 
 ---
 
-### F-S5 Educational / training materials — Phase 1
-
-**Description:** Access content tagged for `local_shop`.
-
-**Acceptance criteria:**
-- List/detail published training content.
-- Empty state handled.
-
-**Data:** `EducationalContent`  
-**Permissions:** Read
+## 3. Screen states
+Loading, empty, success, error, 401, 403, offline with sync status, provisional-cap reached.
 
 ---
 
-### F-S6 Platform aggregate impact (safe) — Phase 1
-
-**Description:** High-level anonymized platform impact (total kg, total users) — **not** other orgs’ financials.
-
-**User story:** As a shop, I want to see collective impact so I feel part of the network.
-
-**Acceptance criteria:**
-- Only aggregate metrics approved for partner visibility.
-- Explicitly excludes payouts/revenues of other parties.
-- Clarifies the draft PRD “overall statistics” ambiguity.
-
-**Data:** Platform aggregates  
-**Permissions:** Approved partner orgs
-
----
-
-### F-S7 Payout and financial statistics — Phase 1 stub / Phase 3 full
-
-**Description:** View settlements where this shop is payee (from hub).
-
-**User story:** As a shop owner, I want clear payout visibility so I trust the platform.
-
-**Acceptance criteria:**
-- Phase 1: placeholder module listing “Settlements available after hub transfers” if none.
-- Phase 3: list settlements, lines, statuses, amounts; export CSV.
-- Disputes openable within window.
-- Cannot see hub↔recycler settlements except shop’s lines.
-
-**Data:** `Settlement`, `SettlementLine`  
-**Permissions:** Party only
-
----
-
-### F-S8 Transfer to Regional Hub — Phase 1
-
-**Description:** Batch collected pickups into lots and transfer to hub.
-
-**Acceptance criteria:**
-- Create `MaterialLot`; initiate `Transfer` to linked/approved hub.
-- Weight variance handling on receive (hub side).
-- Timeline visible on lot.
-
-**Data:** `MaterialLot`, `Transfer`  
-**Permissions:** Owning shop
-
----
-
-## 3. Screen checklist
-
-| Screen | States |
-|--------|--------|
-| Onboarding / profile | L/S/Err/pending gate |
-| Pickup board | L/E/S/Err/403 |
-| Pickup detail | L/S/Err |
-| Stats | L/E/S/Err |
-| Education | L/E/S |
-| Impact aggregates | L/S/Err |
-| Settlements | L/E/S/Err |
-| Lots / transfers | L/E/S/Err |
-
----
-
-## 4. Clarifications vs original draft
-
-- “Overall waste collection statistics of the platform” = **aggregate impact only**.
-- “Payout and financial statistics of the platform” = **this shop’s settlements**, not platform-wide P&L.
+## 4. Out of scope
+- Seeing other shops' jobs or payments
+- Setting their own platform rates
+- Issuing attestations

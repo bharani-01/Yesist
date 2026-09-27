@@ -3,159 +3,179 @@
 **Product name:** EcoSure  
 **Brand tagline:** Making Everything Count  
 **Document type:** Master Product Requirements Document (PRD)  
-**Status:** Approved for documentation phase  
-**Last updated:** 2026-09-26
+**Programme type:** Government initiative (state-led pilot, designed to federate into national digital public infrastructure)  
+**Status:** v2 — strengthened after field, feasibility, and regulatory research  
+**Last updated:** 2026-09-27
 
 ---
 
-## 1. Vision
+## 1. Programme assumptions (confirm with sponsor)
 
-EcoSure is an all-in-one e-waste management SaaS platform that connects consumers, local recycle shops, regional hubs, professional recyclers, manufacturers, and government agencies into one auditable chain of custody — so every device collected, transferred, processed, and certified can be measured, rewarded, and reported.
+These defaults drive every PRD in this folder. Changing one of them changes scope; see [14-open-questions.md](./14-open-questions.md) section "Sponsor decisions".
 
----
-
-## 2. Problem Statement
-
-India generates tens of millions of tonnes of waste annually, with a large share ending in landfills, waterways, and informal channels. Within that landscape, **e-waste** is especially high-impact: hazardous materials, recoverable rare metals, and regulatory obligations under Extended Producer Responsibility (EPR).
-
-Current gaps:
-
-1. **Fragmented collection** — Individuals and businesses lack a trusted, trackable path from discard to certified recycling.
-2. **Poor segregation and awareness** — Improper disposal stems from missing education and unclear local options.
-3. **No connected ecosystem** — Stakeholders cannot share pickup status, material lots, settlements, or compliance evidence in one system.
-4. **Hard-to-measure impact** — Without chain-of-custody data, sustainability efforts and EPR claims cannot be verified.
-
-EcoSure focuses on **e-waste** (not general municipal solid waste), while remaining extensible for adjacent recyclable streams later.
+| Assumption | Default |
+|------------|---------|
+| Sponsor | State government: State Pollution Control Board (SPCB) with the state IT / e-governance department |
+| Pilot geography | One corridor: Indore + Pithampur (Madhya Pradesh). No second city until pilot gates pass |
+| Long-term path | Standards and data model federate into a national layer run by MoEFCC / CPCB |
+| Statutory truth | The CPCB EPR portal remains the only place EPR certificates are generated. EcoSure never issues EPR certificates |
+| Mandate | Authorized recyclers and registered producers taking part in the pilot join via SPCB direction or MoU. Shops, hubs, and citizens join voluntarily, with incentives |
+| Operations | Department owns the platform and data. A contracted field operator runs collection logistics and settlement float under a service-level agreement |
+| Hosting | State data centre or government-empanelled cloud, PostgreSQL, data resident in India |
+| Funding | State scheme budget plus producer-funded take-back pool. No fee to citizens. No commission on scrap value |
 
 ---
 
-## 3. Solution
+## 2. Vision
 
-EcoSure provides role-specific dashboards on a shared platform:
-
-| Stakeholder | Primary value |
-|-------------|---------------|
-| Consumer | Device inventory, pickup scheduling, education, EcoPoints |
-| Local Recycle Shop | Inbound pickup management, collection stats, hub settlements |
-| Regional Hub | Aggregation, shop/business intake, settlements, regional stats |
-| Professional Recycler | Downstream processing, certificates, EPR documentation support |
-| Manufacturer | Product e-waste footprint, EPR / CPCB / SPCB reporting |
-| Government Agency | Aggregate monitoring, compliance visibility, education |
-| Platform Admin | Org approval, KYC, disputes, configuration (internal) |
-
-Future technical foundation (not built in this documentation phase):
-
-- **Local PostgreSQL** as the system of record
-- **Node.js** secure API with authentication and RBAC
-- Single idempotent **`schema.sql`** representing production database state
-- Real operational data only (no mock/fake business data in production features)
+EcoSure is the state's formal e-waste custody and evidence layer. It records every hand-off from a citizen or business to a collection shop, hub, and authorized recycler, so that formal tonnes can be counted, shops can be paid on time, producers can assemble EPR evidence, and the SPCB can see an honest picture of the formal network.
 
 ---
 
-## 4. Goals and Success Metrics
+## 3. Problem statement
 
-### 4.1 Product goals
+India generates large and rising volumes of e-waste. Most of it moves through informal channels that pay cash immediately, with no custody record and unsafe processing of hazardous components.
 
-- Make responsible e-waste disposal the easiest path for consumers and SMBs.
-- Create an auditable chain of custody from pickup to certified processing.
-- Enable fair settlements across shops, hubs, and recyclers.
-- Support manufacturer EPR reporting and regulator visibility.
-- Incentivize participation via EcoPoints without compromising ledger integrity.
+What stops formal recycling today:
 
-### 4.2 Success metrics (targets to refine at launch)
-
-| Metric | Description | Phase |
-|--------|-------------|-------|
-| Active consumers | Monthly active users with ≥1 device or pickup | 1 |
-| Pickup completion rate | `collected` / `requested` within SLA window | 1 |
-| Chain completeness | % of pickups with unbroken custody events | 1–3 |
-| Time-to-settle | Median days from `processed` to `settled` | 3 |
-| EcoPoints earn rate | Points earned per completed recycle event | 2 |
-| Certificate issuance | Certificates issued per processed lot | 3 |
-| Manufacturer report export | Successful CPCB/SPCB-ready exports | 4 |
-| Regulator coverage | Agencies with read access to aggregate dashboards | 4 |
+1. **Cash beats paperwork.** Kabadiwalas pay the same day. Formal channels pay late or not at all.
+2. **No shared custody record.** Material changes hands several times with no trail, so tonnes cannot be verified.
+3. **Evidence is scattered.** Producers rebuild EPR evidence by hand from recycler PDFs, emails, and spreadsheets.
+4. **Regulators see partial data.** Only formal participants are visible, and reports rarely say so.
+5. **Low trust at the door.** Citizens fear data left on phones, cannot book around society or PG gate rules, and do not use English-only tools.
 
 ---
 
-## 5. In Scope (product documentation)
+## 4. Positioning
 
-- Six stakeholder dashboards and Platform Admin capabilities
-- Domain model, RBAC, workflows, integrations, NFRs
-- Phased implementation roadmap (Phases 0–5)
-- Explicit open questions for unresolved commercial/legal choices
+**EcoSure is:** the formal e-waste custody and evidence infrastructure for the state, run corridor by corridor under authorized recyclers.
 
----
+**EcoSure is not:**
 
-## 6. Out of Scope (this phase and near-term product)
-
-- Application code, UI implementation, and live deployments
-- General municipal waste (wet/dry MSW) as a first-class domain
-- Legal certification that reports satisfy all CPCB/SPCB formats without expert review
-- Instant payout rails and banking partnerships at Phase 0–1
-- WhatsApp chatbot / conversational AI (Phase 1 is outbound notifications only)
-- Carbon credit marketplace
+- a replacement for kabadiwalas on cash price
+- a rewards or EcoPoints app
+- the CPCB EPR portal, or an issuer of EPR certificates
+- an EPR credit exchange or broker
+- a Producer Responsibility Organisation (PRO) substitute
+- a complete picture of all e-waste in the state (it covers the formal network only)
 
 ---
 
-## 7. Assumptions
+## 5. Design principles
 
-1. India is the primary geography; INR and Indian regulatory framing apply.
-2. Organizations (shops, hubs, recyclers, manufacturers, agencies) require onboarding and approval before operational use.
-3. Consumers may self-register with lighter KYC than commercial orgs.
-4. Pricing, scrap category rates, and EcoPoints redemption partners will be configured by Platform Admin (details in open questions).
-5. Local PostgreSQL + Node.js is the intended stack until an explicit migration decision.
+These principles override any feature request that conflicts with them.
 
----
-
-## 8. Constraints
-
-- Least-privilege access: no role sees another org’s financials unless explicitly authorized.
-- Compliance documents must be immutable once issued (append-only audit trail).
-- PII handling must align with India’s DPDP Act principles (purpose limitation, access control, retention).
-- Every data-driven screen must define loading, empty, success, error, unauthorized, and forbidden states.
+1. **Money moves fast.** Shops are paid within 7 days of hub receipt. Citizens get a UPI incentive at collection, not points later.
+2. **Density before demand.** A corridor goes live for citizens only after its launch checklist passes (section 8).
+3. **Recycler is the root of trust.** Every lot ends at a CPCB-authorized recycler with a signed offtake agreement.
+4. **Honest artifacts.** EcoSure issues *custody attestations*, never "certificates" that could be mistaken for EPR certificates. Every attestation can be verified publicly by number.
+5. **Honest coverage.** Every aggregate says "formal EcoSure network only".
+6. **WhatsApp and local language first.** Hindi and English from day one, plus the local language of each new corridor.
+7. **Works offline.** Collection, weighing, and hub receipt work without signal and sync later.
+8. **Real data only.** No mock operational data in any production feature.
 
 ---
 
-## 9. Gap Analysis (draft PRD → this document set)
+## 6. Stakeholders and value
 
-The original brief was a strong vision statement. Gaps closed by this PRD set:
-
-| Gap in draft | How addressed |
-|--------------|---------------|
-| No user stories / acceptance criteria | Role PRDs `04`–`09` |
-| No data model | `03-domain-model.md` |
-| No RBAC matrix | `02-roles-rbac.md` |
-| Undefined pickup states | `10-workflows.md` |
-| Undefined EcoPoints rules | `04-consumer.md`, `10-workflows.md`, `14-open-questions.md` |
-| Vague WhatsApp scope | `11-integrations.md` |
-| Vague EPR / CPCB / SPCB | `08-manufacturer.md`, `07-professional-recycler.md` |
-| Payouts without pricing model | Domain + open questions |
-| Problem framed as general waste | Reframed to e-waste / EPR |
-| Missing NFRs / privacy | `12-nfr-security.md` |
-| Missing Platform Admin | Personas + RBAC |
+| Stakeholder | Joins because | EcoSure provides |
+|-------------|---------------|------------------|
+| Citizen / household | UPI incentive, doorstep or drop-off, data-wipe guidance | Simple pickup request, WhatsApp status, receipt |
+| Society (RWA) / small office | Clean, documented bulk collection | Collection drives, gate-pass details, disposal receipt |
+| Local collection shop | Steady volume and payment within 7 days | Pickup queue, weighing, lots, weekly settlement, advances |
+| Regional hub | Full trucks and a guaranteed buyer | Multi-shop trips, dual weighing, offtake schedule |
+| Authorized recycler | More compliant feedstock | Graded inbound lots, reject rights, attestation issuing |
+| Producer (manufacturer) | EPR evidence without spreadsheets | Attestation library, target-gap view, exports for portal filing |
+| SPCB | Visibility of the formal chain | Monitoring views, compliance flags, public verification |
+| Programme operator (department) | Run the programme | Onboarding, rate cards, disputes, float, audit |
 
 ---
 
-## 10. Glossary
+## 7. Success metrics (pilot, 12 months)
+
+| Metric | Target | Why |
+|--------|--------|-----|
+| Formal tonnes reaching authorized recyclers | Grows every month | Core programme outcome |
+| Chain completeness | ≥ 95% of lots with unbroken custody events | Evidence quality |
+| Shop payment time | Median ≤ 7 days from hub receipt | Keeps shops from diverting to informal buyers |
+| Pickup completion rate | ≥ 80% of accepted pickups collected | Citizen trust |
+| Weight disputes | ≤ 10% of transfers | Settlement health |
+| Public verifications | Tracked; any failed verification investigated within 48 hours | Fraud control |
+| Producer evidence exports | Used by ≥ 10 pilot producers | Evidence value |
+
+Metrics deliberately excluded: app downloads, EcoPoints issued, and number of government accounts.
+
+---
+
+## 8. Corridor launch checklist
+
+A corridor opens to citizens only when all of these are true:
+
+- At least 8 active approved shops covering the main wards
+- At least 1 hub with storage suitable for monsoon season
+- At least 1 authorized recycler with a signed offtake agreement (maximum dwell, weight tolerance, reject rules, payment terms)
+- Settlement float funded for at least 8 weeks
+- WhatsApp templates approved in Hindi and English
+- Programme operator field team trained
+
+---
+
+## 9. Scope
+
+### In scope
+- Citizen, society, and small-office pickups and drop-offs
+- Shop, hub, and recycler custody chain with trips, dual weighing, and disputes
+- Weekly settlements and capped shop advances
+- UPI citizen incentives (scheme-funded)
+- Custody attestations with public verification
+- Producer evidence library and exports
+- SPCB monitoring views
+- Wizard-of-Oz pilot before software (see [13-roadmap.md](./13-roadmap.md))
+
+### Out of scope
+- Issuing or trading EPR certificates or credits
+- Automatic filing on the CPCB portal
+- Replacing PROs or large-producer contracts
+- General municipal solid waste
+- IoT device telemetry
+- Carbon credits
+
+---
+
+## 10. Risks the design addresses
+
+| Risk | Mitigation in this PRD |
+|------|------------------------|
+| Informal cash wins | UPI incentive at collection; shop payment within 7 days |
+| Empty map at launch | Corridor launch checklist |
+| Fake or inflated paperwork | Attestations only from authorized recyclers, weight caps, public verification |
+| Confusion with EPR certificates | Naming rule and mandatory disclaimer on every artifact |
+| Hub runs out of cash | Offtake agreement, dwell cap, priced and capped advances |
+| Weak connectivity and power cuts | Offline collection and receipt with later sync |
+| Misleading government statistics | "Formal network only" label on every aggregate |
+| Programme abandoned mid-pilot | Stage gates and kill criteria agreed with sponsor |
+
+---
+
+## 11. Glossary
 
 | Term | Definition |
 |------|------------|
-| **E-waste** | Discarded electrical and electronic equipment (EEE) and components |
-| **EPR** | Extended Producer Responsibility — producers account for end-of-life of products they place on market |
-| **CPCB** | Central Pollution Control Board (India) |
-| **SPCB** | State Pollution Control Board |
-| **Chain of custody** | Ordered, auditable record of possession of material from collection through processing |
-| **Pickup request** | Consumer/business request for e-waste collection |
-| **Material lot** | Batch of collected e-waste with weight/category metadata |
-| **Transfer** | Movement of a lot between organizations (shop → hub → recycler) |
-| **Settlement** | Financial reconciliation for collected/processed material between parties |
-| **EcoPoints** | Incentive ledger units earned for verified recycling actions |
-| **Certificate** | Formal document attesting processing/recycling of a lot (compliance evidence) |
-| **Organization** | Legal or operational entity on the platform (shop, hub, recycler, manufacturer, agency) |
-| **Platform Admin** | Internal EcoSure operator role for approvals, config, and dispute resolution |
+| **E-waste** | Discarded electrical and electronic equipment and components |
+| **EPR** | Extended Producer Responsibility under the E-Waste (Management) Rules, 2022 |
+| **EPR certificate** | Certificate generated on the CPCB EPR portal. EcoSure never issues these |
+| **Custody attestation** | EcoSure record, issued by an authorized recycler, that a lot was received and processed. Not an EPR certificate |
+| **CPCB / SPCB** | Central / State Pollution Control Board |
+| **Corridor** | A pilot geography with its own shops, hub, and recycler |
+| **Trip** | One vehicle movement carrying lots from one or more shops |
+| **Lot** | A batch of collected material with measured weight and categories |
+| **Dual weighing** | Sender and receiver both record weight, with evidence |
+| **Advance** | Capped, recoverable payment to a shop before settlement |
+| **Programme operator** | Department staff and contracted operator who run EcoSure |
+| **Formal network** | Organisations onboarded to EcoSure. Excludes informal channels |
 
 ---
 
-## 11. Document map
+## 12. Document map
 
-See [README.md](./README.md) for the full index of PRD documents.
+See [README.md](./README.md). The reasoning behind the v2 changes is in [15-strengthening-changes.md](./15-strengthening-changes.md).

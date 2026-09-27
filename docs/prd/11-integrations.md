@@ -1,95 +1,80 @@
 # EcoSure — Integrations
 
-**Last updated:** 2026-09-26
+**Last updated:** 2026-09-27 (v2)
 
 ---
 
 ## 1. Principles
 
-- Integrations are mediated by the Node.js backend; clients never hold provider secrets.
-- Outbound side effects are idempotent (dedupe keys).
-- Failures are logged, surfaced to ops, and do not corrupt domain state.
-- Phase tags indicate when an integration becomes required.
+- All integrations run through the backend. Clients never hold provider keys.
+- Side effects (messages, payouts) are idempotent.
+- Failures are logged and visible to the operator; they never corrupt custody records.
 
 ---
 
-## 2. WhatsApp (Phase 2)
+## 2. WhatsApp — Phase 1
 
-### Scope
-- **In scope:** Outbound template notifications for pickup status, EcoPoints, settlement/certificate alerts.
-- **Out of scope (until later):** Inbound chatbot, free-form conversational AI, marketing broadcasts without consent.
+Moved from phase 2 to phase 1 because citizens and shops in Tier-2/3 corridors live on WhatsApp.
 
-### Requirements
-- Meta WhatsApp Business Cloud API (default; BSP optional — OQ-40).
-- User must opt in (`whatsapp_opt_in`); recording of consent timestamp.
-- Templates: `pickup_status`, `pickup_scheduled`, `ecopoints_earned`, `settlement_posted`, `certificate_issued`.
-- Persist `Notification` row per attempt with provider message id.
-- Retry with exponential backoff; mark `failed` after N attempts; optional SMS later (OQ-44).
+**Scope**
+- OTP delivery.
+- Outbound templates in Hindi, English, and corridor language: pickup accepted, scheduled, collector on the way, collected + incentive, sent for recycling, trip planned/arrived, dispute opened/resolved, settlement paid, rate change.
+- Inbound keywords: `RESCHEDULE`, `CANCEL`, `GATE`, `HELP`, `STATUS`. Other messages go to the operator support queue.
 
-### Acceptance criteria
-- Opted-out users never receive WhatsApp.
-- Duplicate event does not send duplicate message (idempotency).
-- Admin can view delivery status for support.
+**Requirements**
+- WhatsApp Business Platform (Meta Cloud API or a government-empanelled provider).
+- Opt-in recorded with timestamp; transactional and informational messages kept separate.
+- Retry with backoff; SMS fallback for OTP and pickup status.
+- Webhook signatures verified.
 
 ---
 
-## 3. Geolocation / Maps (Phase 1)
-
-### Purpose
-- Nearby Local Shops, Regional Hubs, Professional Recyclers discovery.
-- Service-radius filtering for pickup assignment.
-
-### Approach
-- Store `lat`/`lng` on Location.
-- Distance query (Haversine or PostGIS if enabled).
-- Map tiles / geocoding provider configurable (OQ-42).
-- Consumer may enter pincode/address; geocode server-side.
-
-### Acceptance criteria
-- Results only include `approved` organizations.
-- Empty state when none in radius; allow radius expand.
-- Exact home address of consumer not exposed to unassigned shops.
+## 3. SMS — Phase 1
+- Fallback for OTP and pickup status when WhatsApp fails or the user has no WhatsApp.
+- Government-approved sender ID and templates (DLT registration).
 
 ---
 
-## 4. Email (Phase 0–1)
-
-- Transactional: signup verification, password reset, org approval status.
-- Provider abstracted (SMTP or API).
-- Same notification table / audit pattern.
-
----
-
-## 5. File / document storage (Phase 3)
-
-- Certificates, KYC docs, compliance exports.
-- Storage interface: local filesystem first; S3-compatible later (OQ-61).
-- Store content hash for certificates; serve via authenticated download URLs.
+## 4. UPI payouts — Phase 1
+- Citizen incentives and shop settlements paid by UPI through a government-approved payment channel (for example, a public-sector bank payout API or PFMS-linked route, to be confirmed with the sponsor).
+- UPI ID validated before first payout.
+- Every payout has an idempotency key and a reconciliation record.
+- Bank account details stored as tokens only.
 
 ---
 
-## 6. Payments / payouts (Phase 5)
-
-- Phase 3: record settlements as accounting events (manual `paid`).
-- Phase 5: optional UPI/bank payout integration.
-- Never store full bank secrets in client; tokenize via provider.
-
----
-
-## 7. Future (explicitly deferred)
-
-| Integration | Notes |
-|-------------|-------|
-| CPCB portal auto-upload | Only after template parity validated |
-| SMS gateway | Fallback channel |
-| Push notifications (mobile) | If native apps introduced |
-| IoT device telemetry | Not in product scope |
+## 5. Maps and geocoding — Phase 1
+- Pincode and landmark first; coordinates optional.
+- Server-side geocoding; provider configurable (open data preferred for a government programme).
+- Service radius filtering for shop matching.
+- Text list works without map tiles.
 
 ---
 
-## 8. Security notes
+## 6. Statutory registries — Phase 1 (manual), Phase 3 (automated)
+- Phase 1: operator verifies CPCB authorizations and EPR registrations manually against published lists.
+- Phase 3: automated lookup if the CPCB exposes an API or data feed.
+- Phase 3: optional link from an attestation to its CPCB portal EPR certificate reference.
 
-- Rotate API keys; store in server env only.
-- Webhook endpoints verify signatures.
-- Rate-limit outbound messaging per user/org.
-- PII minimized in template variables.
+---
+
+## 7. Identity — Phase 1
+- Phone OTP for all users.
+- Aadhaar-based verification for shop owners (micro tier) through a licensed verification provider, storing only the verification result and masked number.
+
+---
+
+## 8. Document storage — Phase 1
+- Attestations, agreements, KYC documents, exports, photos.
+- Government-hosted object storage; private by default; signed, time-limited download links.
+- SHA-256 stored for attestations.
+
+---
+
+## 9. Deferred
+| Integration | Why deferred |
+|-------------|--------------|
+| Automatic CPCB portal submission | Portal remains the statutory system; manual filing by producers |
+| GPS vehicle tracking | Location notes by WhatsApp are enough for the pilot |
+| IoT scales | Photo + scale ID first |
+| DigiLocker issuance of attestations | Consider after legal review in phase 3 |

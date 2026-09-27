@@ -1,133 +1,72 @@
-# EcoSure — Government Agency Dashboard PRD
+# EcoSure — SPCB (Government) PRD
 
-**Role:** `government`  
-**Organization type:** `government`  
-**Phase focus:** Phase 4  
-**Last updated:** 2026-09-26
+**Role:** `spcb_officer`  
+**Phase:** 1 (verification and flags), 2 (monitoring and inspection)  
+**Last updated:** 2026-09-27 (v2)
 
 ---
 
 ## 1. Summary
 
-Government agencies (e.g., CPCB/SPCB-aligned users) get **read-heavy** aggregate visibility into platform e-waste flows, education resources, feedback channels, and compliance monitoring signals. They do **not** receive a commercial “platform revenue/profitability” view.
+The SPCB sponsors EcoSure and uses it to monitor the formal e-waste chain. SPCB users see honest aggregates, compliance flags, and attestations, and can add inspection notes. They cannot change operational records. Every view states that it covers the formal EcoSure network only.
+
+What changed from v1: SPCB moves from an optional phase-4 viewer to a core stakeholder; the revenue and profitability view is removed; offline inspection packs, state-language reports, and inspection notes are added; platform approval is separated from Board authorization.
 
 ---
 
 ## 2. Features
 
-### F-G1 Registration and profile — Phase 0 / enable Phase 4
+### G1 Onboarding — Phase 1
+SPCB nominates officers. Accounts are scoped to the SPCB's state and regional office.
 
-**Description:** Agency registers jurisdiction (national/state), contacts; Platform Admin verifies.
+### G2 Formal-network aggregates — Phase 2
+**Acceptance criteria**
+- Tonnes collected, received at hubs, and attested at recyclers, by corridor, district, and month.
+- Organization counts by type and status.
+- Every chart and export carries the label "Formal EcoSure network only. Excludes informal channels."
+- Shows the share of weight that is self-reported versus received-and-weighed by a second party.
 
-**Acceptance criteria:**
-- Approval required.
-- Jurisdiction metadata drives default filters (e.g., state).
+### G3 Compliance flags — Phase 1
+**Acceptance criteria**
+- Flags: dwell exceeded, attestation missing past SLA, weight anomaly, capacity exceeded, registration expired, duplicate hash.
+- Each flag shows severity, age, and the organization's public name.
+- Read-only.
 
-**Data:** `Organization`  
-**Permissions:** Admin approve
+### G4 Registration check — Phase 1
+**Acceptance criteria**
+- For each organization, shows statutory registrations (CPCB/SPCB) and platform status side by side, with clear labels.
+- SPCB can mark a statutory registration as verified or disputed; this raises a flag for the operator.
 
----
+### G5 Inspection notes — Phase 2
+**Acceptance criteria**
+- Append-only notes on an organization or flag, with the SPCB reference number.
+- Visible to operator and the SPCB; not to the organization unless the SPCB chooses to share.
 
-### F-G2 Overall waste collection and processing statistics — Phase 4
+### G6 Offline inspection pack — Phase 2
+**Acceptance criteria**
+- Download for a district: organization list, open flags, recent attestations.
+- PDF and CSV in English and the state language.
+- Stamped with generation time and data cut-off.
 
-**Description:** Aggregate kg collected/processed, org counts by type, certificate counts, trend charts.
+### G7 Public verification — Phase 1
+Same public page as [07-professional-recycler.md](./07-professional-recycler.md) R5.
 
-**User story:** As a regulator analyst, I want reliable aggregates so I can monitor regional performance.
+### G8 Feedback — Phase 1
+Structured feedback to the programme operator with category and priority.
 
-**Acceptance criteria:**
-- Filters: date range, state/region.
-- No individual consumer PII in default views.
-- Loading/empty/error states.
-- Export aggregate CSV for internal use.
-
-**Data:** Platform aggregates  
-**Permissions:** Government role
-
----
-
-### F-G3 Educational resources — Phase 4 (content may exist Phase 1)
-
-**Description:** Access education/training materials tagged for government audience (and general).
-
-**Acceptance criteria:**
-- Read published content; empty handled.
-
-**Data:** `EducationalContent`  
-**Permissions:** Read
-
----
-
-### F-G4 Financial statistics — clarified / limited — Phase 4
-
-**Original draft asked for “payout and financial statistics… revenue and profitability.”**
-
-**Product decision:** Government dashboards show **compliance-oriented economic signals only**, such as:
-- Count/value of **posted settlements** in jurisdiction (optional, anonymized totals)
-- Outstanding dispute counts
-
-They do **not** show EcoSure corporate profitability, org bank details, or competitor-level rate cards.
-
-**Acceptance criteria:**
-- UI labels avoid “your revenue”.
-- Any financial aggregate is jurisdiction-scoped and anonymized.
-- Detail drill-down to named org finances requires future lawful process feature (out of scope Phase 4).
+### G9 Lawful data requests — Phase 2
+**Acceptance criteria**
+- Requests for data beyond aggregates (for example, RTI or an investigation) are logged with legal basis and handled by the operator.
+- Released data is redacted according to the documented policy.
 
 ---
 
-### F-G5 Platform overall statistics — Phase 4
-
-**Description:** Users, businesses, total e-waste, sustainability impact summaries.
-
-**Acceptance criteria:**
-- Consistent with F-G2; may include EcoPoints program participation counts (not balances per user).
+## 3. Screen states
+Loading, empty, success, error, 401, 403, stale data warning (data older than 24 hours).
 
 ---
 
-### F-G6 Feedback and suggestions — Phase 4
-
-**Description:** Submit feedback on platform features.
-
-**Acceptance criteria:**
-- Create `Feedback` with category/body.
-- Confirmation success state; history of own submissions.
-- Platform Admin can review.
-
-**Data:** `Feedback`  
-**Permissions:** Write own; admin read all
-
----
-
-### F-G7 Monitor and enforce compliance — Phase 4 (monitor) / Phase 5 (enforce)
-
-**Description:** Monitor compliance signals; enforcement write-tools later.
-
-**Phase 4 (in scope):**
-- Flags: lots past SLA without certificate; orgs suspended; missing transfers.
-- Read-only lists with org public names and metrics.
-
-**Phase 5 (later):**
-- Formal notices/orders workflow (OQ-33).
-
-**Acceptance criteria (Phase 4):**
-- Flag list with severity and age.
-- Click-through to aggregate evidence (lot counts, cert gaps) without dumping unrelated PII.
-- Cannot mutate pickup/settlement records.
-
-**Data:** Derived compliance views  
-**Permissions:** Read
-
----
-
-## 3. Screen checklist
-
-Agency profile, aggregate dashboard, compliance flags, education, feedback, limited economic signals — L/E/S/Err/401/403.
-
----
-
-## 4. Clarifications vs original draft
-
-| Draft ask | PRD decision |
-|-----------|--------------|
-| Gov “revenue and profitability” | Replaced with anonymized compliance economic signals |
-| Enforce compliance | Monitor in Phase 4; enforce workflows Phase 5 |
-| Same “overall stats” as operators | Yes for aggregates; no for private financials |
+## 4. Out of scope
+- Editing pickups, lots, settlements, or attestations
+- Formal notices and orders (future, only with legal process defined)
+- Organization bank details and individual settlement amounts

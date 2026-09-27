@@ -1,154 +1,118 @@
-# EcoSure — Implementation Roadmap
+# EcoSure — Roadmap
 
-**Stack:** Local PostgreSQL + Node.js API + web client  
-**Auth:** Custom server-side auth + RBAC (not Supabase)  
-**Schema:** Single idempotent `schema.sql`  
-**Last updated:** 2026-09-26
-
-This roadmap is the build plan after PRD documentation. Documentation phase does not include application code.
+**Last updated:** 2026-09-27 (v2)  
+**Stack:** PostgreSQL + Node.js, government-hosted  
+**Rule:** No phase starts until the previous stage gate passes.
 
 ---
 
-## Phase overview
+## Overview
 
 ```mermaid
 flowchart LR
-  P0[Phase0 Foundations]
-  P1[Phase1 Collection MVP]
-  P2[Phase2 EcoPoints WhatsApp]
-  P3[Phase3 Recycler Settlements]
-  P4[Phase4 EPR Government]
-  P5[Phase5 Hardening]
-  P0 --> P1 --> P2 --> P3 --> P4 --> P5
+  pilot[Pilot: manual operations] --> p0[Phase 0: Foundations]
+  p0 --> p1[Phase 1: Custody chain live]
+  p1 --> p2[Phase 2: Producers and monitoring]
+  p2 --> p3[Phase 3: Second corridor and federation]
 ```
 
-| Phase | Name | Primary roles | Outcome |
-|-------|------|---------------|---------|
-| 0 | Foundations | Platform Admin | Runnable skeleton, auth, schema |
-| 1 | Collection MVP | Consumer, Local Shop, Regional Hub | End-to-end pickup + shop→hub custody |
-| 2 | Incentives & messaging | Consumer | EcoPoints + WhatsApp notifications |
-| 3 | Downstream recycling | Professional Recycler | Process, certify, settle |
-| 4 | EPR & regulators | Manufacturer, Government | Reports + monitoring |
-| 5 | Hardening | All | KYC depth, disputes, payouts, i18n, a11y |
+| Stage | Duration | Goal |
+|-------|----------|------|
+| Pilot | 12 weeks | Prove the corridor works with WhatsApp, spreadsheets, and UPI before writing software |
+| Phase 0 | 6–8 weeks | Foundations: auth, organizations, corridor, audit |
+| Phase 1 | 12–16 weeks | Citizen → shop → hub → recycler with attestations, weekly settlement, offline |
+| Phase 2 | 10–12 weeks | Producer evidence, SPCB monitoring and inspection packs |
+| Phase 3 | Ongoing | Second corridor, national standards, CPCB integration |
+
+---
+
+## Pilot — manual operations (Indore + Pithampur)
+
+Detailed plan: [`../research/pilot-design.md`](../research/pilot-design.md).
+
+**What runs:** WhatsApp for booking and status, shared spreadsheets as the custody log, UPI for citizen incentives and weekly shop payments, paper weigh slips with photos, recycler-issued custody notes.
+
+**What is not built:** any app, dashboard, or schema.
+
+**Gates**
+
+| Week | Must be true to continue |
+|------|--------------------------|
+| 4 | ≥ 8 active shops; 1 hub; signed recycler offtake agreement; first lots received |
+| 8 | Median shop payment ≤ 7 days; pickup completion ≥ 70%; weight disputes ≤ 15%; no sign that shops send only low-value material |
+| 12 | Steady weekly tonnes; ≥ 5 producers say they would use the evidence exports; SPCB confirms the flags and reports are useful |
+
+If a gate fails, fix and repeat that stage once. If it fails again, stop and report to the sponsor.
 
 ---
 
 ## Phase 0 — Foundations
 
-**Deliverables**
-- Monorepo or app+api scaffold
-- Local PostgreSQL + idempotent `schema.sql` (users, orgs, members, locations, audit_log)
-- Node API: health, auth (register/login/logout), RBAC middleware
-- Platform Admin invite + org approval APIs
-- Env-based config; no secrets in client
-- Backup/runbook notes for local Postgres
+- Repository, CI, government hosting environment
+- `schema.sql` (idempotent): users, organizations, members, statutory registrations, corridors, locations, audit log, reference data
+- Phone OTP auth, sessions, org roles, authorization middleware
+- Operator console: onboarding (micro / standard tiers), registration verification, corridor checklist
+- WhatsApp + SMS channel service
+- Security baseline, backups, logging
 
-**Exit criteria**
-- Approved org can log in with correct role; rejected/pending cannot access ops routes
+**Exit:** operator can onboard a provisional shop, an approved hub, and a verified recycler; access rules tested.
 
 ---
 
-## Phase 1 — Collection MVP
+## Phase 1 — Custody chain live
 
-**Deliverables**
-- Consumer: devices, stats, education consume, nearby shops, pickup create/track/cancel
-- Local Shop: profile, pickup board, collect+weigh, lots, transfer to hub
-- Regional Hub: receive transfers, hub pickups, regional stats, safe platform aggregates
-- Education CMS-lite for Platform Admin
-- Geo nearby search
-- All screens: loading/empty/success/error/unauthorized/forbidden
+- Citizen: phone sign-in, category-and-count pickup, doorstep / drop / society drive, wipe checklist, reschedule keywords, status, UPI incentive
+- Shop: queue, offline collect and weigh, lots, trips, weekly settlement, advances, rate card
+- Hub: offtake agreements, trip planning, offline receive, tolerance and disputes, dwell flags, shop settlements
+- Recycler: grading, accept / partial / reject, custody attestations, capacity checks
+- Public attestation verification
+- SPCB: registration check, compliance flags
+- Operator: rate cards, dispute queue, float view, incentive reconciliation
+- Hindi + English everywhere
 
-**Exit criteria**
-- Real DB-backed flow: consumer pickup → shop collect → hub receive, with custody events
-
-**Explicitly deferred:** EcoPoints, WhatsApp, recycler certificates, CPCB exports
+**Exit:** the pilot corridor runs on the software with the same or better gate metrics than the manual pilot.
 
 ---
 
-## Phase 2 — Incentives & messaging
+## Phase 2 — Producers and monitoring
 
-**Deliverables**
-- EcoPoints account + append-only ledger (earn/redeem/adjust/expire/clawback)
-- Redemption catalog (internal)
-- WhatsApp outbound templates + opt-in
-- Notification preference UI
+- Producer onboarding, attestation library, attribution with review queue
+- Target-gap view, approval before download, bilingual CPCB/SPCB worksheets
+- Recycler evidence packs
+- Producer take-back programme funding for citizen incentives
+- SPCB aggregates with coverage labels, inspection notes, offline inspection pack, lawful data request log
+- Hub surge mode; optional citizen device list
 
-**Exit criteria**
-- Idempotent earn on verified collection; opted-out users never messaged
-
----
-
-## Phase 3 — Downstream recycling
-
-**Deliverables**
-- Professional Recycler dashboard
-- Hub → recycler transfers
-- Lot processing + certificate issuance (immutable)
-- Settlements Recycler↔Hub and Hub↔Shop
-- Document storage abstraction
-
-**Exit criteria**
-- Certificate hash stored; settlement posted visible to both parties
+**Exit:** ≥ 10 producers exporting; SPCB using flags and packs in inspections.
 
 ---
 
-## Phase 4 — EPR & regulators
+## Phase 3 — Scale and federation
 
-**Deliverables**
-- Manufacturer footprint analytics + partner discovery
-- Compliance report generation (EPR summary, CPCB/SPCB-oriented exports)
-- Recycler EPR support packs
-- Government aggregate dashboards + compliance flags + feedback
-- Report retention metadata
-
-**Exit criteria**
-- Manufacturer can download period export; government sees jurisdiction aggregates without consumer PII
+- Second corridor (only after corridor checklist passes), adding its state language
+- Automated statutory registry lookups where available
+- CPCB portal reference linking on attestations
+- Publish data standards for national federation
+- Recognition badges for citizens
 
 ---
 
-## Phase 5 — Hardening
+## Cross-cutting rules
 
-**Deliverables**
-- Deeper KYC, dispute workflows, payout rails (optional)
-- Org sub-roles (`org_admin`, `org_operator`, `org_finance`)
-- Performance indexes, async report jobs at scale
-- Accessibility polish, Hindi i18n hooks
-- Data subject export/delete process
-- Optional WebSocket status updates
-
-**Exit criteria**
-- Dispute SLA met in staging; security review checklist passed
-
----
-
-## Cross-cutting implementation rules
-
-1. Update `schema.sql` on every DB change; keep idempotent.
+1. Update `schema.sql` on every database change; keep it idempotent.
 2. No mock operational data in production features.
-3. Validate all writes; least-privilege reads.
-4. Prefer smallest coherent vertical slices per phase.
-5. Commit meaningful milestones with messages like `feat(phase1): consumer pickup lifecycle`.
+3. Every screen handles loading, empty, success, error, 401, 403, and offline.
+4. Commit meaningful milestones with descriptive messages.
 
 ---
 
-## Suggested engineering order inside Phase 1
+## Removed from v1
 
-1. Schema for devices, pickups, events, lots, transfers  
-2. Authz helpers for pickup visibility  
-3. Consumer pickup APIs + UI  
-4. Shop board + collect  
-5. Hub receive  
-6. Nearby search  
-7. Education read + admin publish  
-8. Stats aggregations  
-
----
-
-## Dependencies and risks
-
-| Risk | Mitigation |
-|------|------------|
-| Unclear scrap pricing | Config rate cards; see open questions |
-| WhatsApp template approval delay | Ship in-app + email first |
-| CPCB template drift | Versioned export mappers + expert review |
-| Local Postgres single point of failure | Backups; migrate to managed PG when needed |
+| Item | Reason |
+|------|--------|
+| EcoPoints ledger and catalog | Loses to cash; fraud and audit risk |
+| Monthly settlement | Shops divert material to informal buyers |
+| Hindi in phase 5 | Blocks adoption from day one |
+| Recycler and attestations in phase 3 | Chain is not verifiable without them |
+| Producer tools in phase 4 | Evidence is needed as soon as attestations exist |
+| Government "revenue" view | Not a government need; removed |

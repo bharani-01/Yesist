@@ -20,7 +20,6 @@ export function OversightPage() {
     <div className="page">
       <PageHeader
         title="Programme overview"
-        description="Aggregates only. Citizen personal data is never shown here."
         actions={
           <span className={`live-dot ${connection === 'live' ? 'is-live' : connection === 'connecting' ? '' : 'is-down'}`} role="status">
             Flags: {LIVE_LABELS[connection]}

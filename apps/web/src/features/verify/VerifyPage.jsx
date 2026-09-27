@@ -21,7 +21,7 @@ export function VerifyPage() {
 
   return (
     <div className="page">
-      <PageHeader title="Verify a custody attestation" description="Anyone can check that an EcoSure attestation is genuine. Only non-personal details are shown." />
+      <PageHeader title="Verify a custody attestation" />
       <Panel>
         <form className="row" style={{ alignItems: 'flex-end' }} onSubmit={(e) => { e.preventDefault(); if (valid) navigate(`/verify/${input.trim().toUpperCase()}`); }}>
           <TextField label="Attestation number" placeholder="ECS-ATT-2026-000001" value={input} onChange={(e) => setInput(e.target.value)} style={{ minWidth: 260, fontFamily: 'var(--font-mono)' }} />

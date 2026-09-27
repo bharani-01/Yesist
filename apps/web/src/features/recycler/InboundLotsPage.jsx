@@ -13,7 +13,7 @@ export function InboundLotsPage() {
   const query = useAsync((s) => recyclerApi.lots(s).then((r) => r.lots), []);
   return (
     <div className="page">
-      <PageHeader title="Inbound lots" description="Receive sealed lots from your agents, check weight and seal, and issue custody attestations." />
+      <PageHeader title="Inbound lots" />
       <Panel flush>
         <AsyncView query={query} isEmpty={(d) => !d.length} empty={<EmptyState title="No lots dispatched to you yet" text="Lots appear here as soon as an agent dispatches them." />}>
           {(lots) => (

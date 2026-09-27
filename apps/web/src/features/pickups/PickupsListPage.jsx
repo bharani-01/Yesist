@@ -14,12 +14,12 @@ export function PickupsListPage() {
 
   return (
     <div className="page">
-      <PageHeader title="My pickups" description="Every pickup is tracked from your door to the authorised recycler." actions={bookButton} />
+      <PageHeader title="My pickups" actions={query.data?.length ? bookButton : null} />
       <Panel flush>
         <AsyncView
           query={query}
           isEmpty={(d) => d.length === 0}
-          empty={<EmptyState title="No pickups yet" text="Book a doorstep pickup for old phones, laptops, appliances, and cables. You get the recycler’s price plus the scheme incentive." action={bookButton} />}
+          empty={<EmptyState title="No pickups yet" text="Book a doorstep pickup for old phones, laptops, appliances, and cables." action={bookButton} />}
         >
           {(pickups) => (
             <ul className="list">

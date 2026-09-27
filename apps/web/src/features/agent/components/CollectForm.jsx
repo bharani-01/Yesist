@@ -11,7 +11,7 @@ const BATTERY_OPTIONS = [
   { value: '', label: 'Select battery condition' },
   { value: 'intact_embedded', label: 'Battery intact' },
   { value: 'no_battery', label: 'No battery' },
-  { value: 'swollen_or_damaged_refused', label: 'Swollen or damaged — refuse' },
+  { value: 'swollen_or_damaged_refused', label: 'Swollen or damaged (refuse)' },
 ];
 
 /** Doorstep collection: battery triage, device IDs, weight, price, then the customer's handover code. */

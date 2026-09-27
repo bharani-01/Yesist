@@ -26,7 +26,7 @@ export function AgentHomePage() {
 
   return (
     <div className="page">
-      <PageHeader title="Jobs and lots" description="Accept requests in your wards, collect at the door, and send sealed lots to your recycler." />
+      <PageHeader title="Jobs and lots" />
       <Tabs label="Agent work" tabs={tabs} value={tab} onChange={(v) => setParams({ tab: v }, { replace: true })} />
       <div role="tabpanel" id={`tabpanel-${tab}`} aria-labelledby={`tab-${tab}`}>
         {tab === 'open' && (

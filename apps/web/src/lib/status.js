@@ -20,7 +20,7 @@ export const LOT_STATUS = {
 };
 
 export const INCENTIVE_STATUS = {
-  eligible: { label: 'Eligible — next treasury batch', tone: 'brand' },
+  eligible: { label: 'Due in next treasury batch', tone: 'brand' },
   batched: { label: 'In treasury batch', tone: 'info' },
   paid: { label: 'Paid', tone: 'success' },
   failed: { label: 'Payment failed', tone: 'danger' },

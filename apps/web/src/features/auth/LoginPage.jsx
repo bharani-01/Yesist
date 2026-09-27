@@ -35,8 +35,10 @@ export function LoginPage() {
   return (
     <AuthLayout
       title="Sign in"
-      subtitle="Track pickups, custody, and recycling in one place."
-      footer={<>New to EcoSure? <Link to="/register">Create a citizen account</Link> · <Link to="/verify">Verify a certificate</Link></>}
+      footer={<>
+        <p>New to EcoSure? <Link to="/register">Create a citizen account</Link></p>
+        <p><Link to="/verify">Verify a certificate</Link></p>
+      </>}
     >
       <form className="form-grid" onSubmit={onSubmit} noValidate>
         {location.state?.expired && <Alert tone="warning">Your session ended. Sign in again to continue.</Alert>}

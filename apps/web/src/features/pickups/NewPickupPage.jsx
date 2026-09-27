@@ -17,7 +17,7 @@ export function NewPickupPage() {
   const reference = useReference();
   return (
     <div className="page">
-      <PageHeader title="Book a pickup" description="A verified collector from your ward will confirm a time." back={{ to: '/pickups', label: 'My pickups' }} />
+      <PageHeader title="Book a pickup" description="A collector from your ward confirms the time. You are paid the recycler’s price at the door." back={{ to: '/pickups', label: 'My pickups' }} />
       <AsyncView query={reference}>{(ref) => <PickupForm reference={ref} />}</AsyncView>
     </div>
   );
@@ -126,14 +126,6 @@ function PickupForm({ reference }) {
             <TextField label="Preferred date" type="date" min={todayIso()} max={addDaysIso(30)} required value={form.preferredDate} onChange={set('preferredDate')} error={fieldErrors.preferredDate} />
             <Segmented name="window" label="Preferred time" value={form.preferredWindow} onChange={(v) => setForm({ ...form, preferredWindow: v })} options={WINDOW_OPTIONS} />
           </div>
-        </Panel>
-        <Panel title="How it works">
-          <ol className="stack stack--sm muted" style={{ margin: 0, paddingLeft: 18, fontSize: 'var(--text-sm)' }}>
-            <li>A collector from your ward accepts and confirms the time.</li>
-            <li>At the door, you share a one-time handover code after weighing.</li>
-            <li>You receive the recycler’s price on the spot; the scheme incentive follows in the next treasury batch.</li>
-            <li>You get the recycling attestation number once the recycler processes it.</li>
-          </ol>
         </Panel>
         {error && !Object.keys(fieldErrors).length && <ErrorAlert error={error} />}
         <Button type="submit" block loading={pending}>Request pickup</Button>

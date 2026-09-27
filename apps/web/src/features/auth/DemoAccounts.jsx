@@ -32,8 +32,7 @@ export function DemoAccounts({ onPick, selectedEmail }) {
               onClick={() => onPick({ email: a.email, password: demo.password })}
             >
               <span className="demo-accounts__label">{a.label}</span>
-              <span className="demo-accounts__desc">{a.description}</span>
-              <span className="demo-accounts__email mono">{a.email}</span>
+              <span className="demo-accounts__email">{a.email}</span>
             </button>
           </li>
         ))}

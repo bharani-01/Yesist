@@ -1,0 +1,53 @@
+import { existsSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import cookieParser from 'cookie-parser';
+import express from 'express';
+import helmet from 'helmet';
+import { API_PREFIX } from './config/constants.js';
+import { env } from './config/env.js';
+import { authenticate } from './middleware/authenticate.js';
+import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
+import { httpLogger } from './middleware/http-logger.js';
+import { originGuard } from './middleware/origin-guard.js';
+import { apiLimiter } from './middleware/rate-limit.js';
+import { requestContext } from './middleware/request-context.js';
+import { buildApiRouter } from './routes/index.js';
+
+const WEB_DIST = resolve(dirname(fileURLToPath(import.meta.url)), '../../web/dist');
+
+export function createApp() {
+  const app = express();
+  app.disable('x-powered-by');
+  app.set('trust proxy', env.trustProxy ? 1 : false);
+
+  // Order matters: context → logging → security → parsing → auth → routes → errors.
+  app.use(requestContext);
+  app.use(httpLogger);
+  app.use(helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:'],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        connectSrc: ["'self'"],
+        frameAncestors: ["'none'"],
+      },
+    },
+  }));
+  app.use(express.json({ limit: '100kb' }));
+  app.use(cookieParser());
+
+  app.use(API_PREFIX, apiLimiter, originGuard, authenticate, buildApiRouter());
+  app.use(API_PREFIX, notFoundHandler);
+
+  // Serves the built web client in production (single origin, no CORS needed).
+  if (existsSync(WEB_DIST)) {
+    app.use(express.static(WEB_DIST, { index: false, maxAge: '1h' }));
+    app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(resolve(WEB_DIST, 'index.html')));
+  }
+
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+  return app;
+}

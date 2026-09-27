@@ -1,0 +1,20 @@
+{
+  "name": "ecosure",
+  "private": true,
+  "description": "EcoSure — e-waste custody and recovery platform (Indore pilot)",
+  "workspaces": [
+    "apps/*"
+  ],
+  "scripts": {
+    "db:setup": "npm run db:setup -w @ecosure/api",
+    "onboard:pilot": "npm run onboard:pilot -w @ecosure/api --",
+    "dev:api": "npm run dev -w @ecosure/api",
+    "dev:web": "npm run dev -w @ecosure/web",
+    "build": "npm run build -w @ecosure/web",
+    "start": "npm run start -w @ecosure/api",
+    "test": "npm test -w @ecosure/api"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

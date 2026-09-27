@@ -1,0 +1,40 @@
+{
+  "_note": "LOCAL TEST ONBOARDING ONLY. Replace every value with the real organisation records (CPCB registration, MPPCB direction, IMC wards) before any pilot use.",
+  "recycler": {
+    "name": "Test Recycler (local only)",
+    "registrationNo": "TEST-CPCB-REG-0001",
+    "registrationValidUntil": "2027-12-31",
+    "capacityTonnesPerMonth": 500,
+    "members": [
+      { "email": "recycler.maker@ecosure.test", "fullName": "Recycler Maker (test)", "orgRole": "operator" },
+      { "email": "recycler.checker@ecosure.test", "fullName": "Recycler Checker (test)", "orgRole": "approver" }
+    ],
+    "rateCard": [
+      { "categoryCode": "mobile_phone", "pricePerUnit": 60 },
+      { "categoryCode": "laptop", "pricePerUnit": 250 },
+      { "categoryCode": "tablet", "pricePerUnit": 90 },
+      { "categoryCode": "desktop_cpu", "pricePerKg": 30 },
+      { "categoryCode": "monitor_tv", "pricePerKg": 12 },
+      { "categoryCode": "printer", "pricePerKg": 15 },
+      { "categoryCode": "small_appliance", "pricePerKg": 25 },
+      { "categoryCode": "cables_accessories", "pricePerKg": 40 }
+    ]
+  },
+  "agents": [
+    {
+      "name": "Test Repair Shop (local only)",
+      "orgType": "local_shop",
+      "tier": "micro",
+      "wardNumbers": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "maxStorageDays": 90,
+      "directionRef": "TEST-MPPCB-DIRECTION",
+      "members": [
+        { "email": "shop@ecosure.test", "fullName": "Shop Owner (test)", "orgRole": "owner" }
+      ]
+    }
+  ],
+  "officers": [
+    { "email": "spcb@ecosure.test", "fullName": "SPCB Officer (test)", "role": "spcb_officer" },
+    { "email": "imc@ecosure.test", "fullName": "IMC Officer (test)", "role": "ulb_officer" }
+  ]
+}

@@ -1,0 +1,977 @@
+-- =============================================================================
+-- EcoSure — complete intended production database state (PostgreSQL 16+)
+-- Scope: Indore pilot custody chain (PRD v3 §8, §9, §16, §17.4, §18, §19).
+--
+-- Idempotent: safe to run repeatedly. Uses IF NOT EXISTS, CREATE OR REPLACE,
+-- DROP ... IF EXISTS before CREATE for policies/triggers, and ON CONFLICT for
+-- reference data. Run as the database owner (see apps/api/scripts/db-setup.js).
+--
+-- The application connects as role `ecosure_app`, which is NOT the table owner
+-- and does NOT bypass row-level security. Every request sets `app.user_id`
+-- inside its transaction; policies read it through app.uid().
+-- =============================================================================
+
+create extension if not exists pgcrypto;
+
+do $$
+begin
+  if not exists (select 1 from pg_roles where rolname = 'ecosure_app') then
+    create role ecosure_app nologin;
+  end if;
+end $$;
+
+create schema if not exists app;
+grant usage on schema app to ecosure_app;
+grant usage on schema public to ecosure_app;
+
+-- -----------------------------------------------------------------------------
+-- Reference data
+-- -----------------------------------------------------------------------------
+
+create table if not exists waste_categories (
+  code             text primary key check (code ~ '^[a-z_]{2,40}$'),
+  name             text not null,
+  data_bearing     boolean not null,
+  has_battery      boolean not null,
+  typical_unit_kg  numeric(12,3) not null check (typical_unit_kg > 0),
+  sort_order       int not null default 100,
+  active           boolean not null default true
+);
+
+create table if not exists wards (
+  id        serial primary key,
+  city      text not null,
+  number    int not null check (number > 0),
+  name      text not null,
+  active    boolean not null default true,
+  unique (city, number)
+);
+
+create table if not exists scheme_settings (
+  key         text primary key,
+  value_num   numeric(12,2) not null,
+  description text not null
+);
+
+-- -----------------------------------------------------------------------------
+-- Identity and organizations
+-- -----------------------------------------------------------------------------
+
+create table if not exists users (
+  id             uuid primary key default gen_random_uuid(),
+  email          text not null check (email = lower(email) and email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
+  phone          text check (phone ~ '^[6-9][0-9]{9}$'),
+  full_name      text not null check (length(full_name) between 2 and 120),
+  password_hash  text not null,
+  platform_role  text not null default 'citizen'
+                 check (platform_role in ('citizen','org_member','ulb_officer','spcb_officer','cpcb_officer','programme_operator')),
+  status         text not null default 'active' check (status in ('active','suspended')),
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now()
+);
+create unique index if not exists users_email_uq on users (email);
+create unique index if not exists users_phone_uq on users (phone) where phone is not null;
+
+create table if not exists sessions (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null references users(id) on delete cascade,
+  token_hash  text not null unique,
+  created_at  timestamptz not null default now(),
+  expires_at  timestamptz not null,
+  revoked_at  timestamptz
+);
+create index if not exists sessions_user_idx on sessions (user_id);
+
+create table if not exists organizations (
+  id                          uuid primary key default gen_random_uuid(),
+  org_type                    text not null check (org_type in
+                                ('local_shop','informal_collector','drop_point','pro_recycler','producer','ulb','spcb_office','cpcb_office','programme_operator')),
+  name                        text not null check (length(name) between 2 and 160),
+  registration_no             text,
+  registration_valid_until    date,
+  capacity_tonnes_per_month   numeric(12,3) check (capacity_tonnes_per_month is null or capacity_tonnes_per_month > 0),
+  tier                        text not null default 'standard' check (tier in ('micro','standard')),
+  status                      text not null default 'active' check (status in ('pending','active','suspended')),
+  created_at                  timestamptz not null default now(),
+  updated_at                  timestamptz not null default now(),
+  constraint recycler_needs_registration check (
+    org_type <> 'pro_recycler' or (registration_no is not null and registration_valid_until is not null)
+  )
+);
+create unique index if not exists organizations_name_type_uq on organizations (org_type, lower(name));
+
+create table if not exists organization_members (
+  org_id      uuid not null references organizations(id) on delete cascade,
+  user_id     uuid not null references users(id) on delete cascade,
+  org_role    text not null check (org_role in ('owner','operator','finance','approver','viewer')),
+  created_at  timestamptz not null default now(),
+  primary key (org_id, user_id)
+);
+create index if not exists organization_members_user_idx on organization_members (user_id);
+
+-- Agent-of-recycler agreement (PRD v3 §5.2, §19.3).
+create table if not exists agent_agreements (
+  id                 uuid primary key default gen_random_uuid(),
+  principal_org_id   uuid not null references organizations(id),
+  agent_org_id       uuid not null references organizations(id),
+  categories         text[] not null check (cardinality(categories) > 0),
+  max_storage_days   int not null check (max_storage_days between 1 and 180),
+  intact_only        boolean not null default true check (intact_only),
+  valid_from         date not null,
+  valid_until        date not null,
+  direction_ref      text,
+  status             text not null default 'active' check (status in ('active','suspended','ended')),
+  created_at         timestamptz not null default now(),
+  check (valid_until > valid_from),
+  check (principal_org_id <> agent_org_id)
+);
+create unique index if not exists agent_agreements_pair_uq
+  on agent_agreements (principal_org_id, agent_org_id, valid_from);
+
+create table if not exists agent_service_wards (
+  agent_org_id  uuid not null references organizations(id) on delete cascade,
+  ward_id       int not null references wards(id),
+  primary key (agent_org_id, ward_id)
+);
+
+-- Recycler-owned material price (Rail A, PRD v3 §17.2).
+create table if not exists rate_cards (
+  id                uuid primary key default gen_random_uuid(),
+  recycler_org_id   uuid not null references organizations(id),
+  category_code     text not null references waste_categories(code),
+  price_per_unit    numeric(12,2) check (price_per_unit is null or price_per_unit >= 0),
+  price_per_kg      numeric(12,2) check (price_per_kg is null or price_per_kg >= 0),
+  effective_from    date not null,
+  created_at        timestamptz not null default now(),
+  check (price_per_unit is not null or price_per_kg is not null),
+  unique (recycler_org_id, category_code, effective_from)
+);
+
+-- -----------------------------------------------------------------------------
+-- Collection and custody
+-- -----------------------------------------------------------------------------
+
+create sequence if not exists lot_number_seq;
+create sequence if not exists attestation_number_seq;
+
+create table if not exists lots (
+  id                    uuid primary key default gen_random_uuid(),
+  agent_org_id          uuid not null references organizations(id),
+  principal_org_id      uuid not null references organizations(id),
+  agreement_id          uuid not null references agent_agreements(id),
+  seal_tag              text not null unique check (seal_tag ~ '^[A-Z0-9-]{6,30}$'),
+  status                text not null default 'sealed'
+                        check (status in ('sealed','in_transit','received','disputed','attested')),
+  storage_deadline      timestamptz not null,
+  unit_count_sent       int not null check (unit_count_sent >= 0),
+  unit_count_received   int check (unit_count_received >= 0),
+  sender_net_kg         numeric(12,3) check (sender_net_kg > 0),
+  receiver_net_kg       numeric(12,3) check (receiver_net_kg > 0),
+  accepted_net_kg       numeric(12,3) check (accepted_net_kg > 0),
+  seal_intact           boolean,
+  vehicle_ref           text,
+  created_by            uuid not null references users(id),
+  dispatched_at         timestamptz,
+  received_at           timestamptz,
+  created_at            timestamptz not null default now(),
+  updated_at            timestamptz not null default now()
+);
+create index if not exists lots_agent_idx on lots (agent_org_id, status);
+create index if not exists lots_principal_idx on lots (principal_org_id, status);
+
+create table if not exists pickup_requests (
+  id                      uuid primary key default gen_random_uuid(),
+  reference               text not null unique default ('PU-' || upper(substr(replace(gen_random_uuid()::text,'-',''),1,8))),
+  requester_id            uuid not null references users(id),
+  ward_id                 int not null references wards(id),
+  status                  text not null default 'requested'
+                          check (status in ('requested','scheduled','collected','in_lot','received','closed','cancelled','refused_item')),
+  preferred_date          date not null,
+  preferred_window        text not null check (preferred_window in ('morning','afternoon','evening')),
+  assigned_agent_org_id   uuid references organizations(id),
+  principal_org_id        uuid references organizations(id),
+  scheduled_for           date,
+  scheduled_window        text check (scheduled_window in ('morning','afternoon','evening')),
+  collected_net_kg        numeric(12,3) check (collected_net_kg > 0),
+  material_paid_amount    numeric(12,2) check (material_paid_amount >= 0),
+  lot_id                  uuid references lots(id),
+  cancel_reason           text,
+  created_at              timestamptz not null default now(),
+  updated_at              timestamptz not null default now(),
+  check (status in ('requested','cancelled') or assigned_agent_org_id is not null)
+);
+create index if not exists pickup_requests_requester_idx on pickup_requests (requester_id, created_at desc);
+create index if not exists pickup_requests_open_idx on pickup_requests (ward_id) where status = 'requested';
+create index if not exists pickup_requests_agent_idx on pickup_requests (assigned_agent_org_id, status);
+create index if not exists pickup_requests_lot_idx on pickup_requests (lot_id);
+
+-- Personal data kept apart so oversight roles never read it (PRD v3 §8.4).
+create table if not exists pickup_addresses (
+  pickup_id      uuid primary key references pickup_requests(id) on delete cascade,
+  contact_name   text not null check (length(contact_name) between 2 and 120),
+  contact_phone  text not null check (contact_phone ~ '^[6-9][0-9]{9}$'),
+  address_line   text not null check (length(address_line) between 5 and 300),
+  landmark       text check (landmark is null or length(landmark) <= 160)
+);
+
+create table if not exists product_units (
+  id               uuid primary key default gen_random_uuid(),
+  category_code    text not null references waste_categories(code),
+  identifier_type  text not null check (identifier_type in ('imei','serial')),
+  identifier_hash  text not null,
+  last4            text not null check (length(last4) = 4),
+  qr_public_id     text not null unique default encode(gen_random_bytes(9), 'hex'),
+  state            text not null default 'collected'
+                   check (state in ('registered','placed_on_market','claimed','handed_over','collected','in_lot',
+                                    'received_at_recycler','processed','materials_recovered','refurbished','lost','disputed')),
+  legacy           boolean not null default true,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  unique (identifier_type, identifier_hash)
+);
+
+create table if not exists pickup_items (
+  id                  uuid primary key default gen_random_uuid(),
+  pickup_id           uuid not null references pickup_requests(id) on delete cascade,
+  category_code       text not null references waste_categories(code),
+  quantity            int not null check (quantity between 1 and 50),
+  collected_quantity  int check (collected_quantity >= 0),
+  battery_check       text check (battery_check in ('no_battery','intact_embedded','swollen_or_damaged_refused')),
+  refused_reason      text,
+  created_at          timestamptz not null default now(),
+  unique (pickup_id, category_code),
+  check (collected_quantity is null or collected_quantity <= quantity)
+);
+
+create table if not exists pickup_item_units (
+  pickup_item_id  uuid not null references pickup_items(id) on delete cascade,
+  unit_id         uuid not null references product_units(id),
+  duplicate       boolean not null default false,
+  primary key (pickup_item_id, unit_id)
+);
+create index if not exists pickup_item_units_unit_idx on pickup_item_units (unit_id);
+
+create table if not exists lifecycle_events (
+  id             bigserial primary key,
+  unit_id        uuid not null references product_units(id),
+  state          text not null,
+  actor_user_id  uuid references users(id),
+  org_id         uuid references organizations(id),
+  pickup_id      uuid references pickup_requests(id),
+  lot_id         uuid references lots(id),
+  created_at     timestamptz not null default now()
+);
+create index if not exists lifecycle_events_unit_idx on lifecycle_events (unit_id, created_at);
+
+create table if not exists handover_codes (
+  pickup_id   uuid primary key references pickup_requests(id) on delete cascade,
+  code_hash   text not null,
+  expires_at  timestamptz not null,
+  used_at     timestamptz,
+  attempts    int not null default 0 check (attempts >= 0),
+  created_at  timestamptz not null default now()
+);
+
+create table if not exists custody_events (
+  id             bigserial primary key,
+  pickup_id      uuid references pickup_requests(id),
+  lot_id         uuid references lots(id),
+  event_type     text not null,
+  actor_user_id  uuid not null references users(id),
+  org_id         uuid references organizations(id),
+  detail         jsonb not null default '{}'::jsonb,
+  created_at     timestamptz not null default now(),
+  check (pickup_id is not null or lot_id is not null)
+);
+create index if not exists custody_events_pickup_idx on custody_events (pickup_id, created_at);
+create index if not exists custody_events_lot_idx on custody_events (lot_id, created_at);
+
+create table if not exists weigh_records (
+  id            bigserial primary key,
+  side          text not null check (side in ('doorstep','sender','receiver')),
+  pickup_id     uuid references pickup_requests(id),
+  lot_id        uuid references lots(id),
+  net_kg        numeric(12,3) not null check (net_kg > 0),
+  entry_method  text not null default 'manual' check (entry_method in ('manual','connected_scale')),
+  recorded_by   uuid not null references users(id),
+  created_at    timestamptz not null default now(),
+  check ((side = 'doorstep' and pickup_id is not null) or (side <> 'doorstep' and lot_id is not null))
+);
+
+create table if not exists attestations (
+  id                   uuid primary key default gen_random_uuid(),
+  public_number        text unique,
+  lot_id               uuid not null unique references lots(id),
+  issuer_org_id        uuid not null references organizations(id),
+  registration_no      text not null,
+  processed_kg         numeric(12,3) not null check (processed_kg > 0),
+  battery_kg           numeric(12,3) not null default 0 check (battery_kg >= 0),
+  unit_count           int not null check (unit_count >= 0),
+  status               text not null default 'draft' check (status in ('draft','issued')),
+  maker_id             uuid not null references users(id),
+  checker_id           uuid references users(id),
+  sha256               text unique,
+  disclaimer_version   text not null default 'D-2026-01',
+  drafted_at           timestamptz not null default now(),
+  issued_at            timestamptz,
+  check (checker_id is null or checker_id <> maker_id),
+  check (status = 'draft' or (checker_id is not null and public_number is not null and sha256 is not null and issued_at is not null))
+);
+
+create table if not exists citizen_incentives (
+  id               uuid primary key default gen_random_uuid(),
+  pickup_id        uuid not null unique references pickup_requests(id),
+  payee_user_id    uuid not null references users(id),
+  eligible_units   int not null check (eligible_units >= 0),
+  amount           numeric(12,2) not null check (amount >= 0),
+  funding_source   text not null default 'state_scheme' check (funding_source in ('state_scheme','producer_takeback')),
+  status           text not null default 'eligible' check (status in ('eligible','batched','paid','failed','held','reversed')),
+  hold_reason      text,
+  idempotency_key  text not null unique,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+create index if not exists citizen_incentives_payee_idx on citizen_incentives (payee_user_id, created_at);
+
+create table if not exists compliance_flags (
+  id               uuid primary key default gen_random_uuid(),
+  flag_type        text not null check (flag_type in
+                     ('weight_variance','seal_broken','unit_count_leakage','duplicate_device','storage_deadline','incentive_cap')),
+  severity         text not null check (severity in ('low','medium','high')),
+  status           text not null default 'open' check (status in ('open','under_review','escalated','closed')),
+  org_id           uuid references organizations(id),
+  lot_id           uuid references lots(id),
+  pickup_id        uuid references pickup_requests(id),
+  summary          text not null,
+  evidence         jsonb not null default '{}'::jsonb,
+  dedupe_key       text unique,
+  resolution_note  text,
+  updated_by       uuid references users(id),
+  opened_at        timestamptz not null default now(),
+  updated_at       timestamptz not null default now()
+);
+create index if not exists compliance_flags_status_idx on compliance_flags (status, opened_at desc);
+
+create table if not exists audit_log (
+  id             bigserial primary key,
+  actor_user_id  uuid references users(id),
+  action         text not null,
+  entity         text not null,
+  entity_id      text,
+  detail         jsonb not null default '{}'::jsonb,
+  ip             text,
+  created_at     timestamptz not null default now()
+);
+create index if not exists audit_log_entity_idx on audit_log (entity, entity_id);
+
+-- -----------------------------------------------------------------------------
+-- Helper functions (SECURITY DEFINER; fixed search_path)
+-- -----------------------------------------------------------------------------
+
+create or replace function app.uid() returns uuid
+language sql stable as $$
+  select nullif(current_setting('app.user_id', true), '')::uuid
+$$;
+
+create or replace function app.user_role() returns text
+language sql stable security definer set search_path = public, pg_temp as $$
+  select platform_role from users where id = app.uid() and status = 'active'
+$$;
+
+create or replace function app.my_org_ids() returns setof uuid
+language sql stable security definer set search_path = public, pg_temp as $$
+  select m.org_id from organization_members m
+  join organizations o on o.id = m.org_id and o.status = 'active'
+  where m.user_id = app.uid()
+$$;
+
+create or replace function app.is_oversight() returns boolean
+language sql stable security definer set search_path = public, pg_temp as $$
+  select coalesce(app.user_role() in ('ulb_officer','spcb_officer','cpcb_officer','programme_operator'), false)
+$$;
+
+-- True when the caller belongs to an agent org that serves the ward under an active agreement.
+create or replace function app.serves_ward(p_ward int) returns boolean
+language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1
+    from organization_members m
+    join organizations o on o.id = m.org_id and o.status = 'active'
+      and o.org_type in ('local_shop','informal_collector','drop_point')
+    join agent_service_wards w on w.agent_org_id = o.id and w.ward_id = p_ward
+    join agent_agreements a on a.agent_org_id = o.id and a.status = 'active'
+      and current_date between a.valid_from and a.valid_until
+    join organizations p on p.id = a.principal_org_id and p.status = 'active'
+      and p.registration_valid_until >= current_date
+    where m.user_id = app.uid()
+  )
+$$;
+
+-- Active agreement for an agent whose principal holds a valid registration (PRD v3 §19.4 rule 4).
+create or replace function app.active_agreement(p_agent uuid) returns uuid
+language sql stable security definer set search_path = public, pg_temp as $$
+  select a.id
+  from agent_agreements a
+  join organizations p on p.id = a.principal_org_id and p.status = 'active'
+    and p.org_type = 'pro_recycler' and p.registration_valid_until >= current_date
+  where a.agent_org_id = p_agent and a.status = 'active'
+    and current_date between a.valid_from and a.valid_until
+  order by a.valid_from desc
+  limit 1
+$$;
+
+-- --- Authentication (callable before a user context exists) -----------------
+
+create or replace function app.auth_register_citizen(p_email text, p_phone text, p_name text, p_hash text)
+returns uuid
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_id uuid;
+begin
+  insert into users (email, phone, full_name, password_hash, platform_role)
+  values (lower(p_email), p_phone, p_name, p_hash, 'citizen')
+  on conflict do nothing
+  returning id into v_id;
+  return v_id; -- null when email or phone already exists
+end $$;
+
+create or replace function app.auth_credentials(p_email text)
+returns table (user_id uuid, password_hash text, status text)
+language sql stable security definer set search_path = public, pg_temp as $$
+  select id, password_hash, status from users where email = lower(p_email)
+$$;
+
+create or replace function app.auth_create_session(p_user uuid, p_token_hash text, p_ttl_hours int)
+returns void
+language sql security definer set search_path = public, pg_temp as $$
+  insert into sessions (user_id, token_hash, expires_at)
+  values (p_user, p_token_hash, now() + make_interval(hours => p_ttl_hours))
+$$;
+
+create or replace function app.auth_resolve_session(p_token_hash text)
+returns uuid
+language sql stable security definer set search_path = public, pg_temp as $$
+  select s.user_id from sessions s join users u on u.id = s.user_id
+  where s.token_hash = p_token_hash and s.revoked_at is null and s.expires_at > now() and u.status = 'active'
+$$;
+
+create or replace function app.auth_revoke_session(p_token_hash text)
+returns void
+language sql security definer set search_path = public, pg_temp as $$
+  update sessions set revoked_at = now() where token_hash = p_token_hash and revoked_at is null
+$$;
+
+-- --- Handover codes: never readable, only issued and checked ---------------
+
+create or replace function app.issue_handover_code(p_pickup uuid, p_code_hash text, p_ttl_minutes int)
+returns timestamptz
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_exp timestamptz := now() + make_interval(mins => p_ttl_minutes);
+begin
+  if not exists (select 1 from pickup_requests where id = p_pickup and requester_id = app.uid() and status = 'scheduled') then
+    raise exception 'handover code not allowed' using errcode = '42501';
+  end if;
+  insert into handover_codes (pickup_id, code_hash, expires_at)
+  values (p_pickup, p_code_hash, v_exp)
+  on conflict (pickup_id) do update
+    set code_hash = excluded.code_hash, expires_at = excluded.expires_at, attempts = 0, created_at = now()
+    where handover_codes.used_at is null;
+  if not found then
+    raise exception 'handover code already used' using errcode = '42501';
+  end if;
+  return v_exp;
+end $$;
+
+-- Returns ok | missing | expired | locked | used | invalid. Locks after 5 wrong attempts.
+create or replace function app.consume_handover_code(p_pickup uuid, p_code_hash text)
+returns text
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare r handover_codes%rowtype;
+begin
+  if not exists (
+    select 1 from pickup_requests p
+    where p.id = p_pickup and p.status = 'scheduled'
+      and p.assigned_agent_org_id in (select app.my_org_ids())
+  ) then
+    raise exception 'not assigned' using errcode = '42501';
+  end if;
+  select * into r from handover_codes where pickup_id = p_pickup for update;
+  if not found then return 'missing'; end if;
+  if r.used_at is not null then return 'used'; end if;
+  if r.attempts >= 5 then return 'locked'; end if;
+  if r.expires_at <= now() then return 'expired'; end if;
+  if r.code_hash <> p_code_hash then
+    update handover_codes set attempts = attempts + 1 where pickup_id = p_pickup;
+    return case when r.attempts + 1 >= 5 then 'locked' else 'invalid' end;
+  end if;
+  update handover_codes set used_at = now() where pickup_id = p_pickup;
+  return 'ok';
+end $$;
+
+-- --- Product passport operations -------------------------------------------
+
+-- Registers (or finds) a unit at collection and links it to the pickup item.
+-- Returns the unit id, its state before this call, and whether it is a duplicate.
+create or replace function app.link_unit_at_collection(
+  p_item uuid, p_category text, p_type text, p_hash text, p_last4 text)
+returns table (unit_id uuid, prior_state text, duplicate boolean)
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+  v_pickup uuid; v_org uuid; v_unit uuid; v_prior text; v_dup boolean := false;
+begin
+  select i.pickup_id, p.assigned_agent_org_id into v_pickup, v_org
+  from pickup_items i join pickup_requests p on p.id = i.pickup_id
+  where i.id = p_item and p.status = 'scheduled'
+    and p.assigned_agent_org_id in (select app.my_org_ids());
+  if v_pickup is null then
+    raise exception 'not assigned' using errcode = '42501';
+  end if;
+
+  select id, state into v_unit, v_prior from product_units
+  where identifier_type = p_type and identifier_hash = p_hash for update;
+
+  if v_unit is null then
+    insert into product_units (category_code, identifier_type, identifier_hash, last4, state, legacy)
+    values (p_category, p_type, p_hash, p_last4, 'collected', true)
+    returning id into v_unit;
+    v_prior := null;
+  else
+    v_dup := v_prior in ('collected','in_lot','received_at_recycler','processed','materials_recovered');
+    if not v_dup then
+      update product_units set state = 'collected', updated_at = now() where id = v_unit;
+    end if;
+  end if;
+
+  insert into pickup_item_units (pickup_item_id, unit_id, duplicate) values (p_item, v_unit, v_dup)
+  on conflict do nothing;
+
+  if not v_dup then
+    insert into lifecycle_events (unit_id, state, actor_user_id, org_id, pickup_id)
+    values (v_unit, 'handed_over', app.uid(), v_org, v_pickup),
+           (v_unit, 'collected',   app.uid(), v_org, v_pickup);
+  end if;
+
+  return query select v_unit, v_prior, v_dup;
+end $$;
+
+-- Moves every non-duplicate unit of the given pickups to a new lifecycle state.
+-- Caller must belong to the agent or principal org of each pickup.
+create or replace function app.advance_units(p_pickups uuid[], p_state text, p_lot uuid)
+returns int
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_count int;
+begin
+  if p_state not in ('in_lot','received_at_recycler','processed') then
+    raise exception 'invalid state' using errcode = '22023';
+  end if;
+  if exists (
+    select 1 from pickup_requests p
+    where p.id = any(p_pickups)
+      and not (p.assigned_agent_org_id in (select app.my_org_ids())
+               or p.principal_org_id in (select app.my_org_ids()))
+  ) then
+    raise exception 'not permitted' using errcode = '42501';
+  end if;
+
+  with targets as (
+    select distinct u.id, p.id as pickup_id, coalesce(p.principal_org_id, p.assigned_agent_org_id) as org_id
+    from pickup_requests p
+    join pickup_items i on i.pickup_id = p.id
+    join pickup_item_units piu on piu.pickup_item_id = i.id and not piu.duplicate
+    join product_units u on u.id = piu.unit_id
+    where p.id = any(p_pickups)
+  ), upd as (
+    update product_units u set state = p_state, updated_at = now()
+    from targets t where u.id = t.id
+    returning u.id
+  )
+  insert into lifecycle_events (unit_id, state, actor_user_id, org_id, pickup_id, lot_id)
+  select t.id, p_state, app.uid(), t.org_id, t.pickup_id, p_lot from targets t;
+  get diagnostics v_count = row_count;
+  return v_count;
+end $$;
+
+-- --- Compliance flags: raised only through this function (deduplicated) -----
+
+create or replace function app.raise_flag(
+  p_type text, p_severity text, p_org uuid, p_lot uuid, p_pickup uuid,
+  p_summary text, p_evidence jsonb, p_dedupe_key text)
+returns void
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  if app.uid() is null then
+    raise exception 'authentication required' using errcode = '42501';
+  end if;
+  insert into compliance_flags (flag_type, severity, org_id, lot_id, pickup_id, summary, evidence, dedupe_key)
+  values (p_type, p_severity, p_org, p_lot, p_pickup, p_summary, coalesce(p_evidence, '{}'::jsonb), p_dedupe_key)
+  on conflict (dedupe_key) do nothing;
+end $$;
+
+-- --- Public verification (no login; non-personal fields only, PRD v3 §8.4) --
+
+create or replace function app.verify_attestation(p_number text)
+returns table (public_number text, issuer_name text, registration_no text, issued_at timestamptz,
+               processed_kg numeric, battery_kg numeric, unit_count int, sha256 text,
+               disclaimer_version text, categories text[])
+language sql stable security definer set search_path = public, pg_temp as $$
+  select a.public_number, o.name, a.registration_no, a.issued_at, a.processed_kg, a.battery_kg,
+         a.unit_count, a.sha256, a.disclaimer_version,
+         array(select distinct c.name from pickup_requests p
+               join pickup_items i on i.pickup_id = p.id and coalesce(i.collected_quantity,0) > 0
+               join waste_categories c on c.code = i.category_code
+               where p.lot_id = a.lot_id order by 1)
+  from attestations a join organizations o on o.id = a.issuer_org_id
+  where a.public_number = upper(p_number) and a.status = 'issued'
+$$;
+
+-- --- Storage deadline scan (PRD v3 §16.4 step 8: flag at 75%) ---------------
+
+create or replace function app.scan_storage_deadlines(p_flag_pct numeric)
+returns int
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_count int;
+begin
+  insert into compliance_flags (flag_type, severity, org_id, lot_id, summary, evidence, dedupe_key)
+  select 'storage_deadline',
+         case when l.storage_deadline <= now() then 'high' else 'medium' end,
+         l.agent_org_id, l.id,
+         'Lot ' || l.seal_tag || ' has used ' ||
+           round(100 * extract(epoch from now() - l.created_at) / nullif(extract(epoch from l.storage_deadline - l.created_at), 0)) ||
+           '% of its storage period and has not reached the recycler',
+         jsonb_build_object('storage_deadline', l.storage_deadline, 'created_at', l.created_at),
+         'storage:' || l.id
+  from lots l
+  where l.status in ('sealed','in_transit')
+    and now() >= l.created_at + (l.storage_deadline - l.created_at) * (p_flag_pct / 100)
+  on conflict (dedupe_key) do nothing;
+  get diagnostics v_count = row_count;
+  return v_count;
+end $$;
+
+-- -----------------------------------------------------------------------------
+-- Triggers
+-- -----------------------------------------------------------------------------
+
+create or replace function app.tg_append_only() returns trigger
+language plpgsql as $$
+begin
+  raise exception '% is append-only', tg_table_name using errcode = '42501';
+end $$;
+
+create or replace function app.tg_touch_updated_at() returns trigger
+language plpgsql as $$
+begin
+  new.updated_at := now();
+  return new;
+end $$;
+
+-- Assigning an agent requires an active agreement; principal comes from it.
+create or replace function app.tg_pickup_assignment() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_agreement uuid;
+begin
+  if new.assigned_agent_org_id is not null
+     and (tg_op = 'INSERT' or new.assigned_agent_org_id is distinct from old.assigned_agent_org_id) then
+    v_agreement := app.active_agreement(new.assigned_agent_org_id);
+    if v_agreement is null then
+      raise exception 'agent has no active agreement with a registered recycler' using errcode = '23514';
+    end if;
+    select principal_org_id into new.principal_org_id from agent_agreements where id = v_agreement;
+  end if;
+  return new;
+end $$;
+
+-- Attestation integrity (PRD v3 §19.4 rules 6 and 7).
+create or replace function app.tg_attestation_rules() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_lot lots%rowtype;
+begin
+  select * into v_lot from lots where id = new.lot_id;
+  if v_lot.status not in ('received','attested') or v_lot.accepted_net_kg is null then
+    raise exception 'lot is not received' using errcode = '23514';
+  end if;
+  if new.issuer_org_id <> v_lot.principal_org_id then
+    raise exception 'issuer must be the lot principal' using errcode = '23514';
+  end if;
+  if new.processed_kg + new.battery_kg > v_lot.accepted_net_kg then
+    raise exception 'processed plus battery weight exceeds accepted weight' using errcode = '23514';
+  end if;
+  if tg_op = 'UPDATE' and old.status = 'issued' then
+    raise exception 'issued attestations are immutable' using errcode = '42501';
+  end if;
+  return new;
+end $$;
+
+create or replace function app.tg_flag_notify() returns trigger
+language plpgsql as $$
+begin
+  perform pg_notify('ecosure_flags', json_build_object('id', new.id, 'op', lower(tg_op))::text);
+  return new;
+end $$;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['lifecycle_events','custody_events','weigh_records','audit_log'] loop
+    execute format('drop trigger if exists %I_append_only on %I', t, t);
+    execute format('create trigger %I_append_only before update or delete on %I for each row execute function app.tg_append_only()', t, t);
+  end loop;
+  foreach t in array array['users','organizations','lots','pickup_requests','product_units','citizen_incentives','compliance_flags'] loop
+    execute format('drop trigger if exists %I_touch on %I', t, t);
+    execute format('create trigger %I_touch before update on %I for each row execute function app.tg_touch_updated_at()', t, t);
+  end loop;
+end $$;
+
+drop trigger if exists pickup_requests_assignment on pickup_requests;
+create trigger pickup_requests_assignment before insert or update of assigned_agent_org_id on pickup_requests
+  for each row execute function app.tg_pickup_assignment();
+
+drop trigger if exists attestations_rules on attestations;
+create trigger attestations_rules before insert or update on attestations
+  for each row execute function app.tg_attestation_rules();
+
+drop trigger if exists compliance_flags_notify on compliance_flags;
+create trigger compliance_flags_notify after insert or update on compliance_flags
+  for each row execute function app.tg_flag_notify();
+
+-- -----------------------------------------------------------------------------
+-- Privileges (least privilege; no DELETE anywhere)
+-- -----------------------------------------------------------------------------
+
+revoke all on all tables in schema public from ecosure_app;
+grant select on waste_categories, wards, scheme_settings to ecosure_app;
+grant select on organizations, organization_members, agent_agreements, agent_service_wards, rate_cards to ecosure_app;
+grant select, update (full_name, phone) on users to ecosure_app;
+grant select, insert, update on pickup_requests, pickup_items, lots, attestations, citizen_incentives to ecosure_app;
+grant select, insert on pickup_addresses to ecosure_app;
+grant select on product_units, pickup_item_units, lifecycle_events to ecosure_app;
+grant select, insert on custody_events, weigh_records, audit_log to ecosure_app;
+grant select, update (status, resolution_note, updated_by) on compliance_flags to ecosure_app;
+grant usage on all sequences in schema public to ecosure_app;
+revoke all on sessions, handover_codes from ecosure_app;
+
+revoke all on all functions in schema app from public;
+grant execute on all functions in schema app to ecosure_app;
+
+-- -----------------------------------------------------------------------------
+-- Row-level security
+-- -----------------------------------------------------------------------------
+
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'waste_categories','wards','scheme_settings','users','sessions','organizations','organization_members',
+    'agent_agreements','agent_service_wards','rate_cards','lots','pickup_requests','pickup_addresses',
+    'product_units','pickup_items','pickup_item_units','lifecycle_events','handover_codes','custody_events',
+    'weigh_records','attestations','citizen_incentives','compliance_flags','audit_log'] loop
+    execute format('alter table %I enable row level security', t);
+    execute format('alter table %I force row level security', t);
+  end loop;
+end $$;
+
+-- Reference data: readable by everyone connected through the app.
+drop policy if exists ref_read on waste_categories;
+create policy ref_read on waste_categories for select using (true);
+drop policy if exists ref_read on wards;
+create policy ref_read on wards for select using (true);
+drop policy if exists ref_read on scheme_settings;
+create policy ref_read on scheme_settings for select using (true);
+
+-- Users: own row; operator for support.
+drop policy if exists users_self on users;
+create policy users_self on users for select using (id = app.uid() or app.user_role() = 'programme_operator');
+drop policy if exists users_self_update on users;
+create policy users_self_update on users for update using (id = app.uid()) with check (id = app.uid());
+
+-- Organizations are public-facing names; members visible within the org.
+drop policy if exists orgs_read on organizations;
+create policy orgs_read on organizations for select using (app.uid() is not null);
+drop policy if exists members_read on organization_members;
+create policy members_read on organization_members for select
+  using (user_id = app.uid() or org_id in (select app.my_org_ids()) or app.is_oversight());
+
+drop policy if exists agreements_read on agent_agreements;
+create policy agreements_read on agent_agreements for select
+  using (principal_org_id in (select app.my_org_ids()) or agent_org_id in (select app.my_org_ids()) or app.is_oversight());
+
+drop policy if exists service_wards_read on agent_service_wards;
+create policy service_wards_read on agent_service_wards for select using (app.uid() is not null);
+
+drop policy if exists rate_cards_read on rate_cards;
+create policy rate_cards_read on rate_cards for select using (app.uid() is not null);
+
+-- Pickups (PRD v3 §8.6 rule 2).
+drop policy if exists pickups_read on pickup_requests;
+create policy pickups_read on pickup_requests for select using (
+  requester_id = app.uid()
+  or assigned_agent_org_id in (select app.my_org_ids())
+  or (principal_org_id in (select app.my_org_ids()) and lot_id is not null)
+  or (status = 'requested' and assigned_agent_org_id is null and app.serves_ward(ward_id))
+  or app.is_oversight()
+);
+drop policy if exists pickups_insert on pickup_requests;
+create policy pickups_insert on pickup_requests for insert with check (
+  requester_id = app.uid() and status = 'requested' and assigned_agent_org_id is null and app.user_role() = 'citizen'
+);
+drop policy if exists pickups_update on pickup_requests;
+create policy pickups_update on pickup_requests for update using (
+  requester_id = app.uid()
+  or assigned_agent_org_id in (select app.my_org_ids())
+  or (principal_org_id in (select app.my_org_ids()) and lot_id is not null)
+  or (status = 'requested' and assigned_agent_org_id is null and app.serves_ward(ward_id))
+) with check (
+  requester_id = app.uid()
+  or assigned_agent_org_id in (select app.my_org_ids())
+  or principal_org_id in (select app.my_org_ids())
+);
+
+-- Addresses: requester and the accepted agent only; never oversight.
+drop policy if exists addresses_read on pickup_addresses;
+create policy addresses_read on pickup_addresses for select using (
+  exists (select 1 from pickup_requests p where p.id = pickup_id
+          and (p.requester_id = app.uid() or p.assigned_agent_org_id in (select app.my_org_ids())))
+);
+drop policy if exists addresses_insert on pickup_addresses;
+create policy addresses_insert on pickup_addresses for insert with check (
+  exists (select 1 from pickup_requests p where p.id = pickup_id and p.requester_id = app.uid() and p.status = 'requested')
+);
+
+drop policy if exists items_read on pickup_items;
+create policy items_read on pickup_items for select using (
+  exists (select 1 from pickup_requests p where p.id = pickup_id)
+);
+drop policy if exists items_insert on pickup_items;
+create policy items_insert on pickup_items for insert with check (
+  exists (select 1 from pickup_requests p where p.id = pickup_id and p.requester_id = app.uid() and p.status = 'requested')
+);
+drop policy if exists items_update on pickup_items;
+create policy items_update on pickup_items for update using (
+  exists (select 1 from pickup_requests p where p.id = pickup_id and p.assigned_agent_org_id in (select app.my_org_ids()) and p.status = 'scheduled')
+);
+
+-- Passport rows: visible when linked to a visible pickup, or to oversight.
+drop policy if exists units_read on product_units;
+create policy units_read on product_units for select using (
+  app.is_oversight()
+  or exists (select 1 from pickup_item_units piu join pickup_items i on i.id = piu.pickup_item_id where piu.unit_id = product_units.id)
+);
+drop policy if exists item_units_read on pickup_item_units;
+create policy item_units_read on pickup_item_units for select using (
+  exists (select 1 from pickup_items i where i.id = pickup_item_id)
+);
+drop policy if exists lifecycle_read on lifecycle_events;
+create policy lifecycle_read on lifecycle_events for select using (
+  app.is_oversight() or exists (select 1 from product_units u where u.id = unit_id)
+);
+
+-- Lots.
+drop policy if exists lots_read on lots;
+create policy lots_read on lots for select using (
+  agent_org_id in (select app.my_org_ids()) or principal_org_id in (select app.my_org_ids()) or app.is_oversight()
+);
+drop policy if exists lots_insert on lots;
+create policy lots_insert on lots for insert with check (
+  agent_org_id in (select app.my_org_ids()) and created_by = app.uid()
+);
+drop policy if exists lots_update on lots;
+create policy lots_update on lots for update using (
+  agent_org_id in (select app.my_org_ids()) or principal_org_id in (select app.my_org_ids())
+);
+
+-- Custody events and weights: readable with the pickup or lot they belong to.
+drop policy if exists custody_read on custody_events;
+create policy custody_read on custody_events for select using (
+  app.is_oversight()
+  or (pickup_id is not null and exists (select 1 from pickup_requests p where p.id = pickup_id))
+  or (lot_id is not null and exists (select 1 from lots l where l.id = lot_id))
+  or (lot_id is not null and exists (select 1 from pickup_requests p where p.lot_id = custody_events.lot_id and p.requester_id = app.uid()))
+);
+drop policy if exists custody_insert on custody_events;
+create policy custody_insert on custody_events for insert with check (actor_user_id = app.uid());
+
+drop policy if exists weigh_read on weigh_records;
+create policy weigh_read on weigh_records for select using (
+  app.is_oversight()
+  or (pickup_id is not null and exists (select 1 from pickup_requests p where p.id = pickup_id))
+  or (lot_id is not null and exists (select 1 from lots l where l.id = lot_id))
+);
+drop policy if exists weigh_insert on weigh_records;
+create policy weigh_insert on weigh_records for insert with check (recorded_by = app.uid());
+
+-- Attestations: issuer, oversight, the lot's agent, and citizens whose pickup was in the lot.
+drop policy if exists attestations_read on attestations;
+create policy attestations_read on attestations for select using (
+  issuer_org_id in (select app.my_org_ids())
+  or app.is_oversight()
+  or exists (select 1 from lots l where l.id = lot_id and l.agent_org_id in (select app.my_org_ids()))
+  or (status = 'issued' and exists (select 1 from pickup_requests p where p.lot_id = attestations.lot_id and p.requester_id = app.uid()))
+);
+drop policy if exists attestations_insert on attestations;
+create policy attestations_insert on attestations for insert with check (
+  issuer_org_id in (select app.my_org_ids()) and maker_id = app.uid() and status = 'draft'
+);
+drop policy if exists attestations_update on attestations;
+create policy attestations_update on attestations for update using (
+  issuer_org_id in (select app.my_org_ids()) and status = 'draft'
+) with check (checker_id = app.uid());
+
+-- Incentives: payee and oversight read; created by the collecting agent.
+drop policy if exists incentives_read on citizen_incentives;
+create policy incentives_read on citizen_incentives for select using (
+  payee_user_id = app.uid() or app.is_oversight()
+);
+drop policy if exists incentives_insert on citizen_incentives;
+create policy incentives_insert on citizen_incentives for insert with check (
+  exists (select 1 from pickup_requests p where p.id = pickup_id
+          and p.requester_id = payee_user_id
+          and p.assigned_agent_org_id in (select app.my_org_ids()))
+);
+
+-- Flags: oversight reads all and updates status; organizations read their own.
+drop policy if exists flags_read on compliance_flags;
+create policy flags_read on compliance_flags for select using (
+  app.is_oversight() or org_id in (select app.my_org_ids())
+);
+drop policy if exists flags_insert on compliance_flags; -- inserts go through app.raise_flag()
+drop policy if exists flags_update on compliance_flags;
+create policy flags_update on compliance_flags for update
+  using (app.is_oversight()) with check (updated_by = app.uid());
+
+drop policy if exists audit_insert on audit_log;
+create policy audit_insert on audit_log for insert with check (actor_user_id is null or actor_user_id = app.uid());
+drop policy if exists audit_read on audit_log;
+create policy audit_read on audit_log for select using (app.user_role() = 'programme_operator');
+
+-- sessions and handover_codes: no policies for ecosure_app (access only via functions).
+
+-- -----------------------------------------------------------------------------
+-- Reference data
+-- -----------------------------------------------------------------------------
+
+insert into waste_categories (code, name, data_bearing, has_battery, typical_unit_kg, sort_order) values
+  ('mobile_phone',     'Mobile phone',                    true,  true,  0.180, 10),
+  ('laptop',           'Laptop',                          true,  true,  2.200, 20),
+  ('tablet',           'Tablet',                          true,  true,  0.500, 30),
+  ('desktop_cpu',      'Desktop computer (CPU)',          true,  false, 8.000, 40),
+  ('monitor_tv',       'Monitor or television',           false, false, 6.000, 50),
+  ('printer',          'Printer or scanner',              false, false, 6.000, 60),
+  ('small_appliance',  'Small appliance (mixer, iron, fan)', false, false, 2.000, 70),
+  ('cables_accessories','Cables, chargers, accessories',  false, false, 0.300, 80)
+on conflict (code) do update set
+  name = excluded.name, data_bearing = excluded.data_bearing, has_battery = excluded.has_battery,
+  typical_unit_kg = excluded.typical_unit_kg, sort_order = excluded.sort_order;
+
+-- Indore Municipal Corporation: 85 wards (names to be loaded from the IMC ward register).
+insert into wards (city, number, name)
+select 'Indore', n, 'Ward ' || lpad(n::text, 2, '0') from generate_series(1, 85) as n
+on conflict (city, number) do nothing;
+
+insert into scheme_settings (key, value_num, description) values
+  ('incentive_per_data_bearing_device', 50,  'State scheme incentive (INR) per intact data-bearing device, PRD v3 §17.3'),
+  ('max_paid_pickups_per_month',        4,   'Paid pickups per payee per calendar month before incentives are held, PRD v3 §17.4'),
+  ('handover_code_ttl_minutes',         720, 'Validity of a citizen handover code'),
+  ('weight_tolerance_pct',              5,   'Sender/receiver weight tolerance outside monsoon, PRD v3 §16.4'),
+  ('weight_tolerance_monsoon_pct',      8,   'Sender/receiver weight tolerance June–September'),
+  ('unit_leakage_min_pct',              97,  'Minimum received/sent unit ratio before a leakage flag, PRD v3 §18.3'),
+  ('storage_flag_pct',                  75,  'Share of storage period after which an undelivered lot is flagged')
+on conflict (key) do update set value_num = excluded.value_num, description = excluded.description;

@@ -8,6 +8,10 @@
 
 ---
 
+## Start here
+
+**[v3-PRD.md](./v3-PRD.md)** — the complete v3 PRD in one document: every idea, fix, and change, with the reasoning and research behind each decision. The topic files below are the working reference for each area.
+
 ## Read order
 
 | # | Document | Contents |

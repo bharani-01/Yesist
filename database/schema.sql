@@ -1102,6 +1102,55 @@ begin
   return new;
 end $$;
 
+-- Manufacturers only register data; custody organisations only handle material. No user may belong
+-- to both sides, so every account resolves to exactly one workspace.
+create or replace function app.is_custody_org_type(p_type text) returns boolean
+language sql immutable set search_path = public, pg_temp as $$
+  select p_type in ('local_shop','informal_collector','drop_point','regional_hub','pro_recycler')
+$$;
+
+create or replace function app.tg_member_separation() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_type text;
+begin
+  -- Serialise membership changes per user so two concurrent inserts cannot both pass the check.
+  perform 1 from users where id = new.user_id for update;
+  select org_type into v_type from organizations where id = new.org_id;
+  if v_type = 'producer' and exists (
+       select 1 from organization_members m join organizations o on o.id = m.org_id
+       where m.user_id = new.user_id and m.org_id <> new.org_id and app.is_custody_org_type(o.org_type))
+  or app.is_custody_org_type(v_type) and exists (
+       select 1 from organization_members m join organizations o on o.id = m.org_id
+       where m.user_id = new.user_id and m.org_id <> new.org_id and o.org_type = 'producer') then
+    raise exception 'a user cannot belong to both a manufacturer and a custody organisation'
+      using errcode = '23514', constraint = 'member_track_separation';
+  end if;
+  return new;
+end $$;
+
+create or replace function app.tg_org_type_fixed() returns trigger
+language plpgsql set search_path = public, pg_temp as $$
+begin
+  if new.org_type is distinct from old.org_type then
+    raise exception 'organisation type cannot change' using errcode = '23514', constraint = 'org_type_fixed';
+  end if;
+  return new;
+end $$;
+
+-- Only an authorised recycler can be a principal, and only custody organisations can act for it.
+create or replace function app.tg_agreement_parties() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  if (select org_type from organizations where id = new.principal_org_id) is distinct from 'pro_recycler' then
+    raise exception 'agreement principal must be a recycler' using errcode = '23514', constraint = 'agreement_parties';
+  end if;
+  if (select org_type from organizations where id = new.agent_org_id)
+       not in ('local_shop','informal_collector','drop_point','regional_hub') then
+    raise exception 'agreement agent must be a collection or hub organisation' using errcode = '23514', constraint = 'agreement_parties';
+  end if;
+  return new;
+end $$;
+
 create or replace function app.tg_flag_notify() returns trigger
 language plpgsql as $$
 begin
@@ -1133,6 +1182,18 @@ create trigger attestations_rules before insert or update on attestations
 drop trigger if exists lots_hub on lots;
 create trigger lots_hub before insert or update of hub_org_id on lots
   for each row execute function app.tg_lot_hub();
+
+drop trigger if exists organization_members_separation on organization_members;
+create trigger organization_members_separation before insert or update on organization_members
+  for each row execute function app.tg_member_separation();
+
+drop trigger if exists organizations_type_fixed on organizations;
+create trigger organizations_type_fixed before update of org_type on organizations
+  for each row execute function app.tg_org_type_fixed();
+
+drop trigger if exists agent_agreements_parties on agent_agreements;
+create trigger agent_agreements_parties before insert or update on agent_agreements
+  for each row execute function app.tg_agreement_parties();
 
 drop trigger if exists compliance_flags_notify on compliance_flags;
 create trigger compliance_flags_notify after insert or update on compliance_flags

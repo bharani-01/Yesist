@@ -22,7 +22,7 @@
 | 3 | [03-domain-model.md](./03-domain-model.md) | Entities, integrity rules |
 | 4 | [04-consumer.md](./04-consumer.md) | Citizen and bulk consumer PRD |
 | 5 | [05-local-recycle-shop.md](./05-local-recycle-shop.md) | Collection agents PRD (shops, informal collectors, drop points) |
-| 6 | [06-regional-hub.md](./06-regional-hub.md) | Regional hub PRD (phase 2) |
+| 6 | [06-regional-hub.md](./06-regional-hub.md) | Regional hub PRD (now built as an optional, recycler-owned stop; see [19](./19-build-changes.md)) |
 | 7 | [07-professional-recycler.md](./07-professional-recycler.md) | Authorized recycler PRD |
 | 8 | [08-manufacturer.md](./08-manufacturer.md) | Producer PRD |
 | 9 | [09-government.md](./09-government.md) | SPCB, CPCB, and city PRD |
@@ -35,6 +35,7 @@
 | 16 | [16-product-passport.md](./16-product-passport.md) | Product passport and lifecycle tracking |
 | 17 | [17-problem-statement-alignment.md](./17-problem-statement-alignment.md) | Problem statement traceability matrix |
 | 18 | [18-v3-changes.md](./18-v3-changes.md) | What changed in v3 |
+| 19 | [19-build-changes.md](./19-build-changes.md) | Changes made during the build: hub in scope, manufacturer and custody separation |
 
 ---
 

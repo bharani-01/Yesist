@@ -2,10 +2,10 @@
 
 export const PICKUP_STATUS = {
   requested: { label: 'Requested', tone: 'info' },
-  scheduled: { label: 'Scheduled', tone: 'brand' },
-  collected: { label: 'Collected', tone: 'brand' },
-  in_lot: { label: 'On the way to recycler', tone: 'brand' },
-  received: { label: 'At recycler', tone: 'brand' },
+  scheduled: { label: 'Scheduled', tone: 'info' },
+  collected: { label: 'Collected', tone: 'info' },
+  in_lot: { label: 'On the way to recycler', tone: 'info' },
+  received: { label: 'At recycler', tone: 'info' },
   closed: { label: 'Recycled', tone: 'success' },
   cancelled: { label: 'Cancelled', tone: 'neutral' },
   refused_item: { label: 'Refused', tone: 'warning' },
@@ -13,14 +13,14 @@ export const PICKUP_STATUS = {
 
 export const LOT_STATUS = {
   sealed: { label: 'Sealed', tone: 'info' },
-  in_transit: { label: 'In transit', tone: 'brand' },
-  received: { label: 'Received', tone: 'brand' },
+  in_transit: { label: 'In transit', tone: 'info' },
+  received: { label: 'Received', tone: 'info' },
   disputed: { label: 'Disputed', tone: 'danger' },
   attested: { label: 'Attested', tone: 'success' },
 };
 
 export const INCENTIVE_STATUS = {
-  eligible: { label: 'Due in next treasury batch', tone: 'brand' },
+  eligible: { label: 'Due in next treasury batch', tone: 'info' },
   batched: { label: 'In treasury batch', tone: 'info' },
   paid: { label: 'Paid', tone: 'success' },
   failed: { label: 'Payment failed', tone: 'danger' },

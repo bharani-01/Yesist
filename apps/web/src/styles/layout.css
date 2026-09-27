@@ -16,9 +16,14 @@
   align-items: center;
   gap: var(--space-6);
 }
-.brand { display: inline-flex; align-items: baseline; gap: var(--space-3); font-size: var(--text-lg); font-weight: 700; color: var(--color-brand); letter-spacing: -0.02em; }
+.brand { display: inline-flex; align-items: center; gap: var(--space-3); justify-self: start; }
 .brand:hover { text-decoration: none; }
-.brand__workspace { font-size: var(--text-sm); font-weight: 550; color: var(--color-ink-muted); letter-spacing: 0; }
+.brand__workspace { font-size: var(--text-sm); font-weight: 550; color: var(--color-ink-muted); padding-left: var(--space-3); border-left: 1px solid var(--color-border); }
+.logo { display: inline-flex; align-items: center; gap: var(--space-2); }
+.logo__mark { flex: none; }
+.logo__word { font-size: var(--text-lg); font-weight: 750; letter-spacing: -0.02em; line-height: 1; }
+.logo__eco { color: var(--color-logo-ink); }
+.logo__sure { color: var(--color-logo-green); }
 
 .nav { display: flex; gap: var(--space-1); flex: 1; }
 .nav a { padding: 6px var(--space-3); border-radius: var(--radius-sm); color: var(--color-ink-muted); font-size: var(--text-sm); font-weight: 550; }

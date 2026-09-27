@@ -1,6 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router-dom';
 import { HOME_BY_WORKSPACE, WORKSPACE_LABELS, useAuth } from '../../features/auth/AuthProvider.jsx';
 import { Button } from '../ui/Button.jsx';
+import { Logo } from './Logo.jsx';
 const NAV = {
   citizen: [{ to: '/pickups', label: 'My pickups', end: true }, { to: '/pickups/new', label: 'Book a pickup' }],
   agent: [{ to: '/agent', label: 'Jobs and lots', end: true }],
@@ -18,7 +19,7 @@ export function AppShell() {
       <header className="header">
         <div className="header__inner">
           <Link to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} className="brand">
-            EcoSure
+            <Logo />
             {user && <span className="brand__workspace">{WORKSPACE_LABELS[user.workspace]}</span>}
           </Link>
           <nav className="nav" aria-label="Primary">

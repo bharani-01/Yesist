@@ -94,6 +94,25 @@ describe('authentication and authorization', () => {
     });
     assert.equal(res.status, 403);
   });
+
+  test('demo accounts are served only when explicitly enabled, and each one signs in to its workspace', async (t) => {
+    const res = await client().get('/auth/demo-accounts');
+    if (process.env.DEMO_LOGIN_ENABLED !== 'true') {
+      assert.equal(res.status, 404);
+      return;
+    }
+    assert.equal(res.status, 200);
+    assert.equal(res.headers.get('cache-control'), 'no-store');
+    assert.ok(res.body.accounts.length >= 6);
+    for (const account of res.body.accounts) {
+      await t.test(account.email, async () => {
+        const c = client();
+        const login = await c.post('/auth/login', { email: account.email, password: res.body.password });
+        assert.equal(login.status, 200, JSON.stringify(login.body));
+        assert.equal(login.body.user.workspace, account.workspace);
+      });
+    }
+  });
 });
 
 describe('custody chain: booking → handover → lot → receipt → maker-checker attestation → verification', () => {

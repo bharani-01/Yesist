@@ -5,6 +5,7 @@ import { Button } from '../../components/ui/Button.jsx';
 import { TextField } from '../../components/ui/Field.jsx';
 import { AuthLayout } from './AuthLayout.jsx';
 import { HOME_BY_WORKSPACE, useAuth } from './AuthProvider.jsx';
+import { DemoAccounts } from './DemoAccounts.jsx';
 
 export function LoginPage() {
   const auth = useAuth();
@@ -44,6 +45,7 @@ export function LoginPage() {
         <TextField label="Password" type="password" autoComplete="current-password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
         <Button type="submit" block loading={pending}>Sign in</Button>
       </form>
+      <DemoAccounts selectedEmail={form.email} onPick={(creds) => { setForm(creds); setError(null); }} />
     </AuthLayout>
   );
 }

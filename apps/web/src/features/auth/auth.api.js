@@ -5,4 +5,5 @@ export const authApi = {
   login: (body) => http.post('/auth/login', body, { silent401: true }),
   register: (body) => http.post('/auth/register', body),
   logout: () => http.post('/auth/logout'),
+  demoAccounts: (signal) => http.get('/auth/demo-accounts', { signal, silent401: true }),
 };

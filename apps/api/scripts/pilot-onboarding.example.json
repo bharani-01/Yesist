@@ -36,5 +36,8 @@
   "officers": [
     { "email": "spcb@ecosure.test", "fullName": "SPCB Officer (test)", "role": "spcb_officer" },
     { "email": "imc@ecosure.test", "fullName": "IMC Officer (test)", "role": "ulb_officer" }
+  ],
+  "citizens": [
+    { "email": "citizen@ecosure.test", "fullName": "Demo Citizen (test)", "phone": "9000000001" }
   ]
 }

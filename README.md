@@ -30,13 +30,16 @@ Production: `npm run build` then `npm start`; the API serves `apps/web/dist` on 
 
 | Email | Workspace |
 | --- | --- |
+| `citizen@ecosure.test` | Citizen |
 | `shop@ecosure.test` | Collection agent (repair shop, wards 1–10) |
 | `recycler.maker@ecosure.test` | Recycler operator (drafts attestations) |
 | `recycler.checker@ecosure.test` | Recycler approver (issues attestations) |
 | `spcb@ecosure.test` | State pollution control board officer (triages flags) |
 | `imc@ecosure.test` | Municipal officer (read-only oversight) |
 
-Citizens self-register at `/register`.
+Citizens can also self-register at `/register`.
+
+For local demos, set `DEMO_LOGIN_ENABLED=true` in `.env` and restart the API: the sign-in page then lists these accounts, and picking one fills in the email and password. The account list comes from the same onboarding file, and the API refuses to start if the flag is set with `NODE_ENV=production`.
 
 ## Tests
 

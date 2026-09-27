@@ -11,6 +11,10 @@ function secret(name) {
 }
 
 const nodeEnv = process.env.NODE_ENV ?? 'development';
+const demoLogin = process.env.DEMO_LOGIN_ENABLED === 'true';
+if (demoLogin && nodeEnv === 'production') {
+  throw new Error('DEMO_LOGIN_ENABLED must not be set in production');
+}
 
 export const env = Object.freeze({
   nodeEnv,
@@ -22,4 +26,6 @@ export const env = Object.freeze({
   handoverHmacKey: secret('HANDOVER_HMAC_KEY'),
   webOrigin: process.env.WEB_ORIGIN ?? 'http://localhost:5173',
   trustProxy: process.env.TRUST_PROXY === 'true',
+  demoLogin,
+  demoPassword: demoLogin ? required('PILOT_ACCOUNT_PASSWORD') : null,
 });

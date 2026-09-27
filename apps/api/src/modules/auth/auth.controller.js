@@ -1,7 +1,9 @@
 import { SESSION } from '../../config/constants.js';
 import { env } from '../../config/env.js';
+import { Errors } from '../../core/errors.js';
 import { contextOf } from '../../shared/context.js';
 import * as service from './auth.service.js';
+import { demoAccounts } from './demo-accounts.js';
 
 const cookieOptions = {
   httpOnly: true,
@@ -30,6 +32,12 @@ export async function logout(req, res) {
   await service.logout(req.cookies?.[SESSION.cookieName]);
   res.clearCookie(SESSION.cookieName, cookieOptions);
   res.status(204).end();
+}
+
+export function listDemoAccounts(_req, res) {
+  const demo = demoAccounts();
+  if (!demo) throw Errors.notFound('Route');
+  res.json(demo);
 }
 
 export function me(req, res) {

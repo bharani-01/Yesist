@@ -17,7 +17,7 @@ export class HttpClient {
     const setCookie = res.headers.get('set-cookie');
     if (setCookie) this.cookie = setCookie.split(';')[0];
     const text = await res.text();
-    return { status: res.status, body: text ? JSON.parse(text) : null };
+    return { status: res.status, headers: res.headers, body: text ? JSON.parse(text) : null };
   }
 
   get(path) { return this.request('GET', path); }

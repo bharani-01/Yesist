@@ -48,6 +48,11 @@ const schema = z.object({
     fullName: z.string().min(2),
     role: z.enum(['ulb_officer', 'spcb_officer', 'cpcb_officer', 'programme_operator']),
   })),
+  citizens: z.array(z.object({
+    email: z.email().toLowerCase(),
+    fullName: z.string().min(2),
+    phone: z.string().regex(/^[6-9]\d{9}$/),
+  })).default([]),
 });
 
 const config = schema.parse(JSON.parse(await readFile(file, 'utf8')));
@@ -128,9 +133,16 @@ try {
   }
 
   for (const o of config.officers) await upsertUser(o, o.role);
+  for (const c of config.citizens) {
+    await client.query(
+      `insert into users (email, phone, full_name, password_hash, platform_role) values ($1,$2,$3,$4,'citizen')
+       on conflict (email) do update set phone = excluded.phone, full_name = excluded.full_name`,
+      [c.email, c.phone, c.fullName, passwordHash],
+    );
+  }
   await client.query('commit');
   console.log(`Onboarded from ${file}`);
-  console.log('Accounts:', [...r.members, ...config.agents.flatMap((a) => a.members), ...config.officers].map((m) => m.email).join(', '));
+  console.log('Accounts:', [...config.citizens, ...r.members, ...config.agents.flatMap((a) => a.members), ...config.officers].map((m) => m.email).join(', '));
 } catch (err) {
   await client.query('rollback');
   console.error('Onboarding failed:', err.message);

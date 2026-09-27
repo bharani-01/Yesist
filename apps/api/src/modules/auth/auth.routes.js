@@ -11,3 +11,4 @@ authRoutes.post('/register', credentialLimiter, validate({ body: registerBody })
 authRoutes.post('/login', credentialLimiter, validate({ body: loginBody }), controller.login);
 authRoutes.post('/logout', controller.logout);
 authRoutes.get('/me', requireAuth, controller.me);
+authRoutes.get('/demo-accounts', controller.listDemoAccounts);

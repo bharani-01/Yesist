@@ -1228,6 +1228,24 @@ revoke all on sessions, handover_codes from ecosure_app;
 revoke all on all functions in schema app from public;
 grant execute on all functions in schema app to ecosure_app;
 
+-- Hosted PostgreSQL (Supabase) grants its API roles every new table in public and serves them over
+-- its REST API. EcoSure never uses that API: all access goes through the Node.js API as ecosure_app.
+do $$
+declare r text;
+begin
+  foreach r in array array['anon','authenticated'] loop
+    if exists (select 1 from pg_roles where rolname = r) then
+      execute format('revoke all on all tables in schema public from %I', r);
+      execute format('revoke all on all sequences in schema public from %I', r);
+      execute format('revoke all on all functions in schema public from %I', r);
+      execute format('revoke all on schema app from %I', r);
+      execute format('alter default privileges in schema public revoke all on tables from %I', r);
+      execute format('alter default privileges in schema public revoke all on sequences from %I', r);
+      execute format('alter default privileges in schema public revoke all on functions from %I', r);
+    end if;
+  end loop;
+end $$;
+
 -- -----------------------------------------------------------------------------
 -- Row-level security
 -- -----------------------------------------------------------------------------

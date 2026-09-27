@@ -1,4 +1,4 @@
-import { SESSION } from '../config/constants.js';
+import { env } from '../config/env.js';
 import { resolveSessionActor } from '../modules/auth/auth.service.js';
 
 /**
@@ -6,7 +6,7 @@ import { resolveSessionActor } from '../modules/auth/auth.service.js';
  * route-level authorization middleware decides what is allowed.
  */
 export async function authenticate(req, _res, next) {
-  const token = req.cookies?.[SESSION.cookieName];
+  const token = req.cookies?.[env.sessionCookieName];
   if (token) req.auth = await resolveSessionActor(token);
   next();
 }

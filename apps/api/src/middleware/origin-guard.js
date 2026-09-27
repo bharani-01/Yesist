@@ -11,7 +11,7 @@ export function originGuard(req, _res, next) {
   if (SAFE_METHODS.has(req.method)) return next();
   const origin = req.get('origin');
   const self = `${req.protocol}://${req.get('host')}`;
-  if (origin && origin !== env.webOrigin && origin !== self) {
+  if (origin && origin !== self && !env.webOrigins.includes(origin)) {
     return next(new AppError(403, 'origin_not_allowed', 'Request origin is not allowed.'));
   }
   if (req.get('content-length') > 0 && !req.is('application/json')) {

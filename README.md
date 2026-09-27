@@ -33,7 +33,23 @@ Product context lives in [`docs/prd`](docs/prd/README.md) and the field simulati
    - `npm run dev:api` (http://localhost:4000)
    - `npm run dev:web` (http://localhost:5173, proxies `/api` to the API)
 
-Production: `npm run build` then `npm start`; the API serves `apps/web/dist` on the same origin.
+Production on a single server: `npm run build` then `npm start`; the API serves `apps/web/dist` on the same origin.
+
+### Deploying to Firebase Hosting (project `yesist-12`)
+
+Firebase Hosting serves the built web client and forwards `/api/**` to the API running on Cloud Run (service `ecosure-api`, region `asia-south1`), so the browser still sees one origin. The database is Supabase PostgreSQL.
+
+1. **Database.** Put the Supabase connection details in a git-ignored `.env.supabase`: `DATABASE_ADMIN_URL` (the `postgres` user), `DATABASE_URL` (the `ecosure_app` runtime role), `ECOSURE_APP_DB_PASSWORD`, and `DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt`. Then run `node --env-file=.env.supabase apps/api/scripts/db-setup.js`. The schema also revokes Supabase's `anon` and `authenticated` roles from every table, because EcoSure never uses Supabase's REST API.
+2. **API on Cloud Run.** Store `DATABASE_URL`, `IDENTIFIER_HMAC_KEY`, and `HANDOVER_HMAC_KEY` in Secret Manager, then deploy from the repository root:
+   ```
+   gcloud run deploy ecosure-api --source . --region asia-south1 --project yesist-12 --allow-unauthenticated \
+     --set-env-vars "^;^NODE_ENV=production;SESSION_COOKIE_NAME=__session;TRUST_PROXY=true;DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt;WEB_ORIGIN=https://yesist-12.web.app,https://yesist-12.firebaseapp.com" \
+     --set-secrets DATABASE_URL=ecosure-database-url:latest,IDENTIFIER_HMAC_KEY=ecosure-identifier-hmac:latest,HANDOVER_HMAC_KEY=ecosure-handover-hmac:latest
+   ```
+   `SESSION_COOKIE_NAME=__session` is required: Firebase Hosting strips every other cookie before forwarding requests to Cloud Run.
+3. **Web client.** `npm install -g firebase-tools`, `firebase login`, then `firebase deploy --only hosting`. The build runs as a predeploy step. Deploy the Cloud Run service first, because the hosting rewrite points at it.
+
+Hosting forwards a request to Cloud Run for at most 60 seconds, so the live flag stream reconnects about once a minute. Never set `DEMO_LOGIN_ENABLED` or run `onboard:pilot` against the hosted database; the API refuses demo login in production.
 
 ### Local test accounts
 

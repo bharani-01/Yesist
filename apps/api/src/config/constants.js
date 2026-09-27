@@ -1,7 +1,6 @@
 export const API_PREFIX = '/api/v1';
 
 export const SESSION = Object.freeze({
-  cookieName: 'ecosure_session',
   ttlHours: 12,
 });
 

@@ -6,6 +6,7 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import { z } from 'zod';
+import { pgConfig } from '../src/core/pg-config.js';
 import { hashPassword } from '../src/core/security/password.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -69,7 +70,7 @@ const schema = z.object({
 
 const config = schema.parse(JSON.parse(await readFile(file, 'utf8')));
 const passwordHash = await hashPassword(password);
-const client = new pg.Client({ connectionString: process.env.DATABASE_ADMIN_URL });
+const client = new pg.Client(pgConfig(process.env.DATABASE_ADMIN_URL));
 await client.connect();
 
 async function upsertUser({ email, fullName }, role) {

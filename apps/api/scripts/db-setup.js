@@ -4,6 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
+import { pgConfig } from '../src/core/pg-config.js';
 
 const adminUrl = process.env.DATABASE_ADMIN_URL;
 const appPassword = process.env.ECOSURE_APP_DB_PASSWORD;
@@ -23,7 +24,7 @@ if (!/^[a-z_][a-z0-9_]{0,62}$/.test(dbName)) {
 async function ensureDatabase() {
   const maintenance = new URL(adminUrl);
   maintenance.pathname = '/postgres';
-  const client = new pg.Client({ connectionString: maintenance.toString() });
+  const client = new pg.Client(pgConfig(maintenance.toString()));
   await client.connect();
   try {
     const { rowCount } = await client.query('select 1 from pg_database where datname = $1', [dbName]);
@@ -38,7 +39,7 @@ async function ensureDatabase() {
 
 async function applySchema() {
   const sql = await readFile(schemaPath, 'utf8');
-  const client = new pg.Client({ connectionString: adminUrl });
+  const client = new pg.Client(pgConfig(adminUrl));
   await client.connect();
   try {
     await client.query(sql);

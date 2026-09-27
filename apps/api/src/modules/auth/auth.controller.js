@@ -13,7 +13,7 @@ const cookieOptions = {
 };
 
 function setSessionCookie(res, token) {
-  res.cookie(SESSION.cookieName, token, { ...cookieOptions, maxAge: SESSION.ttlHours * 3600 * 1000 });
+  res.cookie(env.sessionCookieName, token, { ...cookieOptions, maxAge: SESSION.ttlHours * 3600 * 1000 });
 }
 
 export async function register(req, res) {
@@ -29,8 +29,8 @@ export async function login(req, res) {
 }
 
 export async function logout(req, res) {
-  await service.logout(req.cookies?.[SESSION.cookieName]);
-  res.clearCookie(SESSION.cookieName, cookieOptions);
+  await service.logout(req.cookies?.[env.sessionCookieName]);
+  res.clearCookie(env.sessionCookieName, cookieOptions);
   res.status(204).end();
 }
 

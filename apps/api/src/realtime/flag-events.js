@@ -1,6 +1,7 @@
 import pg from 'pg';
 import { env } from '../config/env.js';
 import { logger } from '../core/logger.js';
+import { pgConfig } from '../core/pg-config.js';
 
 // One LISTEN connection fans out flag notifications to authorised SSE subscribers.
 // Payloads carry only ids; clients refetch through the RLS-protected API.
@@ -22,7 +23,7 @@ function broadcast(event, data) {
 
 async function connect() {
   if (stopped) return;
-  client = new pg.Client({ connectionString: env.databaseUrl });
+  client = new pg.Client(pgConfig(env.databaseUrl));
   client.on('notification', (msg) => {
     try {
       broadcast('flag', JSON.parse(msg.payload));

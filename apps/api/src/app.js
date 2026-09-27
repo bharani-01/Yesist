@@ -21,7 +21,7 @@ const OWN_BODY_PARSER = /^\/api\/v1\/producer\/batches\/[^/]+\/units$/;
 export function createApp() {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', env.trustProxy ? 1 : false);
+  app.set('trust proxy', env.trustProxy);
 
   // Order matters: context → logging → security → parsing → auth → routes → errors.
   app.use(requestContext);

@@ -42,6 +42,8 @@ Sources: [`../research/00-senior-pm-research-synthesis.md`](../research/00-senio
 
 ## 2. Score after v2 (on paper)
 
+> **Superseded (2026-09-27):** A 36-agent review against Indian law, government finance rules, and local context scored v2 at **4.6 / 10** on average. The estimate below measured only the earlier product problems. See [`../research/v2-deep/00-synthesis.md`](../research/v2-deep/00-synthesis.md).
+
 Same scoring method as the earlier assessment.
 
 | Dimension | Weight | v1 | v2 | Why it moved |

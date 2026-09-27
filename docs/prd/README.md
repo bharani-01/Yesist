@@ -43,6 +43,7 @@
 
 ## Research
 
+- [**v2 deep research (36 agents): government norms, adoption, performance**](../research/v2-deep/00-synthesis.md)
 - [Senior PM / research synthesis](../research/00-senior-pm-research-synthesis.md)
 - [Government initiative reframe](../research/gov-initiative-reframe.md)
 - [Tier-2 / Tier-3 field issues](../research/tier2-tier3-field-issues.md)

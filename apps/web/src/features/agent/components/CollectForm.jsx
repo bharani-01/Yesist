@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { QrScanner } from '../../../components/qr/QrScanner.jsx';
 import { Alert, ErrorAlert } from '../../../components/ui/Alert.jsx';
 import { Button } from '../../../components/ui/Button.jsx';
 import { SelectField, TextAreaField, TextField } from '../../../components/ui/Field.jsx';
@@ -17,7 +18,7 @@ const BATTERY_OPTIONS = [
 /** Doorstep collection: battery triage, device IDs, weight, price, then the customer's handover code. */
 export function CollectForm({ job, onCollected }) {
   const [lines, setLines] = useState(() => job.items.map((i) => ({
-    itemId: i.id, collectedQuantity: i.quantity, batteryCheck: '', refusedReason: '', identifiers: '',
+    itemId: i.id, collectedQuantity: i.quantity, batteryCheck: '', refusedReason: '', identifiers: '', qrIds: [], scanning: false,
   })));
   const [netKg, setNetKg] = useState('');
   const [paid, setPaid] = useState('');
@@ -27,7 +28,11 @@ export function CollectForm({ job, onCollected }) {
   const [result, setResult] = useState(null);
 
   const itemById = useMemo(() => Object.fromEntries(job.items.map((i) => [i.id, i])), [job.items]);
-  const update = (index, patch) => setLines(lines.map((l, i) => (i === index ? { ...l, ...patch } : l)));
+  const update = (index, patch) => setLines((current) => current.map((l, i) => (i === index ? { ...l, ...patch } : l)));
+  const addQr = (index, qr) => setLines((current) => {
+    if (current.some((l) => l.qrIds.includes(qr))) return current;
+    return current.map((l, i) => (i === index ? { ...l, qrIds: [...l.qrIds, qr] } : l));
+  });
 
   const suggestedPrice = useMemo(() => {
     let total = 0;
@@ -57,6 +62,7 @@ export function CollectForm({ job, onCollected }) {
             batteryCheck: item.hasBattery ? l.batteryCheck || undefined : undefined,
             refusedReason: l.refusedReason || undefined,
             identifiers: item.dataBearing && !refused ? l.identifiers.split(/\s+/).map((s) => s.trim()).filter(Boolean) : [],
+            qrIds: refused ? [] : l.qrIds,
           };
         }),
       };
@@ -108,6 +114,29 @@ export function CollectForm({ job, onCollected }) {
                   value={line.identifiers}
                   onChange={(e) => update(index, { identifiers: e.target.value })}
                 />
+              )}
+              {!refused && Number(line.collectedQuantity) > 0 && (
+                <div className="stack stack--sm">
+                  <div className="row row--between">
+                    <span className="subtle">
+                      {line.qrIds.length ? `${line.qrIds.length} EcoSure label${line.qrIds.length === 1 ? '' : 's'} scanned` : 'Devices with an EcoSure QR label: scan each one.'}
+                    </span>
+                    <Button type="button" variant="ghost" size="sm" onClick={() => update(index, { scanning: !line.scanning })} aria-expanded={line.scanning}>
+                      {line.scanning ? 'Done scanning' : 'Scan labels'}
+                    </Button>
+                  </div>
+                  {line.qrIds.length > 0 && (
+                    <ul className="chips" aria-label={`Scanned labels for ${item.name}`}>
+                      {line.qrIds.map((qr) => (
+                        <li key={qr} className="chip">
+                          <span className="mono">…{qr.slice(-6)}</span>
+                          <button type="button" aria-label={`Remove label ending ${qr.slice(-6)}`} onClick={() => update(index, { qrIds: line.qrIds.filter((q) => q !== qr) })}>×</button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {line.scanning && <QrScanner label={`Scan ${item.name} labels`} continuous onScan={(qr) => addQr(index, qr)} />}
+                </div>
               )}
             </fieldset>
           );

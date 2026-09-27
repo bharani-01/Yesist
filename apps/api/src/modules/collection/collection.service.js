@@ -74,7 +74,7 @@ function validateCollectionLines(lines, items) {
       throw Errors.badRequest('refusal_reason_required', 'Give a reason for any item not collected.');
     }
     if (line.identifiers.length && !item.dataBearing) throw Errors.badRequest('identifier_not_expected', 'Identifiers are only recorded for data-bearing devices.');
-    if (line.identifiers.length > line.collectedQuantity) throw Errors.badRequest('too_many_identifiers', 'More identifiers than collected devices.');
+    if (line.identifiers.length + line.qrIds.length > line.collectedQuantity) throw Errors.badRequest('too_many_identifiers', 'More identifiers and QR labels than collected devices.');
     if (new Set(line.identifiers).size !== line.identifiers.length) throw Errors.badRequest('duplicate_identifier', 'The same identifier was entered twice.');
     for (const value of line.identifiers) {
       const valid = idType === 'imei' ? isValidImei(value) : /^[A-Za-z0-9-]{4,40}$/.test(value);
@@ -83,6 +83,8 @@ function validateCollectionLines(lines, items) {
       }
     }
   }
+  const qrIds = lines.flatMap((l) => l.qrIds);
+  if (new Set(qrIds).size !== qrIds.length) throw Errors.badRequest('duplicate_qr', 'The same QR label was scanned twice.');
   if (!lines.some((l) => l.collectedQuantity > 0)) {
     throw Errors.badRequest('nothing_collected', 'Nothing was collected. Refuse the pickup instead.');
   }
@@ -116,21 +118,30 @@ export async function collectJob(id, input, ctx) {
         refusedReason: line.refusedReason ?? null,
       });
       let lineDuplicates = 0;
+      const flagDuplicate = async (unit, label) => {
+        lineDuplicates += 1;
+        await raiseFlag(tx, {
+          type: 'duplicate_device', severity: 'high', orgId: ctx.org.id, pickupId: id,
+          summary: `A device (${label}) already in the custody chain was presented again`,
+          evidence: { unitId: unit.unitId, priorState: unit.priorState },
+          dedupeKey: `dup:${unit.unitId}:${id}`,
+        });
+      };
       for (const raw of line.identifiers) {
         const type = identifierTypeFor(item.categoryCode);
         const value = type === 'serial' ? raw.toUpperCase() : raw;
         const unit = await repo.linkUnit(tx, {
           itemId: line.itemId, categoryCode: item.categoryCode, type, hash: hashIdentifier(type, value), last4: value.slice(-4),
         });
-        if (unit.duplicate) {
-          lineDuplicates += 1;
-          await raiseFlag(tx, {
-            type: 'duplicate_device', severity: 'high', orgId: ctx.org.id, pickupId: id,
-            summary: `A device (…${value.slice(-4)}) already in the custody chain was presented again`,
-            evidence: { unitId: unit.unitId, priorState: unit.priorState },
-            dedupeKey: `dup:${unit.unitId}:${id}`,
-          });
+        if (unit.duplicate) await flagDuplicate(unit, `…${value.slice(-4)}`);
+      }
+      for (const qr of line.qrIds) {
+        const unit = await repo.linkUnitByQr(tx, line.itemId, qr);
+        if (unit.problem === 'not_found') throw Errors.badRequest('unknown_qr', `QR label …${qr.slice(-4)} is not registered with EcoSure.`);
+        if (unit.problem === 'category_mismatch') {
+          throw Errors.badRequest('qr_category_mismatch', `QR label …${qr.slice(-4)} belongs to a different kind of device than “${item.name}”.`);
         }
+        if (unit.duplicate) await flagDuplicate(unit, `QR …${qr.slice(-4)}`);
       }
       duplicates += lineDuplicates;
       if (item.dataBearing) eligibleUnits += line.collectedQuantity - lineDuplicates;

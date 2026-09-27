@@ -48,6 +48,7 @@ export const FLAG_TYPE_LABELS = {
   duplicate_device: 'Duplicate device',
   storage_deadline: 'Storage deadline',
   incentive_cap: 'Incentive cap',
+  unit_missing_at_scan: 'Labelled unit missing at gate',
 };
 
 export const UNIT_STATE = {
@@ -59,6 +60,7 @@ export const UNIT_STATE = {
   at_hub: { label: 'At a hub', tone: 'info' },
   received_at_recycler: { label: 'At recycler', tone: 'info' },
   processed: { label: 'Recycled', tone: 'success' },
+  disputed: { label: 'Missing at recycler', tone: 'danger' },
 };
 
 export const BATCH_STATUS = {

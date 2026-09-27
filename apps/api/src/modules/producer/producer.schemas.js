@@ -32,6 +32,6 @@ export const registerUnitsBody = z.object({
 });
 
 export const listUnitsQuery = z.object({
-  state: z.enum(['registered', 'placed_on_market', 'claimed', 'collected', 'in_lot', 'at_hub', 'received_at_recycler', 'processed']).optional(),
+  state: z.enum(['registered', 'placed_on_market', 'claimed', 'collected', 'in_lot', 'at_hub', 'received_at_recycler', 'processed', 'disputed']).optional(),
   batchId: z.uuid().optional(),
 });

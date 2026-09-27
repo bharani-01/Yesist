@@ -3,7 +3,11 @@ import { HOME_BY_WORKSPACE, WORKSPACE_LABELS, useAuth } from '../../features/aut
 import { Button } from '../ui/Button.jsx';
 import { Logo } from './Logo.jsx';
 const NAV = {
-  citizen: [{ to: '/pickups', label: 'My pickups', end: true }, { to: '/pickups/new', label: 'Book a pickup' }],
+  citizen: [
+    { to: '/pickups', label: 'My pickups', end: true },
+    { to: '/pickups/new', label: 'Book a pickup' },
+    { to: '/devices', label: 'My devices' },
+  ],
   agent: [{ to: '/agent', label: 'Jobs and lots', end: true }],
   recycler: [{ to: '/recycler', label: 'Inbound lots', end: true }],
   producer: [

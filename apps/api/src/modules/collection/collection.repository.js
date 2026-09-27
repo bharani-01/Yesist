@@ -91,7 +91,7 @@ export const lockAssignedPickup = (tx, id, agentOrgId) =>
 export const listItemsWithCategory = (tx, pickupId) =>
   queryMany(
     tx,
-    `select i.id, i.category_code as "categoryCode", i.quantity, wc.data_bearing as "dataBearing", wc.has_battery as "hasBattery"
+    `select i.id, i.category_code as "categoryCode", wc.name, i.quantity, wc.data_bearing as "dataBearing", wc.has_battery as "hasBattery"
        from pickup_items i join waste_categories wc on wc.code = i.category_code where i.pickup_id = $1`,
     [pickupId],
   );
@@ -111,6 +111,14 @@ export const linkUnit = (tx, { itemId, categoryCode, type, hash, last4 }) =>
     tx,
     'select unit_id as "unitId", prior_state as "priorState", duplicate from app.link_unit_at_collection($1, $2, $3, $4, $5)',
     [itemId, categoryCode, type, hash, last4],
+  );
+
+// problem: not_found | category_mismatch (nothing written) or null.
+export const linkUnitByQr = (tx, itemId, qr) =>
+  queryOne(
+    tx,
+    'select unit_id as "unitId", prior_state as "priorState", duplicate, problem from app.link_unit_by_qr($1, $2)',
+    [itemId, qr],
   );
 
 export const insertDoorstepWeight = (tx, pickupId, netKg, userId) =>

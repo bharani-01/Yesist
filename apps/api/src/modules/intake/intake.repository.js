@@ -28,14 +28,30 @@ export const listLotContents = (tx, lotId) =>
   queryMany(
     tx,
     `select wc.name, sum(i.collected_quantity)::int as units,
-            count(piu.unit_id) filter (where not piu.duplicate)::int as "passportUnits"
+            sum((select count(*) from pickup_item_units piu where piu.pickup_item_id = i.id and not piu.duplicate))::int as "passportUnits"
        from pickup_requests p
        join pickup_items i on i.pickup_id = p.id and i.collected_quantity > 0
        join waste_categories wc on wc.code = i.category_code
-       left join pickup_item_units piu on piu.pickup_item_id = i.id
       where p.lot_id = $1 group by wc.name, wc.sort_order order by wc.sort_order`,
     [lotId],
   );
+
+// Units in the lot that carry a printed manufacturer QR label (the ones a gate scan can confirm).
+export const listLabelledUnits = (tx, lotId) =>
+  queryMany(
+    tx,
+    `select distinct u.id, u.qr_public_id as "qrPublicId", u.last4, u.state, m.brand, m.model_name as "modelName"
+       from pickup_requests p
+       join pickup_items i on i.pickup_id = p.id
+       join pickup_item_units piu on piu.pickup_item_id = i.id and not piu.duplicate
+       join product_units u on u.id = piu.unit_id and not u.legacy
+       left join product_models m on m.id = u.model_id
+      where p.lot_id = $1
+      order by u.qr_public_id`,
+    [lotId],
+  );
+
+export const markUnitsMissing = (tx, lotId, unitIds) => tx.query('select app.mark_units_missing($1, $2)', [lotId, unitIds]);
 
 export const findLotAttestation = (tx, lotId, userId) =>
   queryOne(

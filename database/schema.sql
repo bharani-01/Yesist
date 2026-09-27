@@ -325,6 +325,15 @@ create table if not exists lifecycle_events (
 );
 create index if not exists lifecycle_events_unit_idx on lifecycle_events (unit_id, created_at);
 
+-- A citizen who scanned a unit's QR and claimed it as theirs, to follow its journey.
+-- One owner per unit; claiming never changes custody or incentives.
+create table if not exists unit_claims (
+  unit_id     uuid primary key references product_units(id),
+  user_id     uuid not null references users(id),
+  claimed_at  timestamptz not null default now()
+);
+create index if not exists unit_claims_user_idx on unit_claims (user_id, claimed_at desc);
+
 create table if not exists handover_codes (
   pickup_id   uuid primary key references pickup_requests(id) on delete cascade,
   code_hash   text not null,
@@ -398,7 +407,8 @@ create index if not exists citizen_incentives_payee_idx on citizen_incentives (p
 create table if not exists compliance_flags (
   id               uuid primary key default gen_random_uuid(),
   flag_type        text not null check (flag_type in
-                     ('weight_variance','seal_broken','unit_count_leakage','duplicate_device','storage_deadline','incentive_cap')),
+                     ('weight_variance','seal_broken','unit_count_leakage','duplicate_device','storage_deadline','incentive_cap',
+                      'unit_missing_at_scan')),
   severity         text not null check (severity in ('low','medium','high')),
   status           text not null default 'open' check (status in ('open','under_review','escalated','closed')),
   org_id           uuid references organizations(id),
@@ -413,6 +423,10 @@ create table if not exists compliance_flags (
   updated_at       timestamptz not null default now()
 );
 create index if not exists compliance_flags_status_idx on compliance_flags (status, opened_at desc);
+alter table compliance_flags drop constraint if exists compliance_flags_flag_type_check;
+alter table compliance_flags add constraint compliance_flags_flag_type_check check (flag_type in
+  ('weight_variance','seal_broken','unit_count_leakage','duplicate_device','storage_deadline','incentive_cap',
+   'unit_missing_at_scan'));
 
 create table if not exists audit_log (
   id             bigserial primary key,
@@ -657,7 +671,7 @@ begin
     from pickup_requests p
     join pickup_items i on i.pickup_id = p.id
     join pickup_item_units piu on piu.pickup_item_id = i.id and not piu.duplicate
-    join product_units u on u.id = piu.unit_id
+    join product_units u on u.id = piu.unit_id and u.state <> 'disputed'
     where p.id = any(p_pickups)
   ), upd as (
     update product_units u set state = p_state, updated_at = now()
@@ -780,6 +794,115 @@ language sql stable security definer set search_path = public, pg_temp as $$
      and e.unit_id in (select id from product_units where producer_org_id in (select app.my_producer_org_ids()))
    group by d.month order by d.month
 $$;
+
+-- --- QR bridge: the only place Track A units meet the custody chain ----------
+
+-- Links a labelled unit to a pickup item by its QR id at collection. Same duplicate rules as
+-- app.link_unit_at_collection. problem: not_found | category_mismatch (nothing is written).
+create or replace function app.link_unit_by_qr(p_item uuid, p_qr text)
+returns table (unit_id uuid, prior_state text, duplicate boolean, problem text)
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+  v_pickup uuid; v_org uuid; v_category text; u product_units%rowtype; v_dup boolean := false;
+begin
+  select i.pickup_id, p.assigned_agent_org_id, i.category_code into v_pickup, v_org, v_category
+  from pickup_items i join pickup_requests p on p.id = i.pickup_id
+  where i.id = p_item and p.status = 'scheduled'
+    and p.assigned_agent_org_id in (select app.my_org_ids());
+  if v_pickup is null then
+    raise exception 'not assigned' using errcode = '42501';
+  end if;
+
+  select * into u from product_units where qr_public_id = lower(p_qr) for update;
+  if not found then
+    return query select null::uuid, null::text, false, 'not_found'::text; return;
+  end if;
+  if u.category_code <> v_category then
+    return query select u.id, u.state, false, 'category_mismatch'::text; return;
+  end if;
+
+  v_dup := u.state in ('collected','in_lot','at_hub','received_at_recycler','processed','materials_recovered');
+  if not v_dup then
+    update product_units set state = 'collected', updated_at = now() where id = u.id;
+  end if;
+  insert into pickup_item_units (pickup_item_id, unit_id, duplicate) values (p_item, u.id, v_dup)
+  on conflict do nothing;
+  if not v_dup then
+    insert into lifecycle_events (unit_id, state, actor_user_id, org_id, pickup_id)
+    values (u.id, 'handed_over', app.uid(), v_org, v_pickup),
+           (u.id, 'collected',   app.uid(), v_org, v_pickup);
+  end if;
+  return query select u.id, u.state, v_dup, null::text;
+end $$;
+
+-- Citizen claims a unit on the market. Returns ok | already_yours | claimed | not_claimable | not_found.
+create or replace function app.claim_unit(p_qr text)
+returns text
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare u product_units%rowtype; v_owner uuid;
+begin
+  if app.user_role() is distinct from 'citizen' then
+    raise exception 'citizens only' using errcode = '42501';
+  end if;
+  select * into u from product_units where qr_public_id = lower(p_qr) for update;
+  if not found then return 'not_found'; end if;
+  select user_id into v_owner from unit_claims where unit_id = u.id;
+  if v_owner = app.uid() then return 'already_yours'; end if;
+  if v_owner is not null then return 'claimed'; end if;
+  if u.state <> 'placed_on_market' then return 'not_claimable'; end if;
+  insert into unit_claims (unit_id, user_id) values (u.id, app.uid());
+  update product_units set state = 'claimed', updated_at = now() where id = u.id;
+  insert into lifecycle_events (unit_id, state, actor_user_id) values (u.id, 'claimed', app.uid());
+  return 'ok';
+end $$;
+
+-- Public product page (no login): model, category, stage dates, and the attestation number.
+-- Never returns people, organisations, places, pickups, or lots.
+create or replace function app.public_product_journey(p_qr text)
+returns table (qr_public_id text, brand text, model_name text, category_name text, registered boolean,
+               state text, claimed boolean, attestation_number text, events jsonb)
+language sql stable security definer set search_path = public, pg_temp as $$
+  select u.qr_public_id, m.brand, m.model_name, wc.name, not u.legacy, u.state,
+         exists (select 1 from unit_claims c where c.unit_id = u.id),
+         (select a.public_number from pickup_item_units piu
+            join pickup_items i on i.id = piu.pickup_item_id
+            join pickup_requests p on p.id = i.pickup_id
+            join attestations a on a.lot_id = p.lot_id and a.status = 'issued'
+           where piu.unit_id = u.id and not piu.duplicate limit 1),
+         coalesce((select jsonb_agg(jsonb_build_object('state', s.state, 'on', s.first_on) order by s.first_id)
+                     from (select e.state, min(e.id) as first_id, min(e.created_at)::date as first_on from lifecycle_events e
+                            where e.unit_id = u.id and e.state <> 'handed_over' group by e.state) s), '[]'::jsonb)
+    from product_units u
+    join waste_categories wc on wc.code = u.category_code
+    left join product_models m on m.id = u.model_id
+   where u.qr_public_id = lower(p_qr)
+$$;
+
+-- Recycler marks labelled units that were not scanned on arrival. They leave the chain as
+-- disputed and are never advanced to processed.
+create or replace function app.mark_units_missing(p_lot uuid, p_units uuid[])
+returns int
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare v_org uuid; v_count int;
+begin
+  select principal_org_id into v_org from lots where id = p_lot and principal_org_id in (select app.my_org_ids());
+  if v_org is null then
+    raise exception 'not permitted' using errcode = '42501';
+  end if;
+  with targets as (
+    select distinct u.id, p.id as pickup_id from product_units u
+      join pickup_item_units piu on piu.unit_id = u.id and not piu.duplicate
+      join pickup_items i on i.id = piu.pickup_item_id
+      join pickup_requests p on p.id = i.pickup_id and p.lot_id = p_lot
+     where u.id = any(p_units)
+  ), upd as (
+    update product_units u set state = 'disputed', updated_at = now() from targets t where u.id = t.id returning u.id
+  )
+  insert into lifecycle_events (unit_id, state, actor_user_id, org_id, pickup_id, lot_id)
+  select t.id, 'disputed', app.uid(), v_org, t.pickup_id, p_lot from targets t;
+  get diagnostics v_count = row_count;
+  return v_count;
+end $$;
 
 -- --- Compliance flags: raised only through this function (deduplicated) -----
 
@@ -934,7 +1057,7 @@ grant select on organizations, organization_members, agent_agreements, agent_ser
 grant select, update (full_name, phone) on users to ecosure_app;
 grant select, insert, update on pickup_requests, pickup_items, lots, attestations, citizen_incentives to ecosure_app;
 grant select, insert on pickup_addresses to ecosure_app;
-grant select on product_units, pickup_item_units, lifecycle_events to ecosure_app;
+grant select on product_units, pickup_item_units, lifecycle_events, unit_claims to ecosure_app;
 grant select, insert on product_models, market_batches to ecosure_app;
 grant select, insert on custody_events, weigh_records, audit_log to ecosure_app;
 grant select, update (status, resolution_note, updated_by) on compliance_flags to ecosure_app;
@@ -956,7 +1079,7 @@ begin
     'agent_agreements','agent_service_wards','rate_cards','lots','pickup_requests','pickup_addresses',
     'product_units','pickup_items','pickup_item_units','lifecycle_events','handover_codes','custody_events',
     'weigh_records','attestations','citizen_incentives','compliance_flags','audit_log',
-    'product_models','market_batches'] loop
+    'product_models','market_batches','unit_claims'] loop
     execute format('alter table %I enable row level security', t);
     execute format('alter table %I force row level security', t);
   end loop;
@@ -1047,8 +1170,12 @@ drop policy if exists units_read on product_units;
 create policy units_read on product_units for select using (
   app.is_oversight()
   or producer_org_id in (select app.my_producer_org_ids())
+  or exists (select 1 from unit_claims c where c.unit_id = product_units.id and c.user_id = app.uid())
   or exists (select 1 from pickup_item_units piu join pickup_items i on i.id = piu.pickup_item_id where piu.unit_id = product_units.id)
 );
+-- Claims are written only through app.claim_unit().
+drop policy if exists claims_read on unit_claims;
+create policy claims_read on unit_claims for select using (user_id = app.uid() or app.is_oversight());
 drop policy if exists item_units_read on pickup_item_units;
 create policy item_units_read on pickup_item_units for select using (
   exists (select 1 from pickup_items i where i.id = pickup_item_id)
@@ -1065,6 +1192,8 @@ create policy lifecycle_read on lifecycle_events for select using (
 drop policy if exists models_read on product_models;
 create policy models_read on product_models for select using (
   producer_org_id in (select app.my_producer_org_ids()) or app.is_oversight()
+  -- Anyone who can see a unit (claimant, custody chain) may see its model; model names are public on /p/ anyway.
+  or exists (select 1 from product_units u where u.model_id = product_models.id)
 );
 drop policy if exists models_insert on product_models;
 create policy models_insert on product_models for insert with check (

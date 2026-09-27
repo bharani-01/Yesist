@@ -17,6 +17,8 @@ import { LabelsPage } from '../features/producer/LabelsPage.jsx';
 import { ModelsPage } from '../features/producer/ModelsPage.jsx';
 import { ProducerOverviewPage } from '../features/producer/ProducerOverviewPage.jsx';
 import { UnitsPage } from '../features/producer/UnitsPage.jsx';
+import { MyDevicesPage } from '../features/products/MyDevicesPage.jsx';
+import { ProductPage } from '../features/products/ProductPage.jsx';
 import { InboundLotsPage } from '../features/recycler/InboundLotsPage.jsx';
 import { LotDetailPage } from '../features/recycler/LotDetailPage.jsx';
 import { VerifyPage } from '../features/verify/VerifyPage.jsx';
@@ -41,9 +43,11 @@ export const router = createBrowserRouter([
       { index: true, element: <HomeRedirect /> },
       { path: 'verify', element: <VerifyPage /> },
       { path: 'verify/:number', element: <VerifyPage /> },
+      { path: 'p/:qr', element: <ProductPage /> },
       {
         element: <RequireWorkspace workspace="citizen" />,
         children: [
+          { path: 'devices', element: <MyDevicesPage /> },
           { path: 'pickups', element: <PickupsListPage /> },
           { path: 'pickups/new', element: <NewPickupPage /> },
           { path: 'pickups/:id', element: <PickupDetailPage /> },

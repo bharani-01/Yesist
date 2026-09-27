@@ -7,3 +7,9 @@ export async function verifyAttestation(number) {
   if (!attestation) throw Errors.notFound('Attestation');
   return attestation;
 }
+
+export async function productJourney(qr) {
+  const product = await withTx(null, (tx) => repo.findProductJourney(tx, qr));
+  if (!product) throw Errors.notFound('Product');
+  return product;
+}

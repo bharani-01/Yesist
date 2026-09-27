@@ -4,6 +4,13 @@ E-waste custody and recovery platform for the Madhya Pradesh programme (Indore p
 
 Manufacturers (producers) only register data: product models, placed-on-market batches, and the individual units in each batch. Every unit gets a QR label (`/p/<id>`) that follows it through collection to the recycler; the manufacturer sees end-of-life outcomes for its own units but never touches pickups, lots, or custody partners.
 
+The QR label is the only link between the manufacturer's registry and the custody chain:
+
+- Anyone can scan a label and open `/p/<id>`, which shows the product, its stage, and dates. It never shows who handled the product, where it was, or who owns it.
+- A signed-in citizen can claim a device that is on the market and follow it under **My devices**.
+- The collection agent scans labels at the door. Unknown labels and labels from the wrong category are rejected, and a label already in the custody chain is flagged for review.
+- The recycler can scan labels when a lot arrives. Every labelled unit not scanned before the receipt is recorded is marked missing and raises a high-severity flag for the regulator. Only units that were actually received count as recycled when the attestation is issued.
+
 Product context lives in [`docs/prd`](docs/prd/README.md) and the field simulations in [`docs/research`](docs/research).
 
 ## Stack
@@ -47,7 +54,7 @@ For local demos, set `DEMO_LOGIN_ENABLED=true` in `.env` and restart the API: th
 
 ## Tests
 
-`npm test` provisions an isolated `<database>_test` database (schema plus test accounts), then runs the integration suite against the real API and PostgreSQL: authentication and authorisation, the full custody chain with fraud controls, handover-code lockout, the manufacturer registry (per-row upload outcomes, maker-checker placing, workspace isolation), and direct row-level-security checks. Development data is never touched.
+`npm test` provisions an isolated `<database>_test` database (schema plus test accounts), then runs the integration suite against the real API and PostgreSQL: authentication and authorisation, the full custody chain with fraud controls, handover-code lockout, the manufacturer registry (per-row upload outcomes, maker-checker placing, workspace isolation), the QR product journey (public page, claims, collection by QR, gate scan with missing-unit flags), and direct row-level-security checks. Development data is never touched.
 
 ## Architecture
 
@@ -76,3 +83,4 @@ Security properties the code relies on:
 - IMEI and serial numbers are stored as keyed HMACs; only the last four digits are ever shown.
 - Custody events, weigh records, and the audit log are append-only; the runtime role has no `DELETE` grant.
 - Attestations require a different approver from the drafter, and public verification returns non-personal fields only.
+- The public product page reads through a single security-definer function that returns stages and dates only. Claims are written only through `app.claim_unit()`, and each citizen can see only their own claims.

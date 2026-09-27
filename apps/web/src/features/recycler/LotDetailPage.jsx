@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { AsyncView } from '../../components/feedback/AsyncView.jsx';
+import { QrScanner } from '../../components/qr/QrScanner.jsx';
 import { Alert, ErrorAlert } from '../../components/ui/Alert.jsx';
 import { StatusBadge } from '../../components/ui/Badge.jsx';
 import { Button } from '../../components/ui/Button.jsx';
@@ -44,6 +45,7 @@ function LotDetail({ lot, onChange }) {
             <Alert tone={receipt.flags.length ? 'warning' : 'success'} title="Lot received">
               Accepted {formatKg(receipt.acceptedNetKg)} (variance {receipt.variancePct}% against tolerance {receipt.tolerancePct}%).
               {receipt.flags.length > 0 && ` Flags raised for the regulator: ${receipt.flags.map((f) => FLAG_TYPE_LABELS[f]).join(', ')}.`}
+              {receipt.missingLabels?.length > 0 && ` Labels not found: ${receipt.missingLabels.map((l) => `…${l}`).join(', ')}.`}
             </Alert>
           )}
           {lot.status === 'disputed' && (
@@ -96,8 +98,20 @@ function LotDetail({ lot, onChange }) {
 
 function ReceiveForm({ lot, onReceived }) {
   const [form, setForm] = useState({ receiverNetKg: '', unitCountReceived: String(lot.unitCountSent), sealIntact: 'yes' });
+  const labelled = lot.labelledUnits ?? [];
+  const [labelCheck, setLabelCheck] = useState(labelled.length ? 'scan' : 'skip');
+  const [scanned, setScanned] = useState([]);
+  const [stray, setStray] = useState(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
+  const expected = new Set(labelled.map((u) => u.qrPublicId));
+  const missingCount = labelled.length - scanned.length;
+
+  const onScan = (qr) => {
+    if (!expected.has(qr)) { setStray(qr); return; }
+    setStray(null);
+    setScanned((current) => (current.includes(qr) ? current : [...current, qr]));
+  };
 
   const submit = async (e) => {
     e.preventDefault();
@@ -108,6 +122,7 @@ function ReceiveForm({ lot, onReceived }) {
         receiverNetKg: Number(form.receiverNetKg),
         unitCountReceived: Number(form.unitCountReceived),
         sealIntact: form.sealIntact === 'yes',
+        ...(labelCheck === 'scan' && { scan: { qrIds: scanned } }),
       });
       onReceived(result);
     } catch (err) {
@@ -124,6 +139,39 @@ function ReceiveForm({ lot, onReceived }) {
           <TextField label="Units counted" type="number" min="0" required value={form.unitCountReceived} onChange={(e) => setForm({ ...form, unitCountReceived: e.target.value })} hint={`${lot.unitCountSent} sent`} />
         </div>
         <Segmented name="seal" label={`Seal ${lot.sealTag}`} value={form.sealIntact} onChange={(v) => setForm({ ...form, sealIntact: v })} options={[{ value: 'yes', label: 'Intact and matching' }, { value: 'no', label: 'Broken or mismatched' }]} />
+        {labelled.length > 0 && (
+          <div className="stack stack--sm">
+            <Segmented
+              name="label-check"
+              label={`Manufacturer labels (${labelled.length} in this lot)`}
+              value={labelCheck}
+              onChange={setLabelCheck}
+              options={[{ value: 'scan', label: 'Scan labels now' }, { value: 'skip', label: 'Skip label check' }]}
+            />
+            {labelCheck === 'scan' ? (
+              <>
+                <QrScanner label="Scan each labelled device" continuous onScan={onScan} />
+                {stray && <Alert tone="warning">Label …{stray.slice(-6)} is not part of this lot. Set the device aside and report it.</Alert>}
+                <ul className="chips" aria-label="Labelled units in this lot">
+                  {labelled.map((u) => (
+                    <li key={u.qrPublicId} className={`chip${scanned.includes(u.qrPublicId) ? ' is-matched' : ''}`} style={{ paddingRight: 10 }}>
+                      <span className="mono">…{u.qrPublicId.slice(-6)}</span>
+                      {u.brand && <span>{u.brand} {u.modelName}</span>}
+                      <span className="subtle">{scanned.includes(u.qrPublicId) ? 'Scanned' : 'Not yet'}</span>
+                    </li>
+                  ))}
+                </ul>
+                {missingCount > 0 && (
+                  <p className="subtle" role="status">
+                    {missingCount} of {labelled.length} still unscanned. Any label not scanned when you record the receipt is reported to the regulator as missing.
+                  </p>
+                )}
+              </>
+            ) : (
+              <p className="subtle">Without a label check, missing devices cannot be detected for this lot.</p>
+            )}
+          </div>
+        )}
         <ErrorAlert error={error} />
         <div className="form-actions"><Button type="submit" loading={pending} disabled={!(Number(form.receiverNetKg) > 0)}>Record receipt</Button></div>
       </form>

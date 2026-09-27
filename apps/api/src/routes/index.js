@@ -3,6 +3,7 @@ import { noStore } from '../middleware/no-store.js';
 import { attestationsRoutes } from '../modules/attestations/attestations.routes.js';
 import { authRoutes } from '../modules/auth/auth.routes.js';
 import { collectionRoutes } from '../modules/collection/collection.routes.js';
+import { devicesRoutes } from '../modules/devices/devices.routes.js';
 import { healthRoutes } from '../modules/health/health.routes.js';
 import { intakeRoutes } from '../modules/intake/intake.routes.js';
 import { lotsRoutes } from '../modules/lots/lots.routes.js';
@@ -24,6 +25,7 @@ export function buildApiRouter() {
   // Authenticated (authorization is enforced per module)
   api.use('/auth', noStore, authRoutes);
   api.use('/pickups', noStore, pickupsRoutes);
+  api.use('/devices', noStore, devicesRoutes);
   api.use('/agent/jobs', noStore, collectionRoutes);
   api.use('/agent/lots', noStore, lotsRoutes);
   api.use('/recycler/lots', noStore, intakeRoutes);

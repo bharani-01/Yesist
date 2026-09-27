@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { isoDate, kg, money, timeWindow } from '../../shared/schemas.js';
+import { isoDate, kg, money, qrPublicId, timeWindow } from '../../shared/schemas.js';
 
 export const acceptJobBody = z.object({
   scheduledFor: isoDate,
@@ -16,5 +16,6 @@ export const collectJobBody = z.object({
     batteryCheck: z.enum(['no_battery', 'intact_embedded', 'swollen_or_damaged_refused']).optional(),
     refusedReason: z.string().trim().max(200).optional(),
     identifiers: z.array(z.string().trim().min(4).max(40)).max(50).default([]),
+    qrIds: z.array(qrPublicId).max(50).default([]),
   })).min(1),
 });

@@ -6,6 +6,8 @@ export const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD')
 export const timeWindow = z.enum(['morning', 'afternoon', 'evening']);
 export const kg = z.number().positive().max(100000).multipleOf(0.001);
 export const money = z.number().min(0).max(1000000).multipleOf(0.01);
+/** Public id printed in a unit's QR label (`/p/<id>`). */
+export const qrPublicId = z.string().trim().toLowerCase().regex(/^[0-9a-f]{18}$/, 'Not an EcoSure product label');
 
 // 15-digit IMEI with a valid Luhn check digit.
 export function isValidImei(value) {

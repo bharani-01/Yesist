@@ -10,3 +10,13 @@ export const findIssuedAttestation = (tx, number) =>
        from app.verify_attestation($1)`,
     [number],
   );
+
+// Stage dates only: no people, organisations, places, pickups, or lots.
+export const findProductJourney = (tx, qr) =>
+  queryOne(
+    tx,
+    `select qr_public_id as "qrPublicId", brand, model_name as "modelName", category_name as "categoryName",
+            registered, state, claimed, attestation_number as "attestationNumber", events
+       from app.public_product_journey($1)`,
+    [qr],
+  );

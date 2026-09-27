@@ -5,3 +5,9 @@ export async function verifyAttestation(req, res) {
   res.set('Cache-Control', 'public, max-age=60');
   res.json({ attestation });
 }
+
+export async function productJourney(req, res) {
+  const product = await service.productJourney(req.valid.params.qr);
+  res.set('Cache-Control', 'public, max-age=30');
+  res.json({ product });
+}

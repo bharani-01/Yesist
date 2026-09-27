@@ -1,18 +1,21 @@
 :root {
   /* Neutrals */
-  --color-canvas: #f6f7f9;
+  --color-canvas: #fafafa;
   --color-surface: #ffffff;
-  --color-surface-muted: #f1f3f6;
-  --color-border: #e3e6eb;
-  --color-border-strong: #cfd4dc;
-  --color-ink: #0e1726;
-  --color-ink-muted: #56606f;
-  --color-ink-subtle: #7b8494;
+  --color-surface-muted: #f4f4f5;
+  --color-border: #ececee;
+  --color-border-strong: #d6d6db;
+  --color-ink: #0a0a0b;
+  --color-ink-muted: #55555f;
+  --color-ink-subtle: #83838e;
 
-  /* Brand */
-  --color-brand: #157a3a;
-  --color-brand-hover: #0f6130;
-  --color-brand-weak: #eaf5ed;
+  /* Primary actions are near-black; green marks brand, links, and success. */
+  --color-primary: #0a0a0b;
+  --color-primary-hover: #2a2a2e;
+  --color-brand: #13803d;
+  --color-brand-hover: #0e6630;
+  --color-brand-weak: #eaf6ee;
+  --color-accent: #22c55e;
   --color-logo-ink: #0b1f3a;
   --color-logo-green: #178a3e;
 
@@ -34,7 +37,8 @@
   --text-md: 1rem;
   --text-lg: 1.125rem;
   --text-xl: 1.375rem;
-  --text-2xl: 1.75rem;
+  --text-2xl: 2rem;
+  --text-display: 3rem;
 
   /* Space, radius, elevation */
   --space-1: 4px;
@@ -45,14 +49,15 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
-  --shadow-sm: 0 1px 2px rgba(14, 23, 38, 0.06);
-  --shadow-md: 0 4px 16px rgba(14, 23, 38, 0.08);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+  --shadow-sm: 0 1px 2px rgba(10, 10, 11, 0.04);
+  --shadow-md: 0 6px 24px rgba(10, 10, 11, 0.06);
 
   --content-width: 1120px;
-  --header-height: 60px;
-  --focus-ring: 0 0 0 3px rgba(21, 122, 58, 0.28);
+  --header-height: 64px;
+  --focus-ring: 0 0 0 3px rgba(19, 128, 61, 0.28);
   --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
 }

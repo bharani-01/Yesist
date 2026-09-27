@@ -53,6 +53,7 @@
 
 ## Research
 
+- [**v3 real-life simulations (18 agents): stakeholder, stress, Monte Carlo, judges**](../research/v3-sim/00-synthesis.md)
 - [**v2 deep research (36 agents): government norms, adoption, performance**](../research/v2-deep/00-synthesis.md)
 - [Senior PM / research synthesis](../research/00-senior-pm-research-synthesis.md)
 - [Government initiative reframe](../research/gov-initiative-reframe.md)

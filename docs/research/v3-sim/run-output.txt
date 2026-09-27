@@ -1,0 +1,119 @@
+﻿
+== schedule ==
+stage1_months: 2.634, 4.965, 9.524
+pilot_end_month: 6.783, 10.407, 16.677
+golive_1a_month: 12.567, 16.548, 22.801
+exit_1b_month: 15.830, 20.390, 28.110
+exit_2_month: 19.481, 24.927, 33.929
+P_golive_by_24: 0.9276
+P_exit1b_by_24: 0.7591
+P_exit2_by_24: 0.4227
+P_phase2_within_prd_66wk: 0.0032
+
+== volume ==
+tracked_t_m12: 0.000, 22.684, 39.978
+tracked_t_m18: 0.000, 28.540, 65.113
+tracked_t_m24: 0.000, 29.963, 82.766
+tracked_t_m24_alive: 29.707, 59.816, 92.002
+newchannel_t_m24_alive: 11.182, 18.744, 31.429
+additional_t_m24_alive: 10.153, 20.715, 35.242
+baseline_t_per_month: 34.419, 56.206, 83.559
+cum_tracked_24m: 41.394, 434.075, 1,002.368
+cum_additional_24m: 14.410, 166.486, 400.483
+channels_m24_alive:
+  imc: 3.601, 27.926, 53.382
+  other: 3.427, 9.090, 22.416
+  hh: 1.716, 3.855, 9.313
+  agents: 3.340, 7.956, 18.592
+  bulk: 2.192, 4.797, 10.366
+agents_active_m24_alive: 17.352, 28.856, 45.197
+household_participation_m24_alive: 0.014, 0.033, 0.077
+P_participation_ge5pct: 0.1482
+additional_share_of_tracked_cum: 0.275, 0.396, 0.509
+informal_diversion_share: 0.155, 0.302, 0.444
+
+== gates ==
+P_gate8_pilot_exit: 0.7960
+P_gate25_1b_exit: 0.5574
+P_gate50_2_exit: 0.2489
+P_gate8_strict_newchannel: 0.5953
+P_gate25_strict_newchannel: 0.1158
+P_gate50_strict_newchannel: 0.0035
+P_m24_tracked_ge8: 0.5583
+P_m24_tracked_ge25: 0.5333
+P_m24_tracked_ge50: 0.3545
+P_m24_new_ge8: 0.5463
+P_m24_new_ge25: 0.1332
+P_m24_new_ge50: 0.0056
+
+== kpi ==
+P_kpi_prd_literal: 0.0453
+P_kpi_total_formal_static_baseline: 0.3654
+P_kpi_true_additionality: 0.2711
+ratio_literal_alive: -0.593, -0.209, 0.293
+ratio_total_alive: 0.237, 0.432, 0.738
+ratio_true_alive: 0.139, 0.299, 0.584
+P_success_prd_view: 0.0445
+P_success_genuine: 0.1006
+
+== survival ==
+P_survive_24: 0.5454
+kill_causes:
+  Stage -1 lapse (>12 months): 0.0426
+  Pilot gate stop: 0.1267
+  25 t gate kill: 0.0158
+  50 t gate kill: 0.0479
+  Budget not renewed: 0.0802
+  IMC conflict / additionality scandal: 0.0462
+  Hazard incident: 0.0250
+  Fraud scandal: 0.0321
+  Recycler dropout, no backup: 0.0157
+  Kabadiwala backlash: 0.0224
+
+== money ==
+total_spend_cr: 0.973, 4.654, 6.079
+total_spend_cr_alive: 4.312, 5.311, 6.375
+P_spend_over_6_2cr: 0.0812
+fixed_share_alive: 0.921, 0.953, 0.968
+incentive_spend_lakh: 0.318, 5.451, 18.530
+fraud_leakage_lakh: 0.024, 0.413, 1.672
+cost_per_tracked_kg_24m_alive: 48.930, 77.649, 143.730
+cost_per_additional_kg_24m_alive: 119.120, 203.792, 392.097
+recurring_rs_per_tracked_kg_m24_alive: 20.023, 32.352, 59.279
+recurring_rs_per_additional_kg_m24_alive: 53.026, 92.342, 178.420
+
+== combos ==
+P_success_genuine_given_imc_ok: 0.1328
+P_success_genuine_given_imc_fail: 0.0509
+P_success_genuine_given_imc_ok_informal_share_gt25_hh_m_gt12: 0.1649
+P_kpi_lit_given_imc_ok: 0.0725
+P_kpi_lit_given_imc_fail: 0.0033
+P_survive_given_stage1_le_4: 0.5522
+P_survive_given_stage1_gt_8: 0.4568
+
+== spearman (top 10) ==
+  imc_ok: -0.310
+  ag_kg: +0.126
+  imc_flow: +0.124
+  ag_max: +0.094
+  imc_formal: -0.089
+  stage1: -0.084
+  gap: -0.067
+  bulk_max: +0.064
+  imc_cap: +0.055
+  imc_uplift: +0.051
+
+== tornado (top 12 by swing in genuine success + true KPI) ==
+  base: success=0.101 kpi_lit=0.045 survive=0.545 addT=10.2
+  ag_kg        P10=  210.7534 succ=0.022 kpiT=0.183 surv=0.513 | P90=  759.1810 succ=0.243 kpiT=0.390 surv=0.579
+  imc_ok       P10=      True succ=0.137 kpiT=0.403 surv=0.642 | P90=     False succ=0.049 kpiT=0.079 surv=0.403
+  imc_formal   P10=     0.545 succ=0.118 kpiT=0.393 surv=0.547 | P90=     0.905 succ=0.079 kpiT=0.135 surv=0.539
+  ag_max       P10=  26.40175 succ=0.036 kpiT=0.204 surv=0.519 | P90=  62.89736 succ=0.184 kpiT=0.346 surv=0.572
+  b_other      P10=  9.270166 succ=0.118 kpiT=0.365 surv=0.517 | P90=  43.14917 succ=0.073 kpiT=0.140 surv=0.575
+  bulk_max     P10=  2.317541 succ=0.059 kpiT=0.239 surv=0.528 | P90=  10.78729 succ=0.168 kpiT=0.320 surv=0.568
+  gap          P10=  1.200000 succ=0.143 kpiT=0.307 surv=0.556 | P90=      10.8 succ=0.056 kpiT=0.232 surv=0.533
+  stage1       P10=  2.634417 succ=0.113 kpiT=0.311 surv=0.528 | P90=  9.489763 succ=0.083 kpiT=0.206 surv=0.610
+  hh_m         P10=  0.067031 succ=0.071 kpiT=0.247 surv=0.540 | P90=  0.205600 succ=0.140 kpiT=0.298 surv=0.552
+  bass_q       P10=  0.071870 succ=0.076 kpiT=0.251 surv=0.541 | P90=  0.200359 succ=0.138 kpiT=0.295 surv=0.552
+  imc_uplift   P10=     0.015 succ=0.095 kpiT=0.226 surv=0.537 | P90=     0.135 succ=0.107 kpiT=0.319 surv=0.550
+  kg_ho        P10=  2.234952 succ=0.077 kpiT=0.252 surv=0.541 | P90=  5.481101 succ=0.137 kpiT=0.296 surv=0.552

@@ -1,0 +1,2007 @@
+{
+ "N": 10000,
+ "seed": 20260927,
+ "schedule": {
+  "stage1_months": [
+   2.6340298971762297,
+   4.965091470828156,
+   9.523733448159208
+  ],
+  "pilot_end_month": [
+   6.782863654553341,
+   10.406931843793156,
+   16.67683659366529
+  ],
+  "golive_1a_month": [
+   12.56699196461688,
+   16.54799249469938,
+   22.801021126396694
+  ],
+  "exit_1b_month": [
+   15.830401471345617,
+   20.389862990534763,
+   28.109627437261917
+  ],
+  "exit_2_month": [
+   19.481201201716956,
+   24.927269895198464,
+   33.92896894538801
+  ],
+  "P_golive_by_24": 0.9276,
+  "P_exit1b_by_24": 0.7591,
+  "P_exit2_by_24": 0.4227,
+  "P_phase2_within_prd_66wk": 0.0032
+ },
+ "volume": {
+  "tracked_t_m12": [
+   0.0,
+   22.683970007646188,
+   39.97836026902517
+  ],
+  "tracked_t_m18": [
+   0.0,
+   28.539519223991874,
+   65.11259050735055
+  ],
+  "tracked_t_m24": [
+   0.0,
+   29.962710058885122,
+   82.76592869783694
+  ],
+  "tracked_t_m24_alive": [
+   29.70731464148689,
+   59.81619360047108,
+   92.00203491833203
+  ],
+  "newchannel_t_m24_alive": [
+   11.182227213335445,
+   18.74434593708075,
+   31.428761699137283
+  ],
+  "additional_t_m24_alive": [
+   10.153317504712385,
+   20.71529624961944,
+   35.241689150486195
+  ],
+  "baseline_t_per_month": [
+   34.41898400322884,
+   56.20641463871258,
+   83.55927969391051
+  ],
+  "cum_tracked_24m": [
+   41.394352702161065,
+   434.075405050648,
+   1002.3675433728132
+  ],
+  "cum_additional_24m": [
+   14.410261673080047,
+   166.4864764196036,
+   400.4830249896879
+  ],
+  "channels_m24_alive": {
+   "imc": [
+    3.6008724965218155,
+    27.92622383388047,
+    53.38235204509887
+   ],
+   "other": [
+    3.4272679576415013,
+    9.090305940672748,
+    22.41557600228084
+   ],
+   "hh": [
+    1.7163674485835658,
+    3.8549937816143767,
+    9.312515790412801
+   ],
+   "agents": [
+    3.340390686653396,
+    7.955519089318697,
+    18.5923288687437
+   ],
+   "bulk": [
+    2.1922642354838286,
+    4.79678869353502,
+    10.36582483532583
+   ]
+  },
+  "agents_active_m24_alive": [
+   17.35171901759523,
+   28.855711280631574,
+   45.19682307016226
+  ],
+  "household_participation_m24_alive": [
+   0.014005435613437093,
+   0.03307925125870609,
+   0.07706308906616662
+  ],
+  "P_participation_ge5pct": 0.1482,
+  "additional_share_of_tracked_cum": [
+   0.2751794122354209,
+   0.3964100586913129,
+   0.5087075928967213
+  ],
+  "informal_diversion_share": [
+   0.15489896038851467,
+   0.3023467200370875,
+   0.4438204079502184
+  ]
+ },
+ "gates": {
+  "P_gate8_pilot_exit": 0.796,
+  "P_gate25_1b_exit": 0.5574,
+  "P_gate50_2_exit": 0.2489,
+  "P_gate8_strict_newchannel": 0.5953,
+  "P_gate25_strict_newchannel": 0.1158,
+  "P_gate50_strict_newchannel": 0.0035,
+  "P_m24_tracked_ge8": 0.5583,
+  "P_m24_tracked_ge25": 0.5333,
+  "P_m24_tracked_ge50": 0.3545,
+  "P_m24_new_ge8": 0.5463,
+  "P_m24_new_ge25": 0.1332,
+  "P_m24_new_ge50": 0.0056
+ },
+ "kpi": {
+  "P_kpi_prd_literal": 0.0453,
+  "P_kpi_total_formal_static_baseline": 0.3654,
+  "P_kpi_true_additionality": 0.2711,
+  "ratio_literal_alive": [
+   -0.5930023865510137,
+   -0.2092980994451697,
+   0.2925413911794799
+  ],
+  "ratio_total_alive": [
+   0.23745586891360462,
+   0.43158111877859184,
+   0.7383378262631127
+  ],
+  "ratio_true_alive": [
+   0.13914171116988236,
+   0.2991089556796443,
+   0.5837822424847364
+  ],
+  "P_success_prd_view": 0.0445,
+  "P_success_genuine": 0.1006
+ },
+ "survival": {
+  "P_survive_24": 0.5454,
+  "kill_causes": {
+   "Stage -1 lapse (>12 months)": 0.0426,
+   "Pilot gate stop": 0.1267,
+   "25 t gate kill": 0.0158,
+   "50 t gate kill": 0.0479,
+   "Budget not renewed": 0.08020000000000001,
+   "IMC conflict / additionality scandal": 0.0462,
+   "Hazard incident": 0.024999999999999998,
+   "Fraud scandal": 0.032100000000000004,
+   "Recycler dropout, no backup": 0.0157,
+   "Kabadiwala backlash": 0.0224
+  }
+ },
+ "money": {
+  "total_spend_cr": [
+   0.972669159135626,
+   4.65434049296454,
+   6.078641592696459
+  ],
+  "total_spend_cr_alive": [
+   4.311693512195788,
+   5.31097061508206,
+   6.374822725330233
+  ],
+  "P_spend_over_6_2cr": 0.0812,
+  "fixed_share_alive": [
+   0.9206928976652008,
+   0.95272824206284,
+   0.9683635394346513
+  ],
+  "incentive_spend_lakh": [
+   0.31801473532443403,
+   5.450537045208551,
+   18.53018824490558
+  ],
+  "fraud_leakage_lakh": [
+   0.023686270258769005,
+   0.41320413580870013,
+   1.6724681717923977
+  ],
+  "cost_per_tracked_kg_24m_alive": [
+   48.93036180500333,
+   77.6492551246834,
+   143.72959244221505
+  ],
+  "cost_per_additional_kg_24m_alive": [
+   119.11979170740068,
+   203.79158665101363,
+   392.0974847743503
+  ],
+  "recurring_rs_per_tracked_kg_m24_alive": [
+   20.02335795427182,
+   32.35248340656203,
+   59.27869260523746
+  ],
+  "recurring_rs_per_additional_kg_m24_alive": [
+   53.02613461208307,
+   92.3422022544422,
+   178.42028233601644
+  ]
+ },
+ "conditional_genuine_success": {
+  "stage1": {
+   "P_success_low_tercile": 0.11494589061128985,
+   "P_success_high_tercile": 0.07847946045370938
+  },
+  "sw_slip": {
+   "P_success_low_tercile": 0.09241920869827847,
+   "P_success_high_tercile": 0.10778985507246377
+  },
+  "audit_delay": {
+   "P_success_low_tercile": 0.10770603986908658,
+   "P_success_high_tercile": 0.0942883046237534
+  },
+  "vendor_lag": {
+   "P_success_low_tercile": 0.10435813815594426,
+   "P_success_high_tercile": 0.0963855421686747
+  },
+  "imc_flow": {
+   "P_success_low_tercile": 0.10797840431913618,
+   "P_success_high_tercile": 0.08894303990252818
+  },
+  "imc_ok": {
+   "P_success_low_tercile": 0.13394171327642038,
+   "P_success_high_tercile": 0.04840686274509804
+  },
+  "imc_cap": {
+   "P_success_low_tercile": 0.09151113786875377,
+   "P_success_high_tercile": 0.1160085705540251
+  },
+  "imc_formal": {
+   "P_success_low_tercile": 0.11815995189416717,
+   "P_success_high_tercile": 0.08427635497319834
+  },
+  "b_other": {
+   "P_success_low_tercile": 0.11770045385779122,
+   "P_success_high_tercile": 0.0744336569579288
+  },
+  "b_cap": {
+   "P_success_low_tercile": 0.09947155735156979,
+   "P_success_high_tercile": 0.0976470588235294
+  },
+  "hh_m": {
+   "P_success_low_tercile": 0.0800238877276799,
+   "P_success_high_tercile": 0.13071104387291982
+  },
+  "bass_p": {
+   "P_success_low_tercile": 0.08343409915356712,
+   "P_success_high_tercile": 0.12375490492001208
+  },
+  "bass_q": {
+   "P_success_low_tercile": 0.07768492726709997,
+   "P_success_high_tercile": 0.13251961639058413
+  },
+  "kg_ho": {
+   "P_success_low_tercile": 0.0750223280738315,
+   "P_success_high_tercile": 0.13086642599277978
+  },
+  "cov_pilot": {
+   "P_success_low_tercile": 0.09376872378669862,
+   "P_success_high_tercile": 0.10594627226079083
+  },
+  "cov_scale": {
+   "P_success_low_tercile": 0.08159618820726623,
+   "P_success_high_tercile": 0.11334936861094408
+  },
+  "drives_max": {
+   "P_success_low_tercile": 0.10260245288662878,
+   "P_success_high_tercile": 0.10354061291282357
+  },
+  "drive_res": {
+   "P_success_low_tercile": 0.09412470023980815,
+   "P_success_high_tercile": 0.1066787549108492
+  },
+  "repeat": {
+   "P_success_low_tercile": 0.09942925803544608,
+   "P_success_high_tercile": 0.10299909118448955
+  },
+  "ag_max": {
+   "P_success_low_tercile": 0.039963392312385604,
+   "P_success_high_tercile": 0.16946610677864427
+  },
+  "ag_tau": {
+   "P_success_low_tercile": 0.1023142509135201,
+   "P_success_high_tercile": 0.09268292682926829
+  },
+  "ag_pre": {
+   "P_success_low_tercile": 0.09805707346690953,
+   "P_success_high_tercile": 0.10284664830119375
+  },
+  "ag_kg": {
+   "P_success_low_tercile": 0.025395876904690768,
+   "P_success_high_tercile": 0.21609265467845168
+  },
+  "gap": {
+   "P_success_low_tercile": 0.15137614678899083,
+   "P_success_high_tercile": 0.058368076235854674
+  },
+  "churn": {
+   "P_success_low_tercile": 0.11641515244841392,
+   "P_success_high_tercile": 0.07994143484626647
+  },
+  "slow_reimb": {
+   "P_success_low_tercile": 0.07900146842878121,
+   "P_success_high_tercile": 0.10692588092345079
+  },
+  "relabel": {
+   "P_success_low_tercile": 0.11151187255785994,
+   "P_success_high_tercile": 0.08663069544364509
+  },
+  "bulk_max": {
+   "P_success_low_tercile": 0.06352033244286139,
+   "P_success_high_tercile": 0.15734370326054442
+  },
+  "bulk_add": {
+   "P_success_low_tercile": 0.09003312255344775,
+   "P_success_high_tercile": 0.10829694323144105
+  },
+  "cannibal": {
+   "P_success_low_tercile": 0.10799522673031026,
+   "P_success_high_tercile": 0.0944206008583691
+  },
+  "g": {
+   "P_success_low_tercile": 0.0938953488372093,
+   "P_success_high_tercile": 0.1060145808019441
+  },
+  "leak": {
+   "P_success_low_tercile": 0.10467233009708737,
+   "P_success_high_tercile": 0.0969176052163604
+  },
+  "winfl": {
+   "P_success_low_tercile": 0.10226576852418862,
+   "P_success_high_tercile": 0.10444248308325978
+  },
+  "inc_ho": {
+   "P_success_low_tercile": 0.09166173861620343,
+   "P_success_high_tercile": 0.10773899848254932
+  },
+  "imc_uplift": {
+   "P_success_low_tercile": 0.09485578352661314,
+   "P_success_high_tercile": 0.10689127105666156
+  },
+  "p_w8": {
+   "P_success_low_tercile": 0.0912912912912913,
+   "P_success_high_tercile": 0.11349230304859644
+  },
+  "fixed_ov": {
+   "P_success_low_tercile": 0.10026385224274406,
+   "P_success_high_tercile": 0.10180372974625497
+  },
+  "base_meas": {
+   "P_success_low_tercile": 0.0936231884057971,
+   "P_success_high_tercile": 0.10558437595361611
+  },
+  "payout_slow": {
+   "P_success_low_tercile": 0.10035949670461354,
+   "P_success_high_tercile": 0.1029673590504451
+  },
+  "backup_rec": {
+   "P_success_low_tercile": 0.10638939119951778,
+   "P_success_high_tercile": 0.09739077669902912
+  },
+  "topup": {
+   "P_success_low_tercile": 0.10535714285714286,
+   "P_success_high_tercile": 0.10077288941736029
+  }
+ },
+ "combos": {
+  "P_success_genuine_given_imc_ok": 0.13280606360191136,
+  "P_success_genuine_given_imc_fail": 0.05087763927753752,
+  "P_success_genuine_given_imc_ok_informal_share_gt25_hh_m_gt12": 0.1649294911097486,
+  "P_kpi_lit_given_imc_ok": 0.07249958807052233,
+  "P_kpi_lit_given_imc_fail": 0.003307046553039939,
+  "P_survive_given_stage1_le_4": 0.5521986239904277,
+  "P_survive_given_stage1_gt_8": 0.4568469505178366
+ },
+ "spearman_additional_m24": {
+  "imc_ok": -0.3099287295872873,
+  "ag_kg": 0.1258550890185509,
+  "imc_flow": 0.12444303116043033,
+  "ag_max": 0.09355591487955915,
+  "imc_formal": -0.08904076289040762,
+  "stage1": -0.08419844485398445,
+  "gap": -0.06652761102527611,
+  "bulk_max": 0.06398977481189776,
+  "imc_cap": 0.05523888901238889,
+  "imc_uplift": 0.05052848821328488,
+  "bass_q": 0.04645167584051676,
+  "hh_m": 0.04063416801434168,
+  "p_w8": 0.039826067366260674,
+  "bass_p": 0.03738782569387825,
+  "kg_ho": 0.03723912793239128,
+  "slow_reimb": 0.036831760760317606,
+  "leak": -0.03454544930145449,
+  "bulk_add": 0.03407171267271712,
+  "b_other": 0.033939723039397234,
+  "sw_slip": 0.03214581653745816,
+  "cannibal": -0.03011908602119086,
+  "b_cap": 0.027963120219631203,
+  "relabel": -0.024102254533022546,
+  "repeat": -0.022096141780961417,
+  "ag_tau": -0.020647977338479773,
+  "inc_ho": 0.020607416522074165,
+  "drive_res": 0.018229526390295264,
+  "ag_pre": 0.015976984455769845,
+  "churn": -0.014974209449742095,
+  "base_meas": 0.012571103597711035,
+  "drives_max": 0.011456319294563195,
+  "winfl": 0.0069197846491978465,
+  "fixed_ov": 0.0067128339791283406,
+  "cov_scale": 0.006611160918111609,
+  "g": 0.006263405114634051,
+  "payout_slow": -0.005717421525174216,
+  "cov_pilot": 0.0052944917569449175,
+  "backup_rec": -0.0052352469283524685,
+  "topup": 0.0051562918835629185,
+  "vendor_lag": -0.004287812910878129,
+  "audit_delay": 0.0015386266713862666
+ },
+ "tornado_base": {
+  "P_success_genuine": 0.1006,
+  "P_kpi_literal": 0.0453,
+  "P_survive": 0.5454,
+  "median_additional_t_m24": 10.226932624510638
+ },
+ "tornado": [
+  {
+   "key": "ag_kg",
+   "label": "Gross e-waste handled per agent per month",
+   "unit": "kg/month",
+   "p10": {
+    "input_value": 210.75340746641032,
+    "P_success_genuine": 0.0216,
+    "P_kpi_literal": 0.0198,
+    "P_kpi_true": 0.183,
+    "P_survive": 0.513,
+    "P_gate25": 0.5071,
+    "median_additional_t_m24": 6.690148132620008
+   },
+   "p90": {
+    "input_value": 759.1810824007705,
+    "P_success_genuine": 0.243,
+    "P_kpi_literal": 0.0846,
+    "P_kpi_true": 0.3902,
+    "P_survive": 0.5793,
+    "P_gate25": 0.6019,
+    "median_additional_t_m24": 15.53234746261359
+   },
+   "swing_success": 0.22139999999999999,
+   "swing_kpi_true": 0.2072,
+   "swing_survive": 0.06630000000000003,
+   "swing_add_t": 8.842199329993582
+  },
+  {
+   "key": "imc_ok",
+   "label": "IMC integration succeeds (MoU signed AND custody logging works)",
+   "unit": "flag",
+   "p10": {
+    "input_value": true,
+    "P_success_genuine": 0.1367,
+    "P_kpi_literal": 0.0742,
+    "P_kpi_true": 0.4027,
+    "P_survive": 0.6423,
+    "P_gate25": 0.6495,
+    "median_additional_t_m24": 18.167194665095696
+   },
+   "p90": {
+    "input_value": false,
+    "P_success_genuine": 0.0488,
+    "P_kpi_literal": 0.0034,
+    "P_kpi_true": 0.0785,
+    "P_survive": 0.403,
+    "P_gate25": 0.4126,
+    "median_additional_t_m24": 0.0
+   },
+   "swing_success": 0.08789999999999998,
+   "swing_kpi_true": 0.3242,
+   "swing_survive": 0.23929999999999996,
+   "swing_add_t": 18.167194665095696
+  },
+  {
+   "key": "imc_formal",
+   "label": "Share of IMC flow already reaching authorized recyclers (baseline)",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.545,
+    "P_success_genuine": 0.1177,
+    "P_kpi_literal": 0.0906,
+    "P_kpi_true": 0.3934,
+    "P_survive": 0.547,
+    "P_gate25": 0.5583,
+    "median_additional_t_m24": 11.398485648195614
+   },
+   "p90": {
+    "input_value": 0.905,
+    "P_success_genuine": 0.0787,
+    "P_kpi_literal": 0.0126,
+    "P_kpi_true": 0.1345,
+    "P_survive": 0.5392,
+    "P_gate25": 0.5543,
+    "median_additional_t_m24": 8.926884908115095
+   },
+   "swing_success": 0.03899999999999999,
+   "swing_kpi_true": 0.2589,
+   "swing_survive": 0.007800000000000029,
+   "swing_add_t": 2.471600740080518
+  },
+  {
+   "key": "ag_max",
+   "label": "Informal agents enrolled at maturity",
+   "unit": "agents",
+   "p10": {
+    "input_value": 26.40175425099138,
+    "P_success_genuine": 0.0363,
+    "P_kpi_literal": 0.0236,
+    "P_kpi_true": 0.2043,
+    "P_survive": 0.5188,
+    "P_gate25": 0.5139,
+    "median_additional_t_m24": 7.341540297830754
+   },
+   "p90": {
+    "input_value": 62.89736862351293,
+    "P_success_genuine": 0.1838,
+    "P_kpi_literal": 0.0741,
+    "P_kpi_true": 0.3465,
+    "P_survive": 0.5717,
+    "P_gate25": 0.5959,
+    "median_additional_t_m24": 13.458158204481599
+   },
+   "swing_success": 0.1475,
+   "swing_kpi_true": 0.14219999999999997,
+   "swing_survive": 0.05289999999999995,
+   "swing_add_t": 6.116617906650845
+  },
+  {
+   "key": "b_other",
+   "label": "PRO + recycler-direct Indore flow (baseline)",
+   "unit": "t/month",
+   "p10": {
+    "input_value": 9.270166448906409,
+    "P_success_genuine": 0.118,
+    "P_kpi_literal": 0.095,
+    "P_kpi_true": 0.3653,
+    "P_survive": 0.5166,
+    "P_gate25": 0.5118,
+    "median_additional_t_m24": 8.962303320645702
+   },
+   "p90": {
+    "input_value": 43.14917129100606,
+    "P_success_genuine": 0.0733,
+    "P_kpi_literal": 0.0043,
+    "P_kpi_true": 0.1397,
+    "P_survive": 0.5753,
+    "P_gate25": 0.595,
+    "median_additional_t_m24": 11.209220625741173
+   },
+   "swing_success": 0.04469999999999999,
+   "swing_kpi_true": 0.22560000000000002,
+   "swing_survive": 0.058700000000000085,
+   "swing_add_t": 2.2469173050954705
+  },
+  {
+   "key": "bulk_max",
+   "label": "Bulk/institutional/producer take-back tonnes at maturity",
+   "unit": "t/month",
+   "p10": {
+    "input_value": 2.317541612226602,
+    "P_success_genuine": 0.059,
+    "P_kpi_literal": 0.0311,
+    "P_kpi_true": 0.2393,
+    "P_survive": 0.5277,
+    "P_gate25": 0.5259,
+    "median_additional_t_m24": 8.258331295492075
+   },
+   "p90": {
+    "input_value": 10.787292822751516,
+    "P_success_genuine": 0.1681,
+    "P_kpi_literal": 0.0656,
+    "P_kpi_true": 0.3196,
+    "P_survive": 0.5679,
+    "P_gate25": 0.5945,
+    "median_additional_t_m24": 12.93950237353431
+   },
+   "swing_success": 0.1091,
+   "swing_kpi_true": 0.08029999999999998,
+   "swing_survive": 0.040200000000000014,
+   "swing_add_t": 4.681171078042235
+  },
+  {
+   "key": "gap",
+   "label": "Street price minus formal recycler price",
+   "unit": "Rs/kg",
+   "p10": {
+    "input_value": 1.2000000000000002,
+    "P_success_genuine": 0.143,
+    "P_kpi_literal": 0.0574,
+    "P_kpi_true": 0.3075,
+    "P_survive": 0.5564,
+    "P_gate25": 0.5724,
+    "median_additional_t_m24": 11.831371707337677
+   },
+   "p90": {
+    "input_value": 10.8,
+    "P_success_genuine": 0.056,
+    "P_kpi_literal": 0.0337,
+    "P_kpi_true": 0.2319,
+    "P_survive": 0.5326,
+    "P_gate25": 0.5386,
+    "median_additional_t_m24": 8.655446935322104
+   },
+   "swing_success": 0.087,
+   "swing_kpi_true": 0.0756,
+   "swing_survive": 0.023800000000000043,
+   "swing_add_t": 3.1759247720155734
+  },
+  {
+   "key": "stage1",
+   "label": "Stage -1 duration (sanction to pilot start)",
+   "unit": "months",
+   "p10": {
+    "input_value": 2.634417593330129,
+    "P_success_genuine": 0.1133,
+    "P_kpi_literal": 0.0757,
+    "P_kpi_true": 0.3109,
+    "P_survive": 0.5278,
+    "P_gate25": 0.6755,
+    "median_additional_t_m24": 10.100356309612591
+   },
+   "p90": {
+    "input_value": 9.489763530009633,
+    "P_success_genuine": 0.083,
+    "P_kpi_literal": 0.0101,
+    "P_kpi_true": 0.2057,
+    "P_survive": 0.6095,
+    "P_gate25": 0.3331,
+    "median_additional_t_m24": 10.963869635563931
+   },
+   "swing_success": 0.030299999999999994,
+   "swing_kpi_true": 0.10520000000000002,
+   "swing_survive": 0.0817,
+   "swing_add_t": 0.8635133259513399
+  },
+  {
+   "key": "hh_m",
+   "label": "Household market potential in covered wards (24 months)",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.0670316771899245,
+    "P_success_genuine": 0.0712,
+    "P_kpi_literal": 0.0379,
+    "P_kpi_true": 0.2468,
+    "P_survive": 0.5396,
+    "P_gate25": 0.5485,
+    "median_additional_t_m24": 9.20479239042707
+   },
+   "p90": {
+    "input_value": 0.2056000320989508,
+    "P_success_genuine": 0.1397,
+    "P_kpi_literal": 0.0539,
+    "P_kpi_true": 0.2983,
+    "P_survive": 0.5523,
+    "P_gate25": 0.5675,
+    "median_additional_t_m24": 11.756947665256545
+   },
+   "swing_success": 0.06849999999999999,
+   "swing_kpi_true": 0.05150000000000002,
+   "swing_survive": 0.012700000000000045,
+   "swing_add_t": 2.5521552748294756
+  },
+  {
+   "key": "bass_q",
+   "label": "Household imitation (word-of-mouth) rate",
+   "unit": "/month",
+   "p10": {
+    "input_value": 0.0718708757876876,
+    "P_success_genuine": 0.076,
+    "P_kpi_literal": 0.0394,
+    "P_kpi_true": 0.2509,
+    "P_survive": 0.5408,
+    "P_gate25": 0.5505,
+    "median_additional_t_m24": 9.256646587008328
+   },
+   "p90": {
+    "input_value": 0.2003593227740645,
+    "P_success_genuine": 0.1378,
+    "P_kpi_literal": 0.0531,
+    "P_kpi_true": 0.2946,
+    "P_survive": 0.5522,
+    "P_gate25": 0.5667,
+    "median_additional_t_m24": 11.777460547464415
+   },
+   "swing_success": 0.06180000000000001,
+   "swing_kpi_true": 0.04369999999999996,
+   "swing_survive": 0.011400000000000077,
+   "swing_add_t": 2.5208139604560866
+  },
+  {
+   "key": "imc_uplift",
+   "label": "Uplift of IMC flow from EcoSure outreach",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.015,
+    "P_success_genuine": 0.0948,
+    "P_kpi_literal": 0.035,
+    "P_kpi_true": 0.2261,
+    "P_survive": 0.5368,
+    "P_gate25": 0.5535,
+    "median_additional_t_m24": 9.51566155378331
+   },
+   "p90": {
+    "input_value": 0.135,
+    "P_success_genuine": 0.107,
+    "P_kpi_literal": 0.0551,
+    "P_kpi_true": 0.3191,
+    "P_survive": 0.5505,
+    "P_gate25": 0.5603,
+    "median_additional_t_m24": 10.698802901408872
+   },
+   "swing_success": 0.012200000000000003,
+   "swing_kpi_true": 0.093,
+   "swing_survive": 0.013699999999999934,
+   "swing_add_t": 1.1831413476255612
+  },
+  {
+   "key": "kg_ho",
+   "label": "Weight per household hand-over",
+   "unit": "kg",
+   "p10": {
+    "input_value": 2.234952379319375,
+    "P_success_genuine": 0.0767,
+    "P_kpi_literal": 0.0394,
+    "P_kpi_true": 0.2517,
+    "P_survive": 0.5407,
+    "P_gate25": 0.5506,
+    "median_additional_t_m24": 9.426167423879253
+   },
+   "p90": {
+    "input_value": 5.4811011247275765,
+    "P_success_genuine": 0.1371,
+    "P_kpi_literal": 0.0526,
+    "P_kpi_true": 0.2957,
+    "P_survive": 0.5518,
+    "P_gate25": 0.5647,
+    "median_additional_t_m24": 11.295994890550018
+   },
+   "swing_success": 0.060399999999999995,
+   "swing_kpi_true": 0.04400000000000004,
+   "swing_survive": 0.011099999999999999,
+   "swing_add_t": 1.869827466670765
+  },
+  {
+   "key": "imc_cap",
+   "label": "Max share of IMC flow brought under EcoSure custody",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.45,
+    "P_success_genuine": 0.0968,
+    "P_kpi_literal": 0.0195,
+    "P_kpi_true": 0.2324,
+    "P_survive": 0.5282,
+    "P_gate25": 0.5429,
+    "median_additional_t_m24": 9.053422916328206
+   },
+   "p90": {
+    "input_value": 0.8500000000000001,
+    "P_success_genuine": 0.1055,
+    "P_kpi_literal": 0.0767,
+    "P_kpi_true": 0.3092,
+    "P_survive": 0.5589,
+    "P_gate25": 0.5704,
+    "median_additional_t_m24": 11.324002662555742
+   },
+   "swing_success": 0.0087,
+   "swing_kpi_true": 0.07679999999999998,
+   "swing_survive": 0.03069999999999995,
+   "swing_add_t": 2.2705797462275363
+  },
+  {
+   "key": "bass_p",
+   "label": "Household innovation (spontaneous trial) rate",
+   "unit": "/month",
+   "p10": {
+    "input_value": 0.002634417593330129,
+    "P_success_genuine": 0.0802,
+    "P_kpi_literal": 0.0406,
+    "P_kpi_true": 0.2502,
+    "P_survive": 0.5414,
+    "P_gate25": 0.5497,
+    "median_additional_t_m24": 9.342523612992053
+   },
+   "p90": {
+    "input_value": 0.009489763530009632,
+    "P_success_genuine": 0.1232,
+    "P_kpi_literal": 0.051,
+    "P_kpi_true": 0.2917,
+    "P_survive": 0.5514,
+    "P_gate25": 0.5662,
+    "median_additional_t_m24": 11.338133970104295
+   },
+   "swing_success": 0.04300000000000001,
+   "swing_kpi_true": 0.04150000000000004,
+   "swing_survive": 0.010000000000000009,
+   "swing_add_t": 1.9956103571122412
+  },
+  {
+   "key": "slow_reimb",
+   "label": "Agent reimbursement median > 7 days",
+   "unit": "flag",
+   "p10": {
+    "input_value": true,
+    "P_success_genuine": 0.0767,
+    "P_kpi_literal": 0.0363,
+    "P_kpi_true": 0.2426,
+    "P_survive": 0.5158,
+    "P_gate25": 0.5133,
+    "median_additional_t_m24": 7.966227611931821
+   },
+   "p90": {
+    "input_value": false,
+    "P_success_genuine": 0.1138,
+    "P_kpi_literal": 0.0492,
+    "P_kpi_true": 0.2861,
+    "P_survive": 0.5589,
+    "P_gate25": 0.5772,
+    "median_additional_t_m24": 11.104369567655974
+   },
+   "swing_success": 0.037099999999999994,
+   "swing_kpi_true": 0.04350000000000001,
+   "swing_survive": 0.043099999999999916,
+   "swing_add_t": 3.138141955724153
+  },
+  {
+   "key": "imc_flow",
+   "label": "IMC true existing e-waste flow",
+   "unit": "t/month",
+   "p10": {
+    "input_value": 23.625,
+    "P_success_genuine": 0.1122,
+    "P_kpi_literal": 0.0673,
+    "P_kpi_true": 0.2927,
+    "P_survive": 0.4934,
+    "P_gate25": 0.5303,
+    "median_additional_t_m24": 6.263642399885102
+   },
+   "p90": {
+    "input_value": 66.825,
+    "P_success_genuine": 0.0885,
+    "P_kpi_literal": 0.0333,
+    "P_kpi_true": 0.2471,
+    "P_survive": 0.5691,
+    "P_gate25": 0.5745,
+    "median_additional_t_m24": 12.128789839511287
+   },
+   "swing_success": 0.0237,
+   "swing_kpi_true": 0.04560000000000003,
+   "swing_survive": 0.07570000000000005,
+   "swing_add_t": 5.865147439626185
+  },
+  {
+   "key": "relabel",
+   "label": "Share of agent tonnes that were already formal (recyclers' own aggregators)",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.23,
+    "P_success_genuine": 0.1063,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2948,
+    "P_survive": 0.5457,
+    "P_gate25": 0.5576,
+    "median_additional_t_m24": 11.067476264169489
+   },
+   "p90": {
+    "input_value": 0.47000000000000003,
+    "P_success_genuine": 0.0934,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.245,
+    "P_survive": 0.5439,
+    "P_gate25": 0.5568,
+    "median_additional_t_m24": 9.435150789983746
+   },
+   "swing_success": 0.012900000000000009,
+   "swing_kpi_true": 0.04980000000000001,
+   "swing_survive": 0.0017999999999999128,
+   "swing_add_t": 1.632325474185743
+  },
+  {
+   "key": "churn",
+   "label": "Agent base monthly churn",
+   "unit": "/month",
+   "p10": {
+    "input_value": 0.021260790546553433,
+    "P_success_genuine": 0.1189,
+    "P_kpi_literal": 0.0496,
+    "P_kpi_true": 0.2822,
+    "P_survive": 0.5491,
+    "P_gate25": 0.562,
+    "median_additional_t_m24": 10.944001834809468
+   },
+   "p90": {
+    "input_value": 0.05709982241662568,
+    "P_success_genuine": 0.082,
+    "P_kpi_literal": 0.0406,
+    "P_kpi_true": 0.2578,
+    "P_survive": 0.5408,
+    "P_gate25": 0.5511,
+    "median_additional_t_m24": 9.639873845939153
+   },
+   "swing_success": 0.0369,
+   "swing_kpi_true": 0.024400000000000033,
+   "swing_survive": 0.008300000000000085,
+   "swing_add_t": 1.3041279888703148
+  },
+  {
+   "key": "cov_scale",
+   "label": "Households covered after 1a go-live",
+   "unit": "households",
+   "p10": {
+    "input_value": 175000.0,
+    "P_success_genuine": 0.0825,
+    "P_kpi_literal": 0.0417,
+    "P_kpi_true": 0.2602,
+    "P_survive": 0.5435,
+    "P_gate25": 0.5545,
+    "median_additional_t_m24": 9.812141576819513
+   },
+   "p90": {
+    "input_value": 375000.0,
+    "P_success_genuine": 0.1208,
+    "P_kpi_literal": 0.0495,
+    "P_kpi_true": 0.2813,
+    "P_survive": 0.5479,
+    "P_gate25": 0.5594,
+    "median_additional_t_m24": 10.648349477998352
+   },
+   "swing_success": 0.0383,
+   "swing_kpi_true": 0.021100000000000008,
+   "swing_survive": 0.0044000000000000705,
+   "swing_add_t": 0.8362079011788381
+  },
+  {
+   "key": "bulk_add",
+   "label": "Share of bulk tonnes that are genuinely additional",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.24000000000000002,
+    "P_success_genuine": 0.0967,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2532,
+    "P_survive": 0.5445,
+    "P_gate25": 0.5568,
+    "median_additional_t_m24": 9.398320962050231
+   },
+   "p90": {
+    "input_value": 0.56,
+    "P_success_genuine": 0.1063,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2896,
+    "P_survive": 0.5458,
+    "P_gate25": 0.5577,
+    "median_additional_t_m24": 11.08372847050116
+   },
+   "swing_success": 0.009600000000000011,
+   "swing_kpi_true": 0.03640000000000004,
+   "swing_survive": 0.0012999999999999678,
+   "swing_add_t": 1.685407508450929
+  },
+  {
+   "key": "ag_tau",
+   "label": "Agent enrolment time constant",
+   "unit": "months",
+   "p10": {
+    "input_value": 3.5,
+    "P_success_genuine": 0.105,
+    "P_kpi_literal": 0.0497,
+    "P_kpi_true": 0.2847,
+    "P_survive": 0.5537,
+    "P_gate25": 0.5697,
+    "median_additional_t_m24": 10.664007885150092
+   },
+   "p90": {
+    "input_value": 7.5,
+    "P_success_genuine": 0.0948,
+    "P_kpi_literal": 0.0408,
+    "P_kpi_true": 0.257,
+    "P_survive": 0.5387,
+    "P_gate25": 0.5466,
+    "median_additional_t_m24": 9.817071734637212
+   },
+   "swing_success": 0.0102,
+   "swing_kpi_true": 0.027700000000000002,
+   "swing_survive": 0.015000000000000013,
+   "swing_add_t": 0.8469361505128798
+  },
+  {
+   "key": "drive_res",
+   "label": "Residents per drive",
+   "unit": "residents",
+   "p10": {
+    "input_value": 17.9677189469219,
+    "P_success_genuine": 0.0943,
+    "P_kpi_literal": 0.0433,
+    "P_kpi_true": 0.2615,
+    "P_survive": 0.5429,
+    "P_gate25": 0.553,
+    "median_additional_t_m24": 9.85511028516834
+   },
+   "p90": {
+    "input_value": 50.089830693516134,
+    "P_success_genuine": 0.1092,
+    "P_kpi_literal": 0.0484,
+    "P_kpi_true": 0.2832,
+    "P_survive": 0.5489,
+    "P_gate25": 0.5621,
+    "median_additional_t_m24": 10.806473960107072
+   },
+   "swing_success": 0.01490000000000001,
+   "swing_kpi_true": 0.021699999999999997,
+   "swing_survive": 0.006000000000000005,
+   "swing_add_t": 0.9513636749387313
+  },
+  {
+   "key": "inc_ho",
+   "label": "Scheme incentive per household hand-over",
+   "unit": "Rs",
+   "p10": {
+    "input_value": 44.6990475863875,
+    "P_success_genuine": 0.0933,
+    "P_kpi_literal": 0.0428,
+    "P_kpi_true": 0.2609,
+    "P_survive": 0.5427,
+    "P_gate25": 0.5537,
+    "median_additional_t_m24": 9.833940271140815
+   },
+   "p90": {
+    "input_value": 109.62202249455153,
+    "P_success_genuine": 0.1096,
+    "P_kpi_literal": 0.0482,
+    "P_kpi_true": 0.2806,
+    "P_survive": 0.5475,
+    "P_gate25": 0.5615,
+    "median_additional_t_m24": 10.699654998637527
+   },
+   "swing_success": 0.01630000000000001,
+   "swing_kpi_true": 0.019699999999999995,
+   "swing_survive": 0.0048000000000000265,
+   "swing_add_t": 0.8657147274967123
+  },
+  {
+   "key": "p_w8",
+   "label": "Pilot week-8 operational gate first-try pass probability",
+   "unit": "prob",
+   "p10": {
+    "input_value": 0.445,
+    "P_success_genuine": 0.0951,
+    "P_kpi_literal": 0.0415,
+    "P_kpi_true": 0.2573,
+    "P_survive": 0.521,
+    "P_gate25": 0.5192,
+    "median_additional_t_m24": 8.819346496721115
+   },
+   "p90": {
+    "input_value": 0.8049999999999999,
+    "P_success_genuine": 0.1047,
+    "P_kpi_literal": 0.0484,
+    "P_kpi_true": 0.2831,
+    "P_survive": 0.5636,
+    "P_gate25": 0.5876,
+    "median_additional_t_m24": 11.115083246570881
+   },
+   "swing_success": 0.009599999999999997,
+   "swing_kpi_true": 0.025800000000000045,
+   "swing_survive": 0.04259999999999997,
+   "swing_add_t": 2.295736749849766
+  },
+  {
+   "key": "cov_pilot",
+   "label": "Households covered during manual pilot",
+   "unit": "households",
+   "p10": {
+    "input_value": 69000.0,
+    "P_success_genuine": 0.0946,
+    "P_kpi_literal": 0.043,
+    "P_kpi_true": 0.2632,
+    "P_survive": 0.5443,
+    "P_gate25": 0.555,
+    "median_additional_t_m24": 9.946835499799615
+   },
+   "p90": {
+    "input_value": 141000.0,
+    "P_success_genuine": 0.107,
+    "P_kpi_literal": 0.0475,
+    "P_kpi_true": 0.2791,
+    "P_survive": 0.5473,
+    "P_gate25": 0.56,
+    "median_additional_t_m24": 10.49620882136124
+   },
+   "swing_success": 0.012399999999999994,
+   "swing_kpi_true": 0.015900000000000025,
+   "swing_survive": 0.0030000000000000027,
+   "swing_add_t": 0.5493733215616246
+  },
+  {
+   "key": "g",
+   "label": "Organic growth of baseline formal flows",
+   "unit": "/year",
+   "p10": {
+    "input_value": 0.015,
+    "P_success_genuine": 0.0996,
+    "P_kpi_literal": 0.0354,
+    "P_kpi_true": 0.2583,
+    "P_survive": 0.5362,
+    "P_gate25": 0.5491,
+    "median_additional_t_m24": 9.840828174480857
+   },
+   "p90": {
+    "input_value": 0.135,
+    "P_success_genuine": 0.1024,
+    "P_kpi_literal": 0.0586,
+    "P_kpi_true": 0.282,
+    "P_survive": 0.5536,
+    "P_gate25": 0.5645,
+    "median_additional_t_m24": 10.712544508115027
+   },
+   "swing_success": 0.002800000000000011,
+   "swing_kpi_true": 0.0237,
+   "swing_survive": 0.01739999999999997,
+   "swing_add_t": 0.8717163336341702
+  },
+  {
+   "key": "drives_max",
+   "label": "Drives per month at maturity",
+   "unit": "drives/month",
+   "p10": {
+    "input_value": 7.0,
+    "P_success_genuine": 0.0958,
+    "P_kpi_literal": 0.0432,
+    "P_kpi_true": 0.2642,
+    "P_survive": 0.5436,
+    "P_gate25": 0.5541,
+    "median_additional_t_m24": 9.902441562916277
+   },
+   "p90": {
+    "input_value": 15.0,
+    "P_success_genuine": 0.1071,
+    "P_kpi_literal": 0.0468,
+    "P_kpi_true": 0.2788,
+    "P_survive": 0.5472,
+    "P_gate25": 0.5599,
+    "median_additional_t_m24": 10.597462785989318
+   },
+   "swing_success": 0.011300000000000004,
+   "swing_kpi_true": 0.014600000000000002,
+   "swing_survive": 0.0036000000000000476,
+   "swing_add_t": 0.6950212230730415
+  },
+  {
+   "key": "backup_rec",
+   "label": "Backup recycler signed before phase 1b",
+   "unit": "flag",
+   "p10": {
+    "input_value": true,
+    "P_success_genuine": 0.1033,
+    "P_kpi_literal": 0.0465,
+    "P_kpi_true": 0.277,
+    "P_survive": 0.5578,
+    "P_gate25": 0.5678,
+    "median_additional_t_m24": 10.78947206242124
+   },
+   "p90": {
+    "input_value": false,
+    "P_success_genuine": 0.0963,
+    "P_kpi_literal": 0.0438,
+    "P_kpi_true": 0.2604,
+    "P_survive": 0.5241,
+    "P_gate25": 0.54,
+    "median_additional_t_m24": 9.024027967847164
+   },
+   "swing_success": 0.007000000000000006,
+   "swing_kpi_true": 0.016600000000000004,
+   "swing_survive": 0.03369999999999995,
+   "swing_add_t": 1.7654440945740753
+  },
+  {
+   "key": "leak",
+   "label": "Fraud leakage share of incentive spend",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.043808815296854695,
+    "P_success_genuine": 0.1039,
+    "P_kpi_literal": 0.0465,
+    "P_kpi_true": 0.2794,
+    "P_survive": 0.5603,
+    "P_gate25": 0.5652,
+    "median_additional_t_m24": 10.894469244157442
+   },
+   "p90": {
+    "input_value": 0.14165990488619162,
+    "P_success_genuine": 0.0981,
+    "P_kpi_literal": 0.0446,
+    "P_kpi_true": 0.2628,
+    "P_survive": 0.5298,
+    "P_gate25": 0.5494,
+    "median_additional_t_m24": 9.476423337861899
+   },
+   "swing_success": 0.0058,
+   "swing_kpi_true": 0.016600000000000004,
+   "swing_survive": 0.03049999999999997,
+   "swing_add_t": 1.4180459062955428
+  },
+  {
+   "key": "cannibal",
+   "label": "Share of household tonnes cannibalised from IMC/baseline",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.125,
+    "P_success_genuine": 0.102,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2777,
+    "P_survive": 0.5453,
+    "P_gate25": 0.5573,
+    "median_additional_t_m24": 10.504074486616343
+   },
+   "p90": {
+    "input_value": 0.32499999999999996,
+    "P_success_genuine": 0.0992,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2636,
+    "P_survive": 0.5452,
+    "P_gate25": 0.5573,
+    "median_additional_t_m24": 9.886996953092755
+   },
+   "swing_success": 0.002799999999999997,
+   "swing_kpi_true": 0.014100000000000001,
+   "swing_survive": 9.999999999998899e-05,
+   "swing_add_t": 0.6170775335235881
+  },
+  {
+   "key": "payout_slow",
+   "label": "Citizen incentive median > 4 working days",
+   "unit": "flag",
+   "p10": {
+    "input_value": true,
+    "P_success_genuine": 0.0959,
+    "P_kpi_literal": 0.0435,
+    "P_kpi_true": 0.2649,
+    "P_survive": 0.544,
+    "P_gate25": 0.5551,
+    "median_additional_t_m24": 9.934334295918442
+   },
+   "p90": {
+    "input_value": false,
+    "P_success_genuine": 0.1033,
+    "P_kpi_literal": 0.0458,
+    "P_kpi_true": 0.2738,
+    "P_survive": 0.5462,
+    "P_gate25": 0.5585,
+    "median_additional_t_m24": 10.352471880172786
+   },
+   "swing_success": 0.007400000000000004,
+   "swing_kpi_true": 0.008899999999999963,
+   "swing_survive": 0.0021999999999999797,
+   "swing_add_t": 0.4181375842543442
+  },
+  {
+   "key": "audit_delay",
+   "label": "Extra CERT-In/STQC delay before 1a exit",
+   "unit": "months",
+   "p10": {
+    "input_value": 0.30000000000000004,
+    "P_success_genuine": 0.1029,
+    "P_kpi_literal": 0.0559,
+    "P_kpi_true": 0.2766,
+    "P_survive": 0.5273,
+    "P_gate25": 0.602,
+    "median_additional_t_m24": 9.612796453807306
+   },
+   "p90": {
+    "input_value": 2.7,
+    "P_success_genuine": 0.0996,
+    "P_kpi_literal": 0.0344,
+    "P_kpi_true": 0.2641,
+    "P_survive": 0.5614,
+    "P_gate25": 0.5122,
+    "median_additional_t_m24": 10.466869504826835
+   },
+   "swing_success": 0.0033000000000000113,
+   "swing_kpi_true": 0.012500000000000011,
+   "swing_survive": 0.03410000000000002,
+   "swing_add_t": 0.8540730510195296
+  },
+  {
+   "key": "b_cap",
+   "label": "Share of PRO/recycler-direct flow tracked on EcoSure",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.25,
+    "P_success_genuine": 0.0996,
+    "P_kpi_literal": 0.035,
+    "P_kpi_true": 0.2646,
+    "P_survive": 0.5232,
+    "P_gate25": 0.5276,
+    "median_additional_t_m24": 9.393560654701318
+   },
+   "p90": {
+    "input_value": 0.6499999999999999,
+    "P_success_genuine": 0.1021,
+    "P_kpi_literal": 0.0567,
+    "P_kpi_true": 0.276,
+    "P_survive": 0.5594,
+    "P_gate25": 0.5769,
+    "median_additional_t_m24": 10.695604792749332
+   },
+   "swing_success": 0.0025000000000000022,
+   "swing_kpi_true": 0.011400000000000021,
+   "swing_survive": 0.03620000000000001,
+   "swing_add_t": 1.3020441380480143
+  },
+  {
+   "key": "repeat",
+   "label": "Repeat hand-overs per adopter per month",
+   "unit": "/month",
+   "p10": {
+    "input_value": 0.012,
+    "P_success_genuine": 0.0976,
+    "P_kpi_literal": 0.0445,
+    "P_kpi_true": 0.2687,
+    "P_survive": 0.5451,
+    "P_gate25": 0.5569,
+    "median_additional_t_m24": 10.112652210555634
+   },
+   "p90": {
+    "input_value": 0.027999999999999997,
+    "P_success_genuine": 0.1042,
+    "P_kpi_literal": 0.0464,
+    "P_kpi_true": 0.2733,
+    "P_survive": 0.5465,
+    "P_gate25": 0.5581,
+    "median_additional_t_m24": 10.33871059183343
+   },
+   "swing_success": 0.006599999999999995,
+   "swing_kpi_true": 0.004599999999999993,
+   "swing_survive": 0.0013999999999999568,
+   "swing_add_t": 0.2260583812777952
+  },
+  {
+   "key": "ag_pre",
+   "label": "Agents pre-recruited during Stage -1",
+   "unit": "agents",
+   "p10": {
+    "input_value": 1.0,
+    "P_success_genuine": 0.0998,
+    "P_kpi_literal": 0.0428,
+    "P_kpi_true": 0.2657,
+    "P_survive": 0.5334,
+    "P_gate25": 0.5365,
+    "median_additional_t_m24": 9.642106078367142
+   },
+   "p90": {
+    "input_value": 9.0,
+    "P_success_genuine": 0.1007,
+    "P_kpi_literal": 0.0468,
+    "P_kpi_true": 0.2758,
+    "P_survive": 0.5523,
+    "P_gate25": 0.5683,
+    "median_additional_t_m24": 10.510914778741068
+   },
+   "swing_success": 0.000899999999999998,
+   "swing_kpi_true": 0.010099999999999998,
+   "swing_survive": 0.018900000000000028,
+   "swing_add_t": 0.8688087003739255
+  },
+  {
+   "key": "sw_slip",
+   "label": "Software schedule slip multiplier (Phases 0-2)",
+   "unit": "x",
+   "p10": {
+    "input_value": 0.967377224846741,
+    "P_success_genuine": 0.1007,
+    "P_kpi_literal": 0.0552,
+    "P_kpi_true": 0.2662,
+    "P_survive": 0.496,
+    "P_gate25": 0.6255,
+    "median_additional_t_m24": 6.813675899838344
+   },
+   "p90": {
+    "input_value": 1.6151920469778918,
+    "P_success_genuine": 0.1019,
+    "P_kpi_literal": 0.0348,
+    "P_kpi_true": 0.2732,
+    "P_survive": 0.5936,
+    "P_gate25": 0.4743,
+    "median_additional_t_m24": 11.366896333982424
+   },
+   "swing_success": 0.0012000000000000066,
+   "swing_kpi_true": 0.007000000000000006,
+   "swing_survive": 0.09760000000000002,
+   "swing_add_t": 4.55322043414408
+  },
+  {
+   "key": "vendor_lag",
+   "label": "Software vendor contracting lag after Stage -1",
+   "unit": "months",
+   "p10": {
+    "input_value": 0.4635083224453204,
+    "P_success_genuine": 0.1014,
+    "P_kpi_literal": 0.0481,
+    "P_kpi_true": 0.2719,
+    "P_survive": 0.5407,
+    "P_gate25": 0.5686,
+    "median_additional_t_m24": 10.103829834420525
+   },
+   "p90": {
+    "input_value": 2.157458564550303,
+    "P_success_genuine": 0.0998,
+    "P_kpi_literal": 0.0408,
+    "P_kpi_true": 0.2667,
+    "P_survive": 0.5498,
+    "P_gate25": 0.5432,
+    "median_additional_t_m24": 10.341651125240567
+   },
+   "swing_success": 0.0016000000000000042,
+   "swing_kpi_true": 0.005199999999999982,
+   "swing_survive": 0.009099999999999997,
+   "swing_add_t": 0.2378212908200421
+  },
+  {
+   "key": "winfl",
+   "label": "Weight inflation in reported tonnes",
+   "unit": "share",
+   "p10": {
+    "input_value": 0.004,
+    "P_success_genuine": 0.1004,
+    "P_kpi_literal": 0.0411,
+    "P_kpi_true": 0.2698,
+    "P_survive": 0.5432,
+    "P_gate25": 0.5542,
+    "median_additional_t_m24": 10.15355974491443
+   },
+   "p90": {
+    "input_value": 0.036000000000000004,
+    "P_success_genuine": 0.101,
+    "P_kpi_literal": 0.0492,
+    "P_kpi_true": 0.2726,
+    "P_survive": 0.5486,
+    "P_gate25": 0.5611,
+    "median_additional_t_m24": 10.35577809285497
+   },
+   "swing_success": 0.0006000000000000033,
+   "swing_kpi_true": 0.0028000000000000247,
+   "swing_survive": 0.00539999999999996,
+   "swing_add_t": 0.2022183479405406
+  },
+  {
+   "key": "topup",
+   "label": "Incentive budget topped up 50% when exhausted",
+   "unit": "flag",
+   "p10": {
+    "input_value": true,
+    "P_success_genuine": 0.1007,
+    "P_kpi_literal": 0.0454,
+    "P_kpi_true": 0.2711,
+    "P_survive": 0.5454,
+    "P_gate25": 0.5574,
+    "median_additional_t_m24": 10.226932624510638
+   },
+   "p90": {
+    "input_value": false,
+    "P_success_genuine": 0.1006,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2711,
+    "P_survive": 0.5454,
+    "P_gate25": 0.5574,
+    "median_additional_t_m24": 10.226932624510638
+   },
+   "swing_success": 0.00010000000000000286,
+   "swing_kpi_true": 0.0,
+   "swing_survive": 0.0,
+   "swing_add_t": 0.0
+  },
+  {
+   "key": "fixed_ov",
+   "label": "Fixed-cost overrun multiplier",
+   "unit": "x",
+   "p10": {
+    "input_value": 0.9076262946962442,
+    "P_success_genuine": 0.1006,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2711,
+    "P_survive": 0.5456,
+    "P_gate25": 0.5574,
+    "median_additional_t_m24": 10.226932624510638
+   },
+   "p90": {
+    "input_value": 1.333147802207462,
+    "P_success_genuine": 0.1006,
+    "P_kpi_literal": 0.0453,
+    "P_kpi_true": 0.2711,
+    "P_survive": 0.5451,
+    "P_gate25": 0.5573,
+    "median_additional_t_m24": 10.22392871671541
+   },
+   "swing_success": 0.0,
+   "swing_kpi_true": 0.0,
+   "swing_survive": 0.0004999999999999449,
+   "swing_add_t": 0.003003907795228855
+  },
+  {
+   "key": "base_meas",
+   "label": "12-month baseline agreed in Stage -1",
+   "unit": "flag",
+   "p10": {
+    "input_value": true,
+    "P_success_genuine": 0.1006,
+    "P_kpi_literal": 0.0528,
+    "P_kpi_true": 0.2711,
+    "P_survive": 0.5454,
+    "P_gate25": 0.5574,
+    "median_additional_t_m24": 10.226932624510638
+   },
+   "p90": {
+    "input_value": false,
+    "P_success_genuine": 0.1006,
+    "P_kpi_literal": 0.0,
+    "P_kpi_true": 0.2711,
+    "P_survive": 0.5454,
+    "P_gate25": 0.5574,
+    "median_additional_t_m24": 10.226932624510638
+   },
+   "swing_success": 0.0,
+   "swing_kpi_true": 0.0,
+   "swing_survive": 0.0,
+   "swing_add_t": 0.0
+  }
+ ],
+ "assumptions": [
+  {
+   "key": "stage1",
+   "dist": "logn",
+   "params": [
+    5.0,
+    0.5
+   ],
+   "unit": "months",
+   "label": "Stage -1 duration (sanction to pilot start)",
+   "source": "PRD s25.1 says 8-16 wk; v2-deep/10 procurement says 2-12 months (MPSEDC nomination faster). Median 5, P90 ~9.5"
+  },
+  {
+   "key": "sw_slip",
+   "dist": "logn",
+   "params": [
+    1.25,
+    0.2
+   ],
+   "unit": "x",
+   "label": "Software schedule slip multiplier (Phases 0-2)",
+   "source": "PRD s25.1 durations; technical review 50-62 wk for P0-2 vs PRD ~40 wk implies ~1.25x"
+  },
+  {
+   "key": "audit_delay",
+   "dist": "uni",
+   "params": [
+    0.0,
+    3.0
+   ],
+   "unit": "months",
+   "label": "Extra CERT-In/STQC delay before 1a exit",
+   "source": "PRD s25.5 exit needs security audit + STQC; 35-premortem: STQC CQW 5-6 months"
+  },
+  {
+   "key": "vendor_lag",
+   "dist": "logn",
+   "params": [
+    1.0,
+    0.6
+   ],
+   "unit": "months",
+   "label": "Software vendor contracting lag after Stage -1",
+   "source": "PRD s25.2 separate vendor procurement; v2-deep/10: nomination 2-5 months"
+  },
+  {
+   "key": "imc_flow",
+   "dist": "imc",
+   "params": [],
+   "unit": "t/month",
+   "label": "IMC true existing e-waste flow",
+   "source": "PRD s2.2/s26.2 reportedly 60-75 t/month (TOI 2024, unverified; PRD s29.3)"
+  },
+  {
+   "key": "imc_ok",
+   "dist": "bern",
+   "params": [
+    0.6
+   ],
+   "unit": "flag",
+   "label": "IMC integration succeeds (MoU signed AND custody logging works)",
+   "source": "PRD s5.1/s25.2 joint order + MoU; assumed P(MoU)=0.75 x P(logging works)=0.8"
+  },
+  {
+   "key": "imc_cap",
+   "dist": "uni",
+   "params": [
+    0.4,
+    0.9
+   ],
+   "unit": "share",
+   "label": "Max share of IMC flow brought under EcoSure custody",
+   "source": "Assumption: IMC's two vendors hold existing contracts (19-citizen S3); not all flow reaches pilot recycler"
+  },
+  {
+   "key": "imc_formal",
+   "dist": "uni",
+   "params": [
+    0.5,
+    0.95
+   ],
+   "unit": "share",
+   "label": "Share of IMC flow already reaching authorized recyclers (baseline)",
+   "source": "Unknown; PRD s29.3 lists IMC vendor contracts as unverified"
+  },
+  {
+   "key": "b_other",
+   "dist": "logn",
+   "params": [
+    20.0,
+    0.6
+   ],
+   "unit": "t/month",
+   "label": "PRO + recycler-direct Indore flow (baseline)",
+   "source": "Assumption; 19-citizen S18: one Indore recycler ~450 t/yr (~37 t/mo, not all Indore-origin)"
+  },
+  {
+   "key": "b_cap",
+   "dist": "uni",
+   "params": [
+    0.2,
+    0.7
+   ],
+   "unit": "share",
+   "label": "Share of PRO/recycler-direct flow tracked on EcoSure",
+   "source": "Assumption: only participating recyclers' flows are logged (PRD s5.3)"
+  },
+  {
+   "key": "hh_m",
+   "dist": "logit",
+   "params": [
+    0.12,
+    0.5
+   ],
+   "unit": "share",
+   "label": "Household market potential in covered wards (24 months)",
+   "source": "19-citizen: 60% hold e-waste (S9) x intention-action gap ~15-25% (S10)"
+  },
+  {
+   "key": "bass_p",
+   "dist": "logn",
+   "params": [
+    0.005,
+    0.5
+   ],
+   "unit": "/month",
+   "label": "Household innovation (spontaneous trial) rate",
+   "source": "Calibrated so solo base ~ 19-citizen monthly first-pickup conversion 0.6-2% of aware holders"
+  },
+  {
+   "key": "bass_q",
+   "dist": "logn",
+   "params": [
+    0.12,
+    0.4
+   ],
+   "unit": "/month",
+   "label": "Household imitation (word-of-mouth) rate",
+   "source": "Assumption; typical Bass q 0.1-0.4/yr-equivalents scaled; drives visibility"
+  },
+  {
+   "key": "kg_ho",
+   "dist": "logn",
+   "params": [
+    3.5,
+    0.35
+   ],
+   "unit": "kg",
+   "label": "Weight per household hand-over",
+   "source": "19-citizen: 4 kg doorstep assumption; 30-budget: 3 kg; unit-econ: 2.5 kg"
+  },
+  {
+   "key": "cov_pilot",
+   "dist": "uni",
+   "params": [
+    60000,
+    150000
+   ],
+   "unit": "households",
+   "label": "Households covered during manual pilot",
+   "source": "PRD s5.6 Indore only; covered-ward count unspecified (gap). ~750k HH citywide (19-citizen S1)"
+  },
+  {
+   "key": "cov_scale",
+   "dist": "uni",
+   "params": [
+    150000,
+    400000
+   ],
+   "unit": "households",
+   "label": "Households covered after 1a go-live",
+   "source": "Assumption; 20-70% of IMC area"
+  },
+  {
+   "key": "drives_max",
+   "dist": "uni",
+   "params": [
+    6,
+    16
+   ],
+   "unit": "drives/month",
+   "label": "Drives per month at maturity",
+   "source": "19-citizen: 6-12 drives/month recommended; PRD s10.2 C9 150 kg threshold"
+  },
+  {
+   "key": "drive_res",
+   "dist": "logn",
+   "params": [
+    30.0,
+    0.4
+   ],
+   "unit": "residents",
+   "label": "Residents per drive",
+   "source": "19-citizen: 35 at Rs75 incentive"
+  },
+  {
+   "key": "repeat",
+   "dist": "uni",
+   "params": [
+    0.01,
+    0.03
+   ],
+   "unit": "/month",
+   "label": "Repeat hand-overs per adopter per month",
+   "source": "19-citizen: 10-24% repeat within 12 months"
+  },
+  {
+   "key": "ag_max",
+   "dist": "tri",
+   "params": [
+    15,
+    35,
+    80
+   ],
+   "unit": "agents",
+   "label": "Informal agents enrolled at maturity",
+   "source": "PRD s25.3 >=8 agents by wk4; 35-premortem: >3,000 waste pickers in Indore; few will sign"
+  },
+  {
+   "key": "ag_tau",
+   "dist": "uni",
+   "params": [
+    3.0,
+    8.0
+   ],
+   "unit": "months",
+   "label": "Agent enrolment time constant",
+   "source": "Assumption; PRD s11.2 S1 3-day decision, provisional 500 kg/month"
+  },
+  {
+   "key": "ag_pre",
+   "dist": "uni",
+   "params": [
+    0.0,
+    10.0
+   ],
+   "unit": "agents",
+   "label": "Agents pre-recruited during Stage -1",
+   "source": "PRD s25.2 recycler MoU + agent agreements in Stage -1"
+  },
+  {
+   "key": "ag_kg",
+   "dist": "logn",
+   "params": [
+    400.0,
+    0.5
+   ],
+   "unit": "kg/month",
+   "label": "Gross e-waste handled per agent per month",
+   "source": "19-citizen: ~13 kg/shop/day; unit-econ: 180 kg typical lot"
+  },
+  {
+   "key": "gap",
+   "dist": "uni",
+   "params": [
+    0.0,
+    12.0
+   ],
+   "unit": "Rs/kg",
+   "label": "Street price minus formal recycler price",
+   "source": "unit-econ Economy 2: street Rs32 vs formal Rs28 plus friction; gap >8 = adverse selection"
+  },
+  {
+   "key": "churn",
+   "dist": "logit",
+   "params": [
+    0.035,
+    0.4
+   ],
+   "unit": "/month",
+   "label": "Agent base monthly churn",
+   "source": "Assumption; unit-econ: multi-homing when money is slow"
+  },
+  {
+   "key": "slow_reimb",
+   "dist": "bern",
+   "params": [
+    0.3
+   ],
+   "unit": "flag",
+   "label": "Agent reimbursement median > 7 days",
+   "source": "35-premortem Story 1: 7-day SLA structurally hard; PRD s17 escrow reduces risk"
+  },
+  {
+   "key": "relabel",
+   "dist": "uni",
+   "params": [
+    0.2,
+    0.5
+   ],
+   "unit": "share",
+   "label": "Share of agent tonnes that were already formal (recyclers' own aggregators)",
+   "source": "PRD s5.3 layers over recyclers' own networks; assumption"
+  },
+  {
+   "key": "bulk_max",
+   "dist": "logn",
+   "params": [
+    5.0,
+    0.6
+   ],
+   "unit": "t/month",
+   "label": "Bulk/institutional/producer take-back tonnes at maturity",
+   "source": "30-budget: ~60% of tonnage non-household; 19-citizen S16 BMC 75% non-household"
+  },
+  {
+   "key": "bulk_add",
+   "dist": "uni",
+   "params": [
+    0.2,
+    0.6
+   ],
+   "unit": "share",
+   "label": "Share of bulk tonnes that are genuinely additional",
+   "source": "Assumption: Rule 8 already obliges bulk consumers to use authorized channels"
+  },
+  {
+   "key": "cannibal",
+   "dist": "uni",
+   "params": [
+    0.1,
+    0.35
+   ],
+   "unit": "share",
+   "label": "Share of household tonnes cannibalised from IMC/baseline",
+   "source": "35-premortem Story 2; assumption"
+  },
+  {
+   "key": "g",
+   "dist": "uni",
+   "params": [
+    0.0,
+    0.15
+   ],
+   "unit": "/year",
+   "label": "Organic growth of baseline formal flows",
+   "source": "Assumption: generation growth + IMC's own paid pickup app (19-citizen S18)"
+  },
+  {
+   "key": "leak",
+   "dist": "logit",
+   "params": [
+    0.08,
+    0.5
+   ],
+   "unit": "share",
+   "label": "Fraud leakage share of incentive spend",
+   "source": "35-premortem Story 4; PRD s18 controls (handover code, caps); CAG PM-KISAN pattern"
+  },
+  {
+   "key": "winfl",
+   "dist": "uni",
+   "params": [
+    0.0,
+    0.04
+   ],
+   "unit": "share",
+   "label": "Weight inflation in reported tonnes",
+   "source": "PRD s18.2 dual weighing, 5%/8% tolerance"
+  },
+  {
+   "key": "inc_ho",
+   "dist": "logn",
+   "params": [
+    70.0,
+    0.35
+   ],
+   "unit": "Rs",
+   "label": "Scheme incentive per household hand-over",
+   "source": "PRD s17.3 Rs50 per data-bearing device (illustrative); OQ-70 unset; 30-budget Rs75"
+  },
+  {
+   "key": "imc_uplift",
+   "dist": "uni",
+   "params": [
+    0.0,
+    0.15
+   ],
+   "unit": "share",
+   "label": "Uplift of IMC flow from EcoSure outreach",
+   "source": "Assumption; 19-citizen F2 IMC co-run effect"
+  },
+  {
+   "key": "p_w8",
+   "dist": "uni",
+   "params": [
+    0.4,
+    0.85
+   ],
+   "unit": "prob",
+   "label": "Pilot week-8 operational gate first-try pass probability",
+   "source": "PRD s25.3 five conjunct conditions; assumption"
+  },
+  {
+   "key": "fixed_ov",
+   "dist": "logn",
+   "params": [
+    1.1,
+    0.15
+   ],
+   "unit": "x",
+   "label": "Fixed-cost overrun multiplier",
+   "source": "30-budget +10% contingency; government IT overrun norms"
+  },
+  {
+   "key": "base_meas",
+   "dist": "bern",
+   "params": [
+    0.85
+   ],
+   "unit": "flag",
+   "label": "12-month baseline agreed in Stage -1",
+   "source": "PRD s24.1 / s18.3 tripwire; baseline data may not exist by channel"
+  },
+  {
+   "key": "payout_slow",
+   "dist": "bern",
+   "params": [
+    0.25
+   ],
+   "unit": "flag",
+   "label": "Citizen incentive median > 4 working days",
+   "source": "PRD s17.2 treasury batch 1-4 days; v2-deep/07 T+4"
+  },
+  {
+   "key": "backup_rec",
+   "dist": "bern",
+   "params": [
+    0.6
+   ],
+   "unit": "flag",
+   "label": "Backup recycler signed before phase 1b",
+   "source": "PRD s27.2 at least one backup recycler"
+  },
+  {
+   "key": "topup",
+   "dist": "bern",
+   "params": [
+    0.5
+   ],
+   "unit": "flag",
+   "label": "Incentive budget topped up 50% when exhausted",
+   "source": "Assumption; PRD s26.1 incentives ~Rs39 lakh"
+  }
+ ]
+}

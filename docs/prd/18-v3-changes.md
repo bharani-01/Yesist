@@ -42,4 +42,6 @@ v2 scored about 4.6 / 10 against Indian norms and field performance, and matched
 
 ## 3. Expected score
 
+> **Tested (2026-09-27):** 18 real-life simulations scored v3 at **4.7 / 10** in real life and **6.8 / 10** with a YESIST12 judging panel. The estimate below was too high. See [`../research/v3-sim/00-synthesis.md`](../research/v3-sim/00-synthesis.md).
+
 The 36-agent review estimated that these changes raise the score from 4.6 to about 6.5–7 / 10, and pre-mortem survival from about 30% to about 60%. Verified facts, signed MoUs, and a passed pilot are needed to go higher. These are estimates, not measurements; a fresh review of v3 would confirm them.

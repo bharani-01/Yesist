@@ -6,7 +6,7 @@ export const listForAgent = (tx, agentOrgId) =>
     `select l.id, l.seal_tag as "sealTag", l.status, l.unit_count_sent as "unitCountSent",
             l.sender_net_kg as "senderNetKg", l.accepted_net_kg as "acceptedNetKg", l.storage_deadline as "storageDeadline",
             l.created_at as "createdAt", l.dispatched_at as "dispatchedAt", l.received_at as "receivedAt",
-            r.name as "recyclerName",
+            r.name as "recyclerName", (select h.name from organizations h where h.id = l.hub_org_id) as "hubName",
             (select count(*)::int from pickup_requests p where p.lot_id = l.id) as "pickupCount",
             (select a.public_number from attestations a where a.lot_id = l.id and a.status = 'issued') as "attestationNumber"
        from lots l join organizations r on r.id = l.principal_org_id
@@ -46,13 +46,24 @@ export const insertLot = (tx, l) =>
 export const assignPickupsToLot = (tx, lotId, pickupIds) =>
   tx.query("update pickup_requests set status = 'in_lot', lot_id = $1 where id = any($2)", [lotId, pickupIds]);
 
-export const markDispatched = (tx, id, agentOrgId, { senderNetKg, vehicleRef }) =>
+export const lockSealedLot = (tx, id, agentOrgId) =>
   queryOne(
     tx,
-    `update lots set status = 'in_transit', sender_net_kg = $3, vehicle_ref = $4, dispatched_at = now()
-      where id = $1 and agent_org_id = $2 and status = 'sealed'
-      returning id, status`,
-    [id, agentOrgId, senderNetKg, vehicleRef ?? null],
+    `select id, principal_org_id as "principalOrgId" from lots where id = $1 and agent_org_id = $2 and status = 'sealed' for update`,
+    [id, agentOrgId],
+  );
+
+export const listHubsOf = (tx, recyclerOrgId) => queryMany(tx, 'select id, name from app.hubs_of_recycler($1)', [recyclerOrgId]);
+
+export const findOrgName = async (tx, id) => (await queryOne(tx, 'select name from organizations where id = $1', [id]))?.name ?? null;
+
+export const markDispatched = (tx, id, { senderNetKg, vehicleRef, hubOrgId }) =>
+  queryOne(
+    tx,
+    `update lots set status = 'in_transit', sender_net_kg = $2, vehicle_ref = $3, hub_org_id = $4, dispatched_at = now()
+      where id = $1 and status = 'sealed'
+      returning id, status, hub_org_id as "hubOrgId"`,
+    [id, senderNetKg, vehicleRef ?? null, hubOrgId ?? null],
   );
 
 export const insertSenderWeight = (tx, lotId, netKg, userId) =>

@@ -8,6 +8,7 @@ export const HOME_BY_WORKSPACE = {
   citizen: '/pickups',
   agent: '/agent',
   recycler: '/recycler',
+  hub: '/hub',
   producer: '/producer',
   oversight: '/oversight',
 };
@@ -16,6 +17,7 @@ export const WORKSPACE_LABELS = {
   citizen: 'Citizen',
   agent: 'Collection agent',
   recycler: 'Recycler',
+  hub: 'Regional hub',
   producer: 'Manufacturer',
   oversight: 'Oversight',
 };

@@ -11,6 +11,8 @@ The QR label is the only link between the manufacturer's registry and the custod
 - The collection agent scans labels at the door. Unknown labels and labels from the wrong category are rejected, and a label already in the custody chain is flagged for review.
 - The recycler can scan labels when a lot arrives. Every labelled unit not scanned before the receipt is recorded is marked missing and raises a high-severity flag for the regulator. Only units that were actually received count as recycled when the attestation is issued.
 
+A collection agent can send a sealed lot straight to the recycler or through one of the recycler's own regional hubs. The hub weighs each lot on arrival against the agent's reading (a variance outside tolerance raises a `hub_weight_variance` flag against the agent), keeps the seal intact, and loads lots onto consolidated shipments. The recycler then weighs each lot against the hub's reading, so any loss is attributed to the leg where it happened. Hubs never see manufacturer data, and manufacturers never see lots, hubs, or shipments.
+
 Product context lives in [`docs/prd`](docs/prd/README.md) and the field simulations in [`docs/research`](docs/research).
 
 ## Stack
@@ -43,6 +45,7 @@ Production: `npm run build` then `npm start`; the API serves `apps/web/dist` on 
 | `shop@ecosure.test` | Collection agent (repair shop, wards 1–10) |
 | `recycler.maker@ecosure.test` | Recycler operator (drafts attestations) |
 | `recycler.checker@ecosure.test` | Recycler approver (issues attestations) |
+| `hub@ecosure.test` | Regional hub supervisor (records arrivals, ships to the recycler) |
 | `producer.owner@ecosure.test` | Manufacturer owner (registers models, batches, and units) |
 | `producer.approver@ecosure.test` | Manufacturer approver (places batches on the market) |
 | `spcb@ecosure.test` | State pollution control board officer (triages flags) |
@@ -54,7 +57,7 @@ For local demos, set `DEMO_LOGIN_ENABLED=true` in `.env` and restart the API: th
 
 ## Tests
 
-`npm test` provisions an isolated `<database>_test` database (schema plus test accounts), then runs the integration suite against the real API and PostgreSQL: authentication and authorisation, the full custody chain with fraud controls, handover-code lockout, the manufacturer registry (per-row upload outcomes, maker-checker placing, workspace isolation), the QR product journey (public page, claims, collection by QR, gate scan with missing-unit flags), and direct row-level-security checks. Development data is never touched.
+`npm test` provisions an isolated `<database>_test` database (schema plus test accounts), then runs the integration suite against the real API and PostgreSQL: authentication and authorisation, the full custody chain with fraud controls, handover-code lockout, the manufacturer registry (per-row upload outcomes, maker-checker placing, workspace isolation), the QR product journey (public page, claims, collection by QR, gate scan with missing-unit flags), the regional hub leg (routing, arrival weighing, shipments, and isolation from the registry), and direct row-level-security checks. Development data is never touched.
 
 ## Architecture
 

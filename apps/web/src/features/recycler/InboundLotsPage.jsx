@@ -26,8 +26,12 @@ export function InboundLotsPage() {
                   {lots.map((l) => (
                     <tr key={l.id} className="is-clickable" onClick={() => navigate(`/recycler/lots/${l.id}`)}>
                       <td><Link className="mono" to={`/recycler/lots/${l.id}`} onClick={(e) => e.stopPropagation()}>{l.sealTag}</Link></td>
-                      <td>{l.agentName}</td>
-                      <td><StatusBadge map={LOT_STATUS} value={l.status} /></td>
+                      <td>{l.agentName}{l.hubName && <span className="subtle"> via {l.hubName}</span>}</td>
+                      <td>
+                        {l.hubName && !l.receivable && ['in_transit', 'at_hub'].includes(l.status)
+                          ? <Badge tone="neutral">{l.hubReceivedAt ? 'At hub' : 'To hub'}</Badge>
+                          : <StatusBadge map={LOT_STATUS} value={l.status} />}
+                      </td>
                       <td className="num">{l.unitCountSent}</td>
                       <td className="num">{formatKg(l.senderNetKg)}</td>
                       <td className="num">{formatKg(l.acceptedNetKg)}</td>

@@ -33,6 +33,15 @@
       ]
     }
   ],
+  "hubs": [
+    {
+      "name": "Test Regional Hub (local only)",
+      "maxStorageDays": 90,
+      "members": [
+        { "email": "hub@ecosure.test", "fullName": "Hub Supervisor (test)", "orgRole": "owner" }
+      ]
+    }
+  ],
   "producers": [
     {
       "name": "Test Electronics Maker (local only)",

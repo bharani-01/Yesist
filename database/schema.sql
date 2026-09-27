@@ -202,6 +202,25 @@ create index if not exists market_batches_model_idx on market_batches (model_id)
 create sequence if not exists lot_number_seq;
 create sequence if not exists attestation_number_seq;
 
+-- Consolidated load from a recycler-owned regional hub to that recycler (Track B only).
+create table if not exists hub_shipments (
+  id               uuid primary key default gen_random_uuid(),
+  reference        text not null unique check (reference ~ '^[A-Z0-9-]{6,30}$'),
+  hub_org_id       uuid not null references organizations(id),
+  recycler_org_id  uuid not null references organizations(id),
+  status           text not null default 'loading' check (status in ('loading','in_transit','received')),
+  vehicle_ref      text check (vehicle_ref is null or length(vehicle_ref) <= 40),
+  created_by       uuid not null references users(id),
+  dispatched_by    uuid references users(id),
+  dispatched_at    timestamptz,
+  received_at      timestamptz,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  check (status = 'loading' or (dispatched_by is not null and dispatched_at is not null))
+);
+create index if not exists hub_shipments_hub_idx on hub_shipments (hub_org_id, status);
+create index if not exists hub_shipments_recycler_idx on hub_shipments (recycler_org_id, status);
+
 create table if not exists lots (
   id                    uuid primary key default gen_random_uuid(),
   agent_org_id          uuid not null references organizations(id),
@@ -209,7 +228,7 @@ create table if not exists lots (
   agreement_id          uuid not null references agent_agreements(id),
   seal_tag              text not null unique check (seal_tag ~ '^[A-Z0-9-]{6,30}$'),
   status                text not null default 'sealed'
-                        check (status in ('sealed','in_transit','received','disputed','attested')),
+                        check (status in ('sealed','in_transit','at_hub','received','disputed','attested')),
   storage_deadline      timestamptz not null,
   unit_count_sent       int not null check (unit_count_sent >= 0),
   unit_count_received   int check (unit_count_received >= 0),
@@ -221,11 +240,38 @@ create table if not exists lots (
   created_by            uuid not null references users(id),
   dispatched_at         timestamptz,
   received_at           timestamptz,
+  -- Optional stop at a recycler-owned hub; null means the lot goes straight to the recycler.
+  hub_org_id            uuid references organizations(id),
+  hub_received_at       timestamptz,
+  hub_net_kg            numeric(12,3) check (hub_net_kg > 0),
+  hub_seal_intact       boolean,
+  hub_unit_count        int check (hub_unit_count >= 0),
+  shipment_id           uuid references hub_shipments(id),
   created_at            timestamptz not null default now(),
-  updated_at            timestamptz not null default now()
+  updated_at            timestamptz not null default now(),
+  constraint lots_hub_consistency check (
+    (hub_org_id is not null or (hub_received_at is null and shipment_id is null))
+    and (hub_received_at is null) = (hub_net_kg is null)
+  )
+);
+alter table lots add column if not exists hub_org_id uuid references organizations(id);
+alter table lots add column if not exists hub_received_at timestamptz;
+alter table lots add column if not exists hub_net_kg numeric(12,3) check (hub_net_kg > 0);
+alter table lots add column if not exists hub_seal_intact boolean;
+alter table lots add column if not exists hub_unit_count int check (hub_unit_count >= 0);
+alter table lots add column if not exists shipment_id uuid references hub_shipments(id);
+alter table lots drop constraint if exists lots_status_check;
+alter table lots add constraint lots_status_check
+  check (status in ('sealed','in_transit','at_hub','received','disputed','attested'));
+alter table lots drop constraint if exists lots_hub_consistency;
+alter table lots add constraint lots_hub_consistency check (
+  (hub_org_id is not null or (hub_received_at is null and shipment_id is null))
+  and (hub_received_at is null) = (hub_net_kg is null)
 );
 create index if not exists lots_agent_idx on lots (agent_org_id, status);
 create index if not exists lots_principal_idx on lots (principal_org_id, status);
+create index if not exists lots_hub_idx on lots (hub_org_id, status) where hub_org_id is not null;
+create index if not exists lots_shipment_idx on lots (shipment_id) where shipment_id is not null;
 
 create table if not exists pickup_requests (
   id                      uuid primary key default gen_random_uuid(),
@@ -270,7 +316,7 @@ create table if not exists product_units (
   last4            text not null check (length(last4) = 4),
   qr_public_id     text not null unique default encode(gen_random_bytes(9), 'hex'),
   state            text not null default 'collected'
-                   check (state in ('registered','placed_on_market','claimed','handed_over','collected','in_lot',
+                   check (state in ('registered','placed_on_market','claimed','handed_over','collected','in_lot','at_hub',
                                     'received_at_recycler','processed','materials_recovered','refurbished','lost','disputed')),
   legacy           boolean not null default true,
   producer_org_id  uuid references organizations(id),
@@ -286,6 +332,10 @@ alter table product_units add column if not exists model_id uuid references prod
 alter table product_units add column if not exists batch_id uuid references market_batches(id);
 alter table product_units drop constraint if exists product_units_identifier_type_check;
 alter table product_units add constraint product_units_identifier_type_check check (identifier_type in ('imei','serial','qr'));
+alter table product_units drop constraint if exists product_units_state_check;
+alter table product_units add constraint product_units_state_check
+  check (state in ('registered','placed_on_market','claimed','handed_over','collected','in_lot','at_hub',
+                   'received_at_recycler','processed','materials_recovered','refurbished','lost','disputed'));
 alter table product_units drop constraint if exists product_units_check;
 alter table product_units add constraint product_units_check
   check (legacy or (producer_org_id is not null and model_id is not null and batch_id is not null));
@@ -359,7 +409,7 @@ create index if not exists custody_events_lot_idx on custody_events (lot_id, cre
 
 create table if not exists weigh_records (
   id            bigserial primary key,
-  side          text not null check (side in ('doorstep','sender','receiver')),
+  side          text not null check (side in ('doorstep','sender','hub','receiver')),
   pickup_id     uuid references pickup_requests(id),
   lot_id        uuid references lots(id),
   net_kg        numeric(12,3) not null check (net_kg > 0),
@@ -368,6 +418,8 @@ create table if not exists weigh_records (
   created_at    timestamptz not null default now(),
   check ((side = 'doorstep' and pickup_id is not null) or (side <> 'doorstep' and lot_id is not null))
 );
+alter table weigh_records drop constraint if exists weigh_records_side_check;
+alter table weigh_records add constraint weigh_records_side_check check (side in ('doorstep','sender','hub','receiver'));
 
 create table if not exists attestations (
   id                   uuid primary key default gen_random_uuid(),
@@ -408,7 +460,7 @@ create table if not exists compliance_flags (
   id               uuid primary key default gen_random_uuid(),
   flag_type        text not null check (flag_type in
                      ('weight_variance','seal_broken','unit_count_leakage','duplicate_device','storage_deadline','incentive_cap',
-                      'unit_missing_at_scan')),
+                      'unit_missing_at_scan','hub_weight_variance')),
   severity         text not null check (severity in ('low','medium','high')),
   status           text not null default 'open' check (status in ('open','under_review','escalated','closed')),
   org_id           uuid references organizations(id),
@@ -426,7 +478,7 @@ create index if not exists compliance_flags_status_idx on compliance_flags (stat
 alter table compliance_flags drop constraint if exists compliance_flags_flag_type_check;
 alter table compliance_flags add constraint compliance_flags_flag_type_check check (flag_type in
   ('weight_variance','seal_broken','unit_count_leakage','duplicate_device','storage_deadline','incentive_cap',
-   'unit_missing_at_scan'));
+   'unit_missing_at_scan','hub_weight_variance'));
 
 create table if not exists audit_log (
   id             bigserial primary key,
@@ -512,6 +564,25 @@ language sql stable security definer set search_path = public, pg_temp as $$
     and current_date between a.valid_from and a.valid_until
   order by a.valid_from desc
   limit 1
+$$;
+
+-- Recycler a regional hub works for, through its own active agreement; null when it has none.
+create or replace function app.hub_principal(p_hub uuid) returns uuid
+language sql stable security definer set search_path = public, pg_temp as $$
+  select a.principal_org_id
+  from organizations h
+  join agent_agreements a on a.id = app.active_agreement(h.id)
+  where h.id = p_hub and h.org_type = 'regional_hub' and h.status = 'active'
+$$;
+
+-- Hubs an agent may route a lot through: active hubs working for the lot's recycler.
+create or replace function app.hubs_of_recycler(p_recycler uuid)
+returns table (id uuid, name text)
+language sql stable security definer set search_path = public, pg_temp as $$
+  select h.id, h.name from organizations h
+  where h.org_type = 'regional_hub' and h.status = 'active' and app.hub_principal(h.id) = p_recycler
+    and app.uid() is not null
+  order by h.name
 $$;
 
 -- --- Authentication (callable before a user context exists) -----------------
@@ -654,14 +725,15 @@ returns int
 language plpgsql security definer set search_path = public, pg_temp as $$
 declare v_count int;
 begin
-  if p_state not in ('in_lot','received_at_recycler','processed') then
+  if p_state not in ('in_lot','at_hub','received_at_recycler','processed') then
     raise exception 'invalid state' using errcode = '22023';
   end if;
   if exists (
     select 1 from pickup_requests p
     where p.id = any(p_pickups)
       and not (p.assigned_agent_org_id in (select app.my_org_ids())
-               or p.principal_org_id in (select app.my_org_ids()))
+               or p.principal_org_id in (select app.my_org_ids())
+               or exists (select 1 from lots l where l.id = p.lot_id and l.hub_org_id in (select app.my_org_ids())))
   ) then
     raise exception 'not permitted' using errcode = '42501';
   end if;
@@ -947,14 +1019,14 @@ begin
   insert into compliance_flags (flag_type, severity, org_id, lot_id, summary, evidence, dedupe_key)
   select 'storage_deadline',
          case when l.storage_deadline <= now() then 'high' else 'medium' end,
-         l.agent_org_id, l.id,
+         case when l.status = 'at_hub' then l.hub_org_id else l.agent_org_id end, l.id,
          'Lot ' || l.seal_tag || ' has used ' ||
            round(100 * extract(epoch from now() - l.created_at) / nullif(extract(epoch from l.storage_deadline - l.created_at), 0)) ||
            '% of its storage period and has not reached the recycler',
          jsonb_build_object('storage_deadline', l.storage_deadline, 'created_at', l.created_at),
          'storage:' || l.id
   from lots l
-  where l.status in ('sealed','in_transit')
+  where l.status in ('sealed','in_transit','at_hub')
     and now() >= l.created_at + (l.storage_deadline - l.created_at) * (p_flag_pct / 100)
   on conflict (dedupe_key) do nothing;
   get diagnostics v_count = row_count;
@@ -1015,6 +1087,21 @@ begin
   return new;
 end $$;
 
+-- A lot may stop only at a hub that works for the lot's own recycler, and its route is fixed once
+-- the hub has received it.
+create or replace function app.tg_lot_hub() returns trigger
+language plpgsql security definer set search_path = public, pg_temp as $$
+begin
+  if tg_op = 'UPDATE' and old.hub_received_at is not null and new.hub_org_id is distinct from old.hub_org_id then
+    raise exception 'hub route is fixed after hub receipt' using errcode = '23514';
+  end if;
+  if new.hub_org_id is not null and (tg_op = 'INSERT' or new.hub_org_id is distinct from old.hub_org_id)
+     and app.hub_principal(new.hub_org_id) is distinct from new.principal_org_id then
+    raise exception 'hub does not work for this recycler' using errcode = '23514';
+  end if;
+  return new;
+end $$;
+
 create or replace function app.tg_flag_notify() returns trigger
 language plpgsql as $$
 begin
@@ -1029,7 +1116,7 @@ begin
     execute format('drop trigger if exists %I_append_only on %I', t, t);
     execute format('create trigger %I_append_only before update or delete on %I for each row execute function app.tg_append_only()', t, t);
   end loop;
-  foreach t in array array['users','organizations','lots','pickup_requests','product_units','citizen_incentives','compliance_flags','market_batches'] loop
+  foreach t in array array['users','organizations','lots','pickup_requests','product_units','citizen_incentives','compliance_flags','market_batches','hub_shipments'] loop
     execute format('drop trigger if exists %I_touch on %I', t, t);
     execute format('create trigger %I_touch before update on %I for each row execute function app.tg_touch_updated_at()', t, t);
   end loop;
@@ -1043,6 +1130,10 @@ drop trigger if exists attestations_rules on attestations;
 create trigger attestations_rules before insert or update on attestations
   for each row execute function app.tg_attestation_rules();
 
+drop trigger if exists lots_hub on lots;
+create trigger lots_hub before insert or update of hub_org_id on lots
+  for each row execute function app.tg_lot_hub();
+
 drop trigger if exists compliance_flags_notify on compliance_flags;
 create trigger compliance_flags_notify after insert or update on compliance_flags
   for each row execute function app.tg_flag_notify();
@@ -1055,7 +1146,7 @@ revoke all on all tables in schema public from ecosure_app;
 grant select on waste_categories, wards, scheme_settings to ecosure_app;
 grant select on organizations, organization_members, agent_agreements, agent_service_wards, rate_cards to ecosure_app;
 grant select, update (full_name, phone) on users to ecosure_app;
-grant select, insert, update on pickup_requests, pickup_items, lots, attestations, citizen_incentives to ecosure_app;
+grant select, insert, update on pickup_requests, pickup_items, lots, attestations, citizen_incentives, hub_shipments to ecosure_app;
 grant select, insert on pickup_addresses to ecosure_app;
 grant select on product_units, pickup_item_units, lifecycle_events, unit_claims to ecosure_app;
 grant select, insert on product_models, market_batches to ecosure_app;
@@ -1079,7 +1170,7 @@ begin
     'agent_agreements','agent_service_wards','rate_cards','lots','pickup_requests','pickup_addresses',
     'product_units','pickup_items','pickup_item_units','lifecycle_events','handover_codes','custody_events',
     'weigh_records','attestations','citizen_incentives','compliance_flags','audit_log',
-    'product_models','market_batches','unit_claims'] loop
+    'product_models','market_batches','unit_claims','hub_shipments'] loop
     execute format('alter table %I enable row level security', t);
     execute format('alter table %I force row level security', t);
   end loop;
@@ -1122,6 +1213,7 @@ create policy pickups_read on pickup_requests for select using (
   requester_id = app.uid()
   or assigned_agent_org_id in (select app.my_org_ids())
   or (principal_org_id in (select app.my_org_ids()) and lot_id is not null)
+  or (lot_id is not null and exists (select 1 from lots l where l.id = lot_id and l.hub_org_id in (select app.my_org_ids())))
   or (status = 'requested' and assigned_agent_org_id is null and app.serves_ward(ward_id))
   or app.is_oversight()
 );
@@ -1192,8 +1284,16 @@ create policy lifecycle_read on lifecycle_events for select using (
 drop policy if exists models_read on product_models;
 create policy models_read on product_models for select using (
   producer_org_id in (select app.my_producer_org_ids()) or app.is_oversight()
-  -- Anyone who can see a unit (claimant, custody chain) may see its model; model names are public on /p/ anyway.
-  or exists (select 1 from product_units u where u.model_id = product_models.id)
+  -- The claimant of a unit, and the recycler receiving it, may see its model (already public on /p/).
+  -- Agents and hubs never read the registry.
+  or exists (select 1 from product_units u join unit_claims c on c.unit_id = u.id
+              where u.model_id = product_models.id and c.user_id = app.uid())
+  or exists (select 1 from product_units u
+               join pickup_item_units piu on piu.unit_id = u.id
+               join pickup_items i on i.id = piu.pickup_item_id
+               join pickup_requests p on p.id = i.pickup_id
+              where u.model_id = product_models.id and p.lot_id is not null
+                and p.principal_org_id in (select app.my_org_ids()))
 );
 drop policy if exists models_insert on product_models;
 create policy models_insert on product_models for insert with check (
@@ -1215,7 +1315,8 @@ create policy batches_insert on market_batches for insert with check (
 -- Lots.
 drop policy if exists lots_read on lots;
 create policy lots_read on lots for select using (
-  agent_org_id in (select app.my_org_ids()) or principal_org_id in (select app.my_org_ids()) or app.is_oversight()
+  agent_org_id in (select app.my_org_ids()) or principal_org_id in (select app.my_org_ids())
+  or hub_org_id in (select app.my_org_ids()) or app.is_oversight()
 );
 drop policy if exists lots_insert on lots;
 create policy lots_insert on lots for insert with check (
@@ -1224,6 +1325,22 @@ create policy lots_insert on lots for insert with check (
 drop policy if exists lots_update on lots;
 create policy lots_update on lots for update using (
   agent_org_id in (select app.my_org_ids()) or principal_org_id in (select app.my_org_ids())
+  or hub_org_id in (select app.my_org_ids())
+);
+
+-- Hub shipments: the hub that loads them, the recycler they go to, and oversight.
+drop policy if exists shipments_read on hub_shipments;
+create policy shipments_read on hub_shipments for select using (
+  hub_org_id in (select app.my_org_ids()) or recycler_org_id in (select app.my_org_ids()) or app.is_oversight()
+);
+drop policy if exists shipments_insert on hub_shipments;
+create policy shipments_insert on hub_shipments for insert with check (
+  hub_org_id in (select app.my_org_ids()) and created_by = app.uid() and status = 'loading'
+  and recycler_org_id = app.hub_principal(hub_org_id)
+);
+drop policy if exists shipments_update on hub_shipments;
+create policy shipments_update on hub_shipments for update using (
+  hub_org_id in (select app.my_org_ids()) or recycler_org_id in (select app.my_org_ids())
 );
 
 -- Custody events and weights: readable with the pickup or lot they belong to.

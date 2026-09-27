@@ -5,6 +5,7 @@ import { authRoutes } from '../modules/auth/auth.routes.js';
 import { collectionRoutes } from '../modules/collection/collection.routes.js';
 import { devicesRoutes } from '../modules/devices/devices.routes.js';
 import { healthRoutes } from '../modules/health/health.routes.js';
+import { hubRoutes } from '../modules/hub/hub.routes.js';
 import { intakeRoutes } from '../modules/intake/intake.routes.js';
 import { lotsRoutes } from '../modules/lots/lots.routes.js';
 import { oversightRoutes } from '../modules/oversight/oversight.routes.js';
@@ -32,6 +33,7 @@ export function buildApiRouter() {
   api.use('/recycler/attestations', noStore, attestationsRoutes);
   api.use('/oversight', noStore, oversightRoutes);
   api.use('/producer', noStore, producerRoutes);
+  api.use('/hub', noStore, hubRoutes);
 
   return api;
 }

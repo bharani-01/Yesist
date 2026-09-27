@@ -9,4 +9,6 @@ export const createLotBody = z.object({
 export const dispatchLotBody = z.object({
   senderNetKg: kg,
   vehicleRef: z.string().trim().max(40).optional(),
+  // A recycler-owned hub to stop at; omitted means straight to the recycler.
+  hubOrgId: z.uuid().optional(),
 });

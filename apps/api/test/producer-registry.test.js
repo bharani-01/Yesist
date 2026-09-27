@@ -1,7 +1,7 @@
 // Manufacturer registry (Track A): models, batches, unit registration with QR ids, placing on market.
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { asAdmin, asAppUser, uniqueRef, useServer } from './helpers/harness.js';
+import { asAppUser, uniqueRef, useServer } from './helpers/harness.js';
 import { randomImei } from './helpers/http-client.js';
 
 const t = useServer();
@@ -97,12 +97,7 @@ describe('manufacturer registry', () => {
 
     const shopId = (await shop.get('/auth/me')).body.user.userId;
     for (const userId of [shopId, citizenId]) {
-      // Only models of units they handled or claimed are visible; the rest of the registry is not.
-      const [seen] = await asAppUser(userId, `select (select count(*) from product_models)::int as models,
-        (select count(distinct model_id) from product_units)::int as handled`);
-      const [all] = await asAdmin('select count(*)::int as n from product_models');
-      assert.equal(seen.models, seen.handled);
-      assert.ok(seen.models < all.n);
+      assert.equal((await asAppUser(userId, 'select id from product_models')).length, 0);
       assert.equal((await asAppUser(userId, 'select id from market_batches')).length, 0);
     }
     // Producers never read lifecycle rows directly (they carry custody org ids).

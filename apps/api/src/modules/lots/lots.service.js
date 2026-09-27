@@ -38,13 +38,34 @@ export async function createLot({ sealTag, pickupIds }, ctx) {
   });
 }
 
+/** Where the agent may send its lots: its recycler directly, or one of that recycler's hubs. */
+export const listDestinations = (ctx) =>
+  withTx(ctx.userId, async (tx) => {
+    const agreement = await repo.findActiveAgreement(tx, ctx.org.id);
+    if (!agreement) return { recycler: null, hubs: [] };
+    return {
+      recycler: { id: agreement.principalOrgId, name: await repo.findOrgName(tx, agreement.principalOrgId) },
+      hubs: await repo.listHubsOf(tx, agreement.principalOrgId),
+    };
+  });
+
 export async function dispatchLot(id, input, ctx) {
   const lot = await withTx(ctx.userId, async (tx) => {
-    const row = await repo.markDispatched(tx, id, ctx.org.id, input);
-    if (!row) return null;
+    const sealed = await repo.lockSealedLot(tx, id, ctx.org.id);
+    if (!sealed) return null;
+    if (input.hubOrgId) {
+      const hubs = await repo.listHubsOf(tx, sealed.principalOrgId);
+      if (!hubs.some((h) => h.id === input.hubOrgId)) {
+        throw Errors.badRequest('invalid_hub', 'That hub does not work for this lot’s recycler.');
+      }
+    }
+    const row = await repo.markDispatched(tx, id, input);
     await repo.insertSenderWeight(tx, id, input.senderNetKg, ctx.userId);
-    await recordCustodyEvent(tx, { lotId: id, type: 'dispatched', actorId: ctx.userId, orgId: ctx.org.id, detail: { netKg: input.senderNetKg } });
-    await writeAudit(tx, { actor: ctx, action: 'lot.dispatch', entity: 'lot', entityId: id });
+    await recordCustodyEvent(tx, {
+      lotId: id, type: 'dispatched', actorId: ctx.userId, orgId: ctx.org.id,
+      detail: { netKg: input.senderNetKg, destination: input.hubOrgId ? 'hub' : 'recycler' },
+    });
+    await writeAudit(tx, { actor: ctx, action: 'lot.dispatch', entity: 'lot', entityId: id, detail: { hubOrgId: input.hubOrgId ?? null } });
     return row;
   });
   if (!lot) throw Errors.conflict('not_dispatchable', 'Only sealed lots of your organisation can be dispatched.');

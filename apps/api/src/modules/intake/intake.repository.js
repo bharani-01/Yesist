@@ -5,7 +5,10 @@ const LOT_FIELDS = `
   l.sender_net_kg as "senderNetKg", l.receiver_net_kg as "receiverNetKg", l.accepted_net_kg as "acceptedNetKg",
   l.seal_intact as "sealIntact", l.vehicle_ref as "vehicleRef", l.storage_deadline as "storageDeadline",
   l.created_at as "createdAt", l.dispatched_at as "dispatchedAt", l.received_at as "receivedAt",
-  ag.name as "agentName"`;
+  ag.name as "agentName",
+  (select h.name from organizations h where h.id = l.hub_org_id) as "hubName",
+  l.hub_received_at as "hubReceivedAt", l.hub_net_kg as "hubNetKg", l.hub_unit_count as "hubUnitCount", l.hub_seal_intact as "hubSealIntact",
+  (l.status = 'in_transit' and (l.hub_org_id is null or l.hub_received_at is not null)) as receivable`;
 
 export const listInbound = (tx, recyclerOrgId) =>
   queryMany(
@@ -15,7 +18,9 @@ export const listInbound = (tx, recyclerOrgId) =>
                from attestations a where a.lot_id = l.id) as attestation
        from lots l join organizations ag on ag.id = l.agent_org_id
       where l.principal_org_id = $1 and l.status <> 'sealed'
-      order by case l.status when 'in_transit' then 0 when 'received' then 1 when 'disputed' then 2 else 3 end,
+      order by case when l.status = 'in_transit' and (l.hub_org_id is null or l.hub_received_at is not null) then 0
+                    when l.status = 'received' then 1 when l.status = 'disputed' then 2
+                    when l.status in ('in_transit','at_hub') then 3 else 4 end,
                l.dispatched_at desc nulls last
       limit 200`,
     [recyclerOrgId],
@@ -63,12 +68,24 @@ export const findLotAttestation = (tx, lotId, userId) =>
     [lotId, userId],
   );
 
-export const lockInTransitLot = (tx, id, recyclerOrgId) =>
+// In transit to this recycler: direct from the agent, or inside a hub shipment after the hub received it.
+export const lockReceivableLot = (tx, id, recyclerOrgId) =>
   queryOne(
     tx,
-    `select id, seal_tag as "sealTag", agent_org_id as "agentOrgId", sender_net_kg as "senderNetKg", unit_count_sent as "unitCountSent"
-       from lots where id = $1 and principal_org_id = $2 and status = 'in_transit' for update`,
+    `select id, seal_tag as "sealTag", agent_org_id as "agentOrgId", sender_net_kg as "senderNetKg", unit_count_sent as "unitCountSent",
+            hub_org_id as "hubOrgId", hub_net_kg as "hubNetKg", hub_unit_count as "hubUnitCount", shipment_id as "shipmentId"
+       from lots
+      where id = $1 and principal_org_id = $2 and status = 'in_transit' and (hub_org_id is null or hub_received_at is not null)
+      for update`,
     [id, recyclerOrgId],
+  );
+
+export const closeShipmentIfComplete = (tx, shipmentId) =>
+  tx.query(
+    `update hub_shipments set status = 'received', received_at = now()
+      where id = $1 and status = 'in_transit'
+        and not exists (select 1 from lots where shipment_id = $1 and status = 'in_transit')`,
+    [shipmentId],
   );
 
 export const insertReceiverWeight = (tx, lotId, netKg, userId) =>

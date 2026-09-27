@@ -48,6 +48,12 @@ const schema = z.object({
     fullName: z.string().min(2),
     role: z.enum(['ulb_officer', 'spcb_officer', 'cpcb_officer', 'programme_operator']),
   })),
+  // Recycler-owned regional hubs: custody only, working for the recycler above.
+  hubs: z.array(z.object({
+    name: z.string().min(2),
+    maxStorageDays: z.number().int().min(1).max(180),
+    members: z.array(member).min(1),
+  })).default([]),
   // Manufacturers and importers: registry only, never part of the custody chain.
   producers: z.array(z.object({
     name: z.string().min(2),
@@ -138,6 +144,18 @@ try {
     );
   }
 
+  for (const h of config.hubs) {
+    const hubId = await upsertOrg({ orgType: 'regional_hub', name: h.name });
+    await addMembers(hubId, h.members);
+    await client.query(
+      `insert into agent_agreements (principal_org_id, agent_org_id, categories, max_storage_days, valid_from, valid_until)
+       values ($1,$2,$3,$4, date_trunc('year', current_date)::date, (date_trunc('year', current_date) + interval '2 years')::date)
+       on conflict (principal_org_id, agent_org_id, valid_from) do update
+         set categories = excluded.categories, max_storage_days = excluded.max_storage_days, status = 'active'`,
+      [recyclerId, hubId, categories.map((c) => c.code), h.maxStorageDays],
+    );
+  }
+
   for (const p of config.producers) {
     const producerId = await upsertOrg({ orgType: 'producer', name: p.name, registrationNo: p.registrationNo });
     await addMembers(producerId, p.members);
@@ -154,7 +172,7 @@ try {
   await client.query('commit');
   console.log(`Onboarded from ${file}`);
   console.log('Accounts:', [
-    ...config.citizens, ...r.members, ...config.agents.flatMap((a) => a.members),
+    ...config.citizens, ...r.members, ...config.agents.flatMap((a) => a.members), ...config.hubs.flatMap((h) => h.members),
     ...config.producers.flatMap((p) => p.members), ...config.officers,
   ].map((m) => m.email).join(', '));
 } catch (err) {

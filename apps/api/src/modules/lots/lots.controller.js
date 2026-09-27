@@ -5,6 +5,10 @@ export async function list(req, res) {
   res.json({ lots: await service.listMyLots(contextOf(req)) });
 }
 
+export async function destinations(req, res) {
+  res.json(await service.listDestinations(contextOf(req)));
+}
+
 export async function create(req, res) {
   res.status(201).json({ lot: await service.createLot(req.valid.body, contextOf(req)) });
 }

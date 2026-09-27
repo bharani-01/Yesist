@@ -7,6 +7,7 @@ export const agentApi = {
   accept: (id, body) => http.post(`/agent/jobs/${id}/accept`, body),
   collect: (id, body) => http.post(`/agent/jobs/${id}/collect`, body),
   lots: (signal) => http.get('/agent/lots', { signal }),
+  destinations: (signal) => http.get('/agent/lots/destinations', { signal }),
   createLot: (body) => http.post('/agent/lots', body),
   dispatchLot: (id, body) => http.post(`/agent/lots/${id}/dispatch`, body),
 };

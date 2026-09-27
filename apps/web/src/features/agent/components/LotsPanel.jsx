@@ -13,14 +13,16 @@ import { agentApi } from '../agent.api.js';
 
 export function LotsPanel({ collectedJobs, onChanged }) {
   const lots = useAsync((s) => agentApi.lots(s).then((r) => r.lots), []);
+  const destinations = useAsync((s) => agentApi.destinations(s), []);
+  const hubs = destinations.data?.hubs ?? [];
   const [notice, setNotice] = useState(null);
   const onCreated = (lot) => {
     setNotice(<>Lot <span className="mono">{lot.sealTag}</span> sealed. Dispatch it below once it is weighed.</>);
     lots.refresh();
     onChanged();
   };
-  const onDispatched = (lot) => {
-    setNotice(<>Lot <span className="mono">{lot.sealTag}</span> dispatched. Your recycler will confirm the seal and weight on arrival.</>);
+  const onDispatched = (lot, hub) => {
+    setNotice(<>Lot <span className="mono">{lot.sealTag}</span> dispatched{hub ? ` to ${hub.name}` : ''}. {hub ? 'The hub' : 'Your recycler'} will confirm the seal and weight on arrival.</>);
     lots.refresh();
   };
   return (
@@ -33,22 +35,23 @@ export function LotsPanel({ collectedJobs, onChanged }) {
             <div className="table-wrap">
               <table className="table">
                 <thead>
-                  <tr><th>Seal tag</th><th>Status</th><th className="num">Pickups</th><th className="num">Units</th><th className="num">Sent</th><th>Deadline or attestation</th><th /></tr>
+                  <tr><th>Seal tag</th><th>Status</th><th>Destination</th><th className="num">Pickups</th><th className="num">Units</th><th className="num">Sent</th><th>Deadline or attestation</th><th /></tr>
                 </thead>
                 <tbody>
                   {rows.map((l) => (
                     <tr key={l.id}>
                       <td className="mono">{l.sealTag}</td>
                       <td><StatusBadge map={LOT_STATUS} value={l.status} /></td>
+                      <td>{l.status === 'sealed' ? '—' : l.hubName ? <>{l.hubName}<div className="subtle">Hub, then {l.recyclerName}</div></> : l.recyclerName}</td>
                       <td className="num">{l.pickupCount}</td>
                       <td className="num">{l.unitCountSent}</td>
                       <td className="num">{formatKg(l.senderNetKg)}</td>
                       <td>
-                        {l.status === 'sealed' || l.status === 'in_transit'
+                        {['sealed', 'in_transit', 'at_hub'].includes(l.status)
                           ? <span title={formatDateTime(l.storageDeadline)}>{formatDate(l.storageDeadline)} <span className="subtle">({relativeFromNow(l.storageDeadline)})</span></span>
                           : l.attestationNumber ? <Link to={`/verify/${l.attestationNumber}`} className="mono">{l.attestationNumber}</Link> : '—'}
                       </td>
-                      <td>{l.status === 'sealed' && <DispatchForm lot={l} onDone={onDispatched} />}</td>
+                      <td>{l.status === 'sealed' && <DispatchForm lot={l} recyclerName={l.recyclerName} hubs={hubs} onDone={onDispatched} />}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -113,8 +116,9 @@ function CreateLotForm({ jobs, onCreated }) {
   );
 }
 
-function DispatchForm({ lot, onDone }) {
+function DispatchForm({ lot, recyclerName, hubs, onDone }) {
   const [kg, setKg] = useState('');
+  const [hubId, setHubId] = useState('');
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
   const submit = async (e) => {
@@ -122,8 +126,8 @@ function DispatchForm({ lot, onDone }) {
     setPending(true);
     setError(null);
     try {
-      await agentApi.dispatchLot(lot.id, { senderNetKg: Number(kg) });
-      onDone(lot);
+      await agentApi.dispatchLot(lot.id, { senderNetKg: Number(kg), ...(hubId && { hubOrgId: hubId }) });
+      onDone(lot, hubs.find((h) => h.id === hubId));
     } catch (err) {
       setError(err);
       setPending(false);
@@ -131,6 +135,12 @@ function DispatchForm({ lot, onDone }) {
   };
   return (
     <form className="row" onSubmit={submit} style={{ flexWrap: 'nowrap' }}>
+      {hubs.length > 0 && (
+        <select className="select" style={{ minHeight: 32, width: 'auto' }} aria-label={`Destination for lot ${lot.sealTag}`} value={hubId} onChange={(e) => setHubId(e.target.value)}>
+          <option value="">Direct to {recyclerName}</option>
+          {hubs.map((h) => <option key={h.id} value={h.id}>Via hub: {h.name}</option>)}
+        </select>
+      )}
       <input className="input" style={{ width: 110, minHeight: 32 }} type="number" step="0.001" min="0.001" placeholder="Net kg" aria-label="Net weight at loading (kg)" value={kg} onChange={(e) => setKg(e.target.value)} />
       <Button type="submit" size="sm" loading={pending} disabled={!(Number(kg) > 0)}>Dispatch</Button>
       {error && <span className="field__error" role="alert">{error.message}</span>}

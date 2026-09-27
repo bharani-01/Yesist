@@ -30,6 +30,9 @@ function load() {
       label: m.orgRole === 'approver' ? 'Recycler checker' : 'Recycler maker',
       description: ORG_ROLE_DESCRIPTIONS[m.orgRole],
     })),
+    ...(config.hubs ?? []).flatMap((h) => h.members.map((m) => ({
+      email: m.email, workspace: 'hub', label: 'Regional hub', description: 'Receives lots and ships consolidated loads to the recycler',
+    }))),
     ...(config.producers ?? []).flatMap((p) => p.members.map((m) => ({
       email: m.email,
       workspace: 'producer',

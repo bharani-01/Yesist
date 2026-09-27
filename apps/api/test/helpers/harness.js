@@ -83,3 +83,19 @@ export async function asAdmin(sql, params) {
 }
 
 export const uniqueRef = (prefix) => `${prefix}-${randomUUID().slice(0, 8).toUpperCase()}`;
+
+/** Registers and places `count` QR-only phone units through the manufacturer API; returns their QR ids. */
+export async function placedPhones(t, count) {
+  const owner = await t.signIn('producer.owner@ecosure.test');
+  const approver = await t.signIn('producer.approver@ecosure.test');
+  const model = (await owner.post('/producer/models', {
+    brand: 'QRBrand', modelName: uniqueRef('Q'), categoryCode: 'mobile_phone', typicalUnitKg: 0.2, batteryType: 'li_ion',
+  })).body.model;
+  const batch = (await owner.post('/producer/batches', {
+    modelId: model.id, batchRef: uniqueRef('QB'), marketMonth: '2026-08', stateCode: 'MP', quantity: count,
+  })).body.batch;
+  const upload = await owner.post(`/producer/batches/${batch.id}/units`, { rows: Array.from({ length: count }, () => ({})) });
+  assert.equal(upload.body.registered, count);
+  assert.equal((await approver.post(`/producer/batches/${batch.id}/place`)).status, 200);
+  return upload.body.results.map((r) => r.qrPublicId);
+}

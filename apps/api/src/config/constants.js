@@ -8,6 +8,7 @@ export const SESSION = Object.freeze({
 export const AGENT_ORG_TYPES = Object.freeze(['local_shop', 'informal_collector', 'drop_point']);
 export const RECYCLER_ORG_TYPES = Object.freeze(['pro_recycler']);
 export const PRODUCER_ORG_TYPES = Object.freeze(['producer']);
+export const HUB_ORG_TYPES = Object.freeze(['regional_hub']);
 
 // Staff permission matrix inside an organisation (owner, operator, approver, finance, viewer).
 export const STAFF = Object.freeze({

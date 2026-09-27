@@ -4,6 +4,10 @@ import { AppShell } from '../components/layout/AppShell.jsx';
 import { AgentHomePage } from '../features/agent/AgentHomePage.jsx';
 import { JobDetailPage } from '../features/agent/JobDetailPage.jsx';
 import { HOME_BY_WORKSPACE, useAuth } from '../features/auth/AuthProvider.jsx';
+import { HubLotDetailPage } from '../features/hub/HubLotDetailPage.jsx';
+import { HubLotsPage } from '../features/hub/HubLotsPage.jsx';
+import { ShipmentDetailPage } from '../features/hub/ShipmentDetailPage.jsx';
+import { ShipmentsPage } from '../features/hub/ShipmentsPage.jsx';
 import { LoginPage } from '../features/auth/LoginPage.jsx';
 import { RegisterPage } from '../features/auth/RegisterPage.jsx';
 import { RequireWorkspace } from '../features/auth/RequireWorkspace.jsx';
@@ -65,6 +69,15 @@ export const router = createBrowserRouter([
         children: [
           { path: 'recycler', element: <InboundLotsPage /> },
           { path: 'recycler/lots/:id', element: <LotDetailPage /> },
+        ],
+      },
+      {
+        element: <RequireWorkspace workspace="hub" />,
+        children: [
+          { path: 'hub', element: <HubLotsPage /> },
+          { path: 'hub/lots/:id', element: <HubLotDetailPage /> },
+          { path: 'hub/shipments', element: <ShipmentsPage /> },
+          { path: 'hub/shipments/:id', element: <ShipmentDetailPage /> },
         ],
       },
       {

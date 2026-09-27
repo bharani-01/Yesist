@@ -1,30 +1,14 @@
 // The QR bridge: a manufacturer-labelled unit is claimed, collected by QR, and scanned at the recycler gate.
 import assert from 'node:assert/strict';
 import { describe, test } from 'node:test';
-import { uniqueRef, useServer } from './helpers/harness.js';
+import { placedPhones, uniqueRef, useServer } from './helpers/harness.js';
 import { today } from './helpers/http-client.js';
 
 const t = useServer();
 
-/** Registers and places `count` QR-only phone units; returns their QR ids. */
-async function placedPhones(count) {
-  const owner = await t.signIn('producer.owner@ecosure.test');
-  const approver = await t.signIn('producer.approver@ecosure.test');
-  const model = (await owner.post('/producer/models', {
-    brand: 'QRBrand', modelName: uniqueRef('Q'), categoryCode: 'mobile_phone', typicalUnitKg: 0.2, batteryType: 'li_ion',
-  })).body.model;
-  const batch = (await owner.post('/producer/batches', {
-    modelId: model.id, batchRef: uniqueRef('QB'), marketMonth: '2026-08', stateCode: 'MP', quantity: count,
-  })).body.batch;
-  const upload = await owner.post(`/producer/batches/${batch.id}/units`, { rows: Array.from({ length: count }, () => ({})) });
-  assert.equal(upload.body.registered, count);
-  assert.equal((await approver.post(`/producer/batches/${batch.id}/place`)).status, 200);
-  return upload.body.results.map((r) => r.qrPublicId);
-}
-
 describe('QR product journey', () => {
   test('claim → collect by QR → gate scan flags the missing unit → attestation → public page', async () => {
-    const [qrA, qrB, qrC] = await placedPhones(3);
+    const [qrA, qrB, qrC] = await placedPhones(t, 3);
     const shop = await t.signIn('shop@ecosure.test');
     const maker = await t.signIn('recycler.maker@ecosure.test');
     const checker = await t.signIn('recycler.checker@ecosure.test');

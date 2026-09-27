@@ -10,5 +10,6 @@ export const lotsRoutes = Router();
 lotsRoutes.use(requireWorkspace('agent'), requireOrg(AGENT_ORG_TYPES));
 
 lotsRoutes.get('/', controller.list);
+lotsRoutes.get('/destinations', controller.destinations);
 lotsRoutes.post('/', validate({ body: createLotBody }), controller.create);
 lotsRoutes.post('/:id/dispatch', validate({ params: idParams, body: dispatchLotBody }), controller.dispatch);

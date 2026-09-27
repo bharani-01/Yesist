@@ -10,6 +10,10 @@ const NAV = {
   ],
   agent: [{ to: '/agent', label: 'Jobs and lots', end: true }],
   recycler: [{ to: '/recycler', label: 'Inbound lots', end: true }],
+  hub: [
+    { to: '/hub', label: 'Lots', end: true },
+    { to: '/hub/shipments', label: 'Shipments' },
+  ],
   producer: [
     { to: '/producer', label: 'Outcomes', end: true },
     { to: '/producer/models', label: 'Models' },

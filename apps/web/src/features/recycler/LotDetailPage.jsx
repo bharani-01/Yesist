@@ -35,12 +35,17 @@ function LotDetail({ lot, onChange }) {
       <PageHeader
         back={{ to: '/recycler', label: 'Inbound lots' }}
         title={<>Lot <span className="mono">{lot.sealTag}</span></>}
-        description={`From ${lot.agentName} · dispatched ${formatDateTime(lot.dispatchedAt)}`}
+        description={`From ${lot.agentName}${lot.hubName ? ` via ${lot.hubName}` : ''} · dispatched ${formatDateTime(lot.dispatchedAt)}`}
         actions={<StatusBadge map={LOT_STATUS} value={lot.status} />}
       />
       <div className="split">
         <div className="stack">
-          {lot.status === 'in_transit' && <ReceiveForm lot={lot} onReceived={(r) => { setReceipt(r); onChange(); }} />}
+          {lot.receivable && <ReceiveForm lot={lot} onReceived={(r) => { setReceipt(r); onChange(); }} />}
+          {!lot.receivable && lot.hubName && ['in_transit', 'at_hub'].includes(lot.status) && (
+            <Alert tone="info" title={lot.hubReceivedAt ? 'Waiting at your hub' : 'On its way to your hub'}>
+              This lot is routed through {lot.hubName}. You can receive it once the hub ships it to you.
+            </Alert>
+          )}
           {receipt && (
             <Alert tone={receipt.flags.length ? 'warning' : 'success'} title="Lot received">
               Accepted {formatKg(receipt.acceptedNetKg)} (variance {receipt.variancePct}% against tolerance {receipt.tolerancePct}%).
@@ -84,6 +89,13 @@ function LotDetail({ lot, onChange }) {
             <dt>Units sent</dt><dd>{formatInt(lot.unitCountSent)}</dd>
             <dt>Units received</dt><dd>{formatInt(lot.unitCountReceived)}</dd>
             <dt>Sender net</dt><dd>{formatKg(lot.senderNetKg)}</dd>
+            {lot.hubName && (
+              <>
+                <dt>Hub</dt><dd>{lot.hubName}</dd>
+                <dt>Hub net</dt><dd>{formatKg(lot.hubNetKg)}</dd>
+                <dt>Units at hub</dt><dd>{formatInt(lot.hubUnitCount)}</dd>
+              </>
+            )}
             <dt>Receiver net</dt><dd>{formatKg(lot.receiverNetKg)}</dd>
             <dt>Accepted</dt><dd>{formatKg(lot.acceptedNetKg)}</dd>
             <dt>Seal</dt><dd>{lot.sealIntact == null ? '—' : lot.sealIntact ? 'Intact' : 'Broken'}</dd>
@@ -97,7 +109,9 @@ function LotDetail({ lot, onChange }) {
 }
 
 function ReceiveForm({ lot, onReceived }) {
-  const [form, setForm] = useState({ receiverNetKg: '', unitCountReceived: String(lot.unitCountSent), sealIntact: 'yes' });
+  const viaHub = lot.hubReceivedAt != null;
+  const expectedUnits = viaHub ? lot.hubUnitCount : lot.unitCountSent;
+  const [form, setForm] = useState({ receiverNetKg: '', unitCountReceived: String(expectedUnits), sealIntact: 'yes' });
   const labelled = lot.labelledUnits ?? [];
   const [labelCheck, setLabelCheck] = useState(labelled.length ? 'scan' : 'skip');
   const [scanned, setScanned] = useState([]);
@@ -135,8 +149,8 @@ function ReceiveForm({ lot, onReceived }) {
     <Panel title="Receive at gate">
       <form className="form-grid" onSubmit={submit}>
         <div className="form-grid form-grid--2">
-          <TextField label="Receiver net weight (kg)" type="number" step="0.001" min="0.001" required value={form.receiverNetKg} onChange={(e) => setForm({ ...form, receiverNetKg: e.target.value })} hint={`Sender recorded ${formatKg(lot.senderNetKg)}`} />
-          <TextField label="Units counted" type="number" min="0" required value={form.unitCountReceived} onChange={(e) => setForm({ ...form, unitCountReceived: e.target.value })} hint={`${lot.unitCountSent} sent`} />
+          <TextField label="Receiver net weight (kg)" type="number" step="0.001" min="0.001" required value={form.receiverNetKg} onChange={(e) => setForm({ ...form, receiverNetKg: e.target.value })} hint={viaHub ? `Hub recorded ${formatKg(lot.hubNetKg)}` : `Sender recorded ${formatKg(lot.senderNetKg)}`} />
+          <TextField label="Units counted" type="number" min="0" required value={form.unitCountReceived} onChange={(e) => setForm({ ...form, unitCountReceived: e.target.value })} hint={viaHub ? `${expectedUnits} counted at the hub` : `${expectedUnits} sent`} />
         </div>
         <Segmented name="seal" label={`Seal ${lot.sealTag}`} value={form.sealIntact} onChange={(v) => setForm({ ...form, sealIntact: v })} options={[{ value: 'yes', label: 'Intact and matching' }, { value: 'no', label: 'Broken or mismatched' }]} />
         {labelled.length > 0 && (

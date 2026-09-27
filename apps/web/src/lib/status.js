@@ -14,9 +14,24 @@ export const PICKUP_STATUS = {
 export const LOT_STATUS = {
   sealed: { label: 'Sealed', tone: 'info' },
   in_transit: { label: 'In transit', tone: 'info' },
+  at_hub: { label: 'At hub', tone: 'info' },
   received: { label: 'Received', tone: 'info' },
   disputed: { label: 'Disputed', tone: 'danger' },
   attested: { label: 'Attested', tone: 'success' },
+};
+
+// Where a lot is from the hub's point of view.
+export const HUB_STAGE = {
+  inbound: { label: 'On the way', tone: 'info' },
+  at_hub: { label: 'At hub', tone: 'warning' },
+  shipped: { label: 'Shipped', tone: 'info' },
+  delivered: { label: 'Delivered', tone: 'success' },
+};
+
+export const SHIPMENT_STATUS = {
+  loading: { label: 'Loading', tone: 'warning' },
+  in_transit: { label: 'In transit', tone: 'info' },
+  received: { label: 'Received by recycler', tone: 'success' },
 };
 
 export const INCENTIVE_STATUS = {
@@ -49,6 +64,7 @@ export const FLAG_TYPE_LABELS = {
   storage_deadline: 'Storage deadline',
   incentive_cap: 'Incentive cap',
   unit_missing_at_scan: 'Labelled unit missing at gate',
+  hub_weight_variance: 'Weight variance at hub',
 };
 
 export const UNIT_STATE = {
@@ -75,7 +91,10 @@ export const TIMELINE_LABELS = {
   handed_over: 'Handed over to collector',
   collected: 'Weighed and collected',
   added_to_lot: 'Sealed in a lot',
-  dispatched: 'Dispatched to recycler',
+  dispatched: 'Dispatched',
+  received_at_hub: 'Received at hub',
+  loaded_on_shipment: 'Loaded on hub shipment',
+  shipped_from_hub: 'Shipped from hub',
   received: 'Received by recycler',
   attested: 'Recycling attested',
   cancelled: 'Cancelled',

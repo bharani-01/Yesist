@@ -7,7 +7,8 @@
     "capacityTonnesPerMonth": 500,
     "members": [
       { "email": "recycler.maker@ecosure.test", "fullName": "Recycler Maker (test)", "orgRole": "operator" },
-      { "email": "recycler.checker@ecosure.test", "fullName": "Recycler Checker (test)", "orgRole": "approver" }
+      { "email": "recycler.checker@ecosure.test", "fullName": "Recycler Checker (test)", "orgRole": "approver" },
+      { "email": "recycler.viewer@ecosure.test", "fullName": "Recycler Auditor (test)", "orgRole": "viewer" }
     ],
     "rateCard": [
       { "categoryCode": "mobile_phone", "pricePerUnit": 60 },
@@ -29,7 +30,8 @@
       "maxStorageDays": 90,
       "directionRef": "TEST-MPPCB-DIRECTION",
       "members": [
-        { "email": "shop@ecosure.test", "fullName": "Shop Owner (test)", "orgRole": "owner" }
+        { "email": "shop@ecosure.test", "fullName": "Shop Owner (test)", "orgRole": "owner" },
+        { "email": "shop.finance@ecosure.test", "fullName": "Shop Accountant (test)", "orgRole": "finance" }
       ]
     }
   ],

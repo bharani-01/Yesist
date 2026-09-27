@@ -10,19 +10,28 @@ export const RECYCLER_ORG_TYPES = Object.freeze(['pro_recycler']);
 export const PRODUCER_ORG_TYPES = Object.freeze(['producer']);
 export const HUB_ORG_TYPES = Object.freeze(['regional_hub']);
 
-// Staff permission matrix inside an organisation (owner, operator, approver, finance, viewer).
+// Staff permission matrix inside an organisation. Every member can read; writes need one of these.
+//   work    day-to-day custody and registry work (accept, collect, seal, dispatch, receive, register)
+//   draft   prepare an attestation for the checker
+//   approve maker-checker sign-off (issue attestations, place batches on the market)
+//   money   rate cards, material payments, incentive status
+//   manage  the team page (invite, change roles, remove staff)
+export const ORG_ROLES = Object.freeze(['owner', 'operator', 'approver', 'finance', 'viewer']);
 export const STAFF = Object.freeze({
   work: Object.freeze(['owner', 'operator']),
+  draft: Object.freeze(['owner', 'operator', 'approver']),
   approve: Object.freeze(['owner', 'approver']),
-  read: Object.freeze(['owner', 'operator', 'approver', 'finance', 'viewer']),
+  money: Object.freeze(['owner', 'finance']),
+  manage: Object.freeze(['owner']),
+  read: ORG_ROLES,
 });
 
 export const UNITS_PER_REQUEST = 2000;
 export const OVERSIGHT_ROLES = Object.freeze(['ulb_officer', 'spcb_officer', 'cpcb_officer', 'programme_operator']);
 
 // Maker-checker for attestations (PRD v3 §8.2, §8.6 rule 6).
-export const ATTESTATION_MAKER_ROLES = Object.freeze(['owner', 'operator', 'approver']);
-export const ATTESTATION_CHECKER_ROLES = Object.freeze(['owner', 'approver']);
+export const ATTESTATION_MAKER_ROLES = STAFF.draft;
+export const ATTESTATION_CHECKER_ROLES = STAFF.approve;
 
 export const FLAG_UPDATE_ROLES = Object.freeze(['spcb_officer', 'cpcb_officer', 'programme_operator']);
 

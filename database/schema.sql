@@ -524,6 +524,15 @@ language sql stable security definer set search_path = public, pg_temp as $$
   )
 $$;
 
+-- Active organisations where the caller holds one of the given staff roles (write policies).
+create or replace function app.my_org_ids_with(p_roles text[]) returns setof uuid
+language sql stable security definer set search_path = public, pg_temp as $$
+  select m.org_id from organization_members m
+  join organizations o on o.id = m.org_id and o.status = 'active'
+  join users u on u.id = m.user_id and u.status = 'active'
+  where m.user_id = app.uid() and m.org_role = any(p_roles)
+$$;
+
 create or replace function app.my_producer_org_ids() returns setof uuid
 language sql stable security definer set search_path = public, pg_temp as $$
   select m.org_id from organization_members m
@@ -1285,13 +1294,14 @@ create policy pickups_insert on pickup_requests for insert with check (
 drop policy if exists pickups_update on pickup_requests;
 create policy pickups_update on pickup_requests for update using (
   requester_id = app.uid()
-  or assigned_agent_org_id in (select app.my_org_ids())
-  or (principal_org_id in (select app.my_org_ids()) and lot_id is not null)
-  or (status = 'requested' and assigned_agent_org_id is null and app.serves_ward(ward_id))
+  or assigned_agent_org_id in (select app.my_org_ids_with(array['owner','operator']))
+  or (principal_org_id in (select app.my_org_ids_with(array['owner','operator','approver'])) and lot_id is not null)
+  or (status = 'requested' and assigned_agent_org_id is null and app.serves_ward(ward_id)
+      and exists (select 1 from app.my_org_ids_with(array['owner','operator'])))
 ) with check (
   requester_id = app.uid()
-  or assigned_agent_org_id in (select app.my_org_ids())
-  or principal_org_id in (select app.my_org_ids())
+  or assigned_agent_org_id in (select app.my_org_ids_with(array['owner','operator']))
+  or principal_org_id in (select app.my_org_ids_with(array['owner','operator','approver']))
 );
 
 -- Addresses: requester and the accepted agent only; never oversight.
@@ -1381,12 +1391,14 @@ create policy lots_read on lots for select using (
 );
 drop policy if exists lots_insert on lots;
 create policy lots_insert on lots for insert with check (
-  agent_org_id in (select app.my_org_ids()) and created_by = app.uid()
+  agent_org_id in (select app.my_org_ids_with(array['owner','operator'])) and created_by = app.uid()
 );
+-- The recycler's approver marks a lot attested when issuing its attestation.
 drop policy if exists lots_update on lots;
 create policy lots_update on lots for update using (
-  agent_org_id in (select app.my_org_ids()) or principal_org_id in (select app.my_org_ids())
-  or hub_org_id in (select app.my_org_ids())
+  agent_org_id in (select app.my_org_ids_with(array['owner','operator']))
+  or principal_org_id in (select app.my_org_ids_with(array['owner','operator','approver']))
+  or hub_org_id in (select app.my_org_ids_with(array['owner','operator']))
 );
 
 -- Hub shipments: the hub that loads them, the recycler they go to, and oversight.
@@ -1396,12 +1408,13 @@ create policy shipments_read on hub_shipments for select using (
 );
 drop policy if exists shipments_insert on hub_shipments;
 create policy shipments_insert on hub_shipments for insert with check (
-  hub_org_id in (select app.my_org_ids()) and created_by = app.uid() and status = 'loading'
+  hub_org_id in (select app.my_org_ids_with(array['owner','operator'])) and created_by = app.uid() and status = 'loading'
   and recycler_org_id = app.hub_principal(hub_org_id)
 );
 drop policy if exists shipments_update on hub_shipments;
 create policy shipments_update on hub_shipments for update using (
-  hub_org_id in (select app.my_org_ids()) or recycler_org_id in (select app.my_org_ids())
+  hub_org_id in (select app.my_org_ids_with(array['owner','operator']))
+  or recycler_org_id in (select app.my_org_ids_with(array['owner','operator']))
 );
 
 -- Custody events and weights: readable with the pickup or lot they belong to.
@@ -1422,7 +1435,9 @@ create policy weigh_read on weigh_records for select using (
   or (lot_id is not null and exists (select 1 from lots l where l.id = lot_id))
 );
 drop policy if exists weigh_insert on weigh_records;
-create policy weigh_insert on weigh_records for insert with check (recorded_by = app.uid());
+create policy weigh_insert on weigh_records for insert with check (
+  recorded_by = app.uid() and exists (select 1 from app.my_org_ids_with(array['owner','operator']))
+);
 
 -- Attestations: issuer, oversight, the lot's agent, and citizens whose pickup was in the lot.
 drop policy if exists attestations_read on attestations;
@@ -1434,11 +1449,11 @@ create policy attestations_read on attestations for select using (
 );
 drop policy if exists attestations_insert on attestations;
 create policy attestations_insert on attestations for insert with check (
-  issuer_org_id in (select app.my_org_ids()) and maker_id = app.uid() and status = 'draft'
+  app.has_org_role(issuer_org_id, array['owner','operator','approver']) and maker_id = app.uid() and status = 'draft'
 );
 drop policy if exists attestations_update on attestations;
 create policy attestations_update on attestations for update using (
-  issuer_org_id in (select app.my_org_ids()) and status = 'draft'
+  app.has_org_role(issuer_org_id, array['owner','approver']) and status = 'draft'
 ) with check (checker_id = app.uid());
 
 -- Incentives: payee and oversight read; created by the collecting agent.
@@ -1450,7 +1465,7 @@ drop policy if exists incentives_insert on citizen_incentives;
 create policy incentives_insert on citizen_incentives for insert with check (
   exists (select 1 from pickup_requests p where p.id = pickup_id
           and p.requester_id = payee_user_id
-          and p.assigned_agent_org_id in (select app.my_org_ids()))
+          and p.assigned_agent_org_id in (select app.my_org_ids_with(array['owner','operator'])))
 );
 
 -- Flags: oversight reads all and updates status; organizations read their own.

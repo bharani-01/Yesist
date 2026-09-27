@@ -1,73 +1,82 @@
 # EcoSure — Authorized Recycler PRD
 
 **Role:** `pro_recycler`  
-**Phase:** 1  
-**Last updated:** 2026-09-27 (v2)
+**Phase:** 1a  
+**Last updated:** 2026-09-27 (v3)
 
 ---
 
 ## 1. Summary
 
-Authorized recyclers are the root of trust. They receive lots from hubs under offtake agreements, grade and accept or reject material, and issue custody attestations tied to their CPCB authorization. EcoSure does not charge recyclers a commission on scrap value.
+Authorized recyclers are the root of trust. They appoint and manage collection agents, fund escrow for material payments, receive sealed lots, scan units, accept or reject material, issue maker-checker custody attestations, and report material recovery and monthly mass balance. EcoSure charges no commission on scrap value.
 
-What changed from v1: moved from phase 3 to phase 1; "certificates" renamed to custody attestations with a mandatory disclaimer; reject and partial-accept rights added; capacity and weight caps enforced; public verification added.
+Changes from v2: agent network management, escrow and rate cards owned by the recycler, seal and unit checks, maker-checker signed attestations, material recovery and mass balance, state-verified capacity, certificate provenance, CPCB-ready inflow records.
 
 ---
 
 ## 2. Features
 
-### R1 Onboarding — Phase 1
+### R1 Onboarding — Phase 1a
 **Acceptance criteria**
-- CPCB authorization number, validity dates, authorized capacity, and document upload.
-- Operator verifies against the CPCB list before approval.
-- Expired authorization automatically blocks new attestations and raises a flag.
+- CPCB registration number, validity, and capacity from the MPPCB consent to operate, verified by the operator against official lists.
+- Expired registration or consent blocks new attestations and agent collections and raises a flag.
 
-### R2 Offtake agreements — Phase 1
-Same record as the hub side ([06-regional-hub.md](./06-regional-hub.md) H2). The recycler signs and can propose changes.
-
-### R3 Inbound and grading — Phase 1
+### R2 Agent network — Phase 1a
 **Acceptance criteria**
-- Inbound trips and lots listed with sender weights.
-- Receiver weight and grade per lot.
-- Decisions: accept, partial accept (with accepted and rejected weight), reject (with reason and photos).
+- Invite and approve agents (shops, informal collectors, drop points, IMC flow) with agent agreements: categories, intact-only rule, maximum storage days (≤ 180).
+- Suspend an agent with a reason; suspended agents cannot collect.
+- View each agent's volume, disputes, fraud flags, and storage deadlines.
 
-### R4 Custody attestations — Phase 1
-**Story:** As a recycler, I want to record that a lot was processed so that producers and the SPCB can trust the chain.
-
+### R3 Rate cards and escrow — Phase 1a
 **Acceptance criteria**
-- Issued per lot after processing.
-- Checks before issue: valid CPCB authorization; processed weight ≤ accepted weight; period total ≤ authorized capacity.
-- Unique public number and SHA-256 hash of the document.
-- Mandatory disclaimer on every attestation: "This is a custody attestation recorded on EcoSure. It is not an EPR certificate. EPR certificates are generated only on the CPCB EPR portal."
-- Optional field for the CPCB portal reference once an EPR certificate exists.
-- Corrections issue a new attestation that supersedes the old one; the old one stays visible as superseded.
+- Publish material prices per category, versioned, reviewed at least weekly.
+- Link a bank escrow account; see balance, upcoming reimbursements, and advances.
+- Low-balance alert when escrow falls below 2 weeks of expected reimbursements; new pickups for the recycler's agents pause at zero.
 
-### R5 Public verification — Phase 1
+### R4 Inbound and grading — Phase 1a
 **Acceptance criteria**
-- Anyone can enter an attestation number and see issuer, issue date, weight, categories, status, and superseded status.
-- No personal data, no prices.
-- Duplicate hashes raise a flag.
+- Inbound trips and lots with sender weights and GPS route where available.
+- Seal check (intact, broken, missing); broken seals open a custody dispute.
+- Receiver weight on a connected scale or with photo.
+- Unit scans: 100% for phones and laptops in lots under 200 units; at least a 10% random sample otherwise. Missing units open a flag.
+- Decisions: accept, partial accept, reject (reason and photos).
 
-### R6 Payables to hubs — Phase 1
-Settlements to hubs within agreement payment days; rejection costs per agreement.
-
-### R7 Evidence packs for producers — Phase 2
+### R5 Custody attestations — Phase 1a
 **Acceptance criteria**
-- Recycler can share a pack of attestations with a producer that has attributed weight in those lots.
-- Pack lists attestation numbers, lot weights, categories, period, and CPCB portal references where available.
-- Every share and download is logged.
+- Drafted by a maker, approved by a different checker, digitally signed.
+- Checks: valid registration; processed weight ≤ accepted weight; period total ≤ state-verified capacity; battery weight reported separately and not counted.
+- Unique public number and SHA-256 hash.
+- Mandatory disclaimer: "This is a custody attestation recorded on EcoSure. It is not an EPR certificate. EPR certificates are generated only on the CPCB EPR portal."
+- Corrections supersede; the old attestation stays visible as superseded.
 
-### R8 Capacity view — Phase 1
-Attested tonnes against authorized capacity for the period, with warning at 80%.
+### R6 Material recovery and mass balance — Phase 1b
+**Acceptance criteria**
+- Record output fractions per lot or month: metals, plastics, boards, glass, residue, hazardous residue, and where each was sent (downstream recycler or treatment facility reference).
+- Monthly mass balance with opening and closing stock. Variance above 5% opens a flag.
+- Material recovery efficiency shown per category.
+
+### R7 CPCB-ready inflow records — Phase 1b
+**Acceptance criteria**
+- Monthly export of inflow and processing records in the fields the recycler files on the CPCB portal, so filings and EcoSure data match.
+- Enter CPCB certificate references generated from EcoSure inflow (certificate provenance).
+
+### R8 Public verification — Phase 1a
+Anyone can check an attestation by number: issuer, date, weight, categories, status, superseded status. No personal data or prices. Duplicate hashes raise a flag.
+
+### R9 Agent reimbursements and advances — Phase 1a
+Reimburse agents for accepted weight within 7 days of receipt from escrow; approve advances within caps; chargebacks with maker-checker.
+
+### R10 Capacity view — Phase 1a
+Attested tonnes against state-verified capacity with warning at 80%.
 
 ---
 
 ## 3. Screen states
-Loading, empty, success, error, 401, 403, authorization expired, capacity limit reached.
+Loading, empty, success, error, 401, 403, registration expired, capacity limit reached, escrow low, mass balance variance.
 
 ---
 
 ## 4. Out of scope
-- Issuing EPR certificates
+- Issuing or trading EPR certificates
 - Commission on scrap value
-- Seeing other recyclers' agreements or rates
+- Seeing other recyclers' agents, rates, or agreements

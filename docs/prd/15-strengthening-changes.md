@@ -1,5 +1,7 @@
 # EcoSure — v2 Strengthening Changes
 
+> **History.** This records the v1 → v2 changes. Several v2 decisions (offtake agreements, hub in phase 1, operator float, target-gap view) were replaced in v3; see [18-v3-changes.md](./18-v3-changes.md). Section references below point to v2 numbering.
+
 **Date:** 2026-09-27  
 **Why:** Field research, feasibility analysis, and the government-initiative reframe showed that v1 would not work in Tier-2/3 corridors. This file records each weakness, the fix, and where it now lives.
 

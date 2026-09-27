@@ -1,108 +1,110 @@
-# EcoSure — Citizen PRD
+# EcoSure — Citizen and Bulk Consumer PRD
 
-**Role:** `citizen` (households, and societies / small offices making bulk requests)  
-**Phase:** 1  
-**Last updated:** 2026-09-27 (v2)
+**Roles:** `citizen`, `bulk_consumer`  
+**Phase:** 1a  
+**Last updated:** 2026-09-27 (v3)
 
 ---
 
 ## 1. Summary
 
-Citizens hand over e-waste through doorstep pickup, drop-off at a shop, or a society drive. They get paid by UPI when the material is collected, and they get WhatsApp updates in their language until the material is attested at a recycler.
+Citizens and bulk consumers hand over e-waste by doorstep pickup, drop point, or collection drive. They get the recycler's material price on the spot, a scheme incentive on top after they confirm the handover, and a message when their material is recycled. Devices can be claimed so their full history is visible.
 
-What changed from v1: UPI incentive replaces EcoPoints as the main reward, device inventory is optional, WhatsApp moves to phase 1, and wipe confirmation and gate details are required.
+Changes from v2: product passport claims, handover code, material price plus incentive, non-smartphone channels, non-UPI payouts, drives as the main channel, bulk consumer role.
 
 ---
 
 ## 2. Features
 
-### C1 Phone-first sign-in — Phase 1
-**Story:** As a citizen, I want to sign in with my phone number so I don't need an email or password.
+### C1 Sign-in and channels — Phase 1a
+**Acceptance criteria**
+- Phone OTP by SMS, with WhatsApp as an alternative. OTP valid 10 minutes; resend after 30 seconds; 5 attempts per hour.
+- Hindi is the default language; English available; more languages per corridor.
+- Booking channels: WhatsApp, web, missed call (operator calls back within 4 working hours), IVR (reusing CM Helpline 181 infrastructure where the sponsor agrees), and assisted booking at shops and ward offices.
+- Consent notice shown in the chosen language before first use (see [12-nfr-security.md](./12-nfr-security.md)).
+
+### C2 Pickup request — Phase 1a
+**Acceptance criteria**
+- Items entered as category + count, with plain-language examples. Brand, model, and photo are optional.
+- Modes: doorstep, drop point, drive.
+- Doorstep requires society, wing/flat, landmark, pincode; gate instructions optional.
+- If no agent serves the area, show the nearest drop point and the next ward drive, with a waitlist. Never show an empty map.
+
+### C3 Device claim — Phase 1a
+**Acceptance criteria**
+- Optional: scan an EcoSure QR or IMEI barcode, or type IMEI or serial. See [16-product-passport.md](./16-product-passport.md) PP2.
+- Claimed devices appear in "My devices" with their history.
+
+### C4 Data-wipe help — Phase 1a
+**Acceptance criteria**
+- Shown for data-bearing items: back up, sign out of accounts, factory reset, remove SIM and memory card, in the user's language.
+- Citizen confirms or asks the collector for help (recorded as "collector assisted").
+- A data-bearing item cannot be marked collected without a confirmation.
+- Photos show the sealed bag only, never a device screen.
+
+### C5 Scheduling — Phase 1a
+**Acceptance criteria**
+- Window chosen from the agent's slots, including weekend mornings.
+- Up to 3 reschedules by app, WhatsApp keyword `RESCHEDULE`, or IVR.
+- `GATE` keyword alerts the collector to gate trouble.
+- The first failed visit carries no penalty.
+
+### C6 Safe handover — Phase 1a
+**Acceptance criteria**
+- Citizen receives the collector's name, photo, ID number, and a masked contact number before the visit.
+- Citizen receives a 4-digit handover code and gives it only after the items are weighed and the price is paid.
+- `SAFETY` keyword or a button reports a problem to the operator at once.
+- Swollen or damaged batteries are refused with a message explaining where to take them.
+
+### C7 Price and incentive — Phase 1a
+**Story:** As a citizen, I want at least what the kabadiwala pays, plus something for doing it properly.
 
 **Acceptance criteria**
-- OTP by WhatsApp first; SMS fallback if not delivered within 30 seconds.
-- OTP valid for 10 minutes; resend allowed after 30 seconds; 5 attempts per hour, then a clear message with the retry time.
-- Language chosen at first use (Hindi, English, corridor language) and saved.
+- The collector pays the recycler's published material price on the spot (UPI or cash). The receipt names the recycler and the agent.
+- The scheme incentive is paid in the next daily treasury batch (1–4 working days) after a valid handover code. Amounts are set per category by the sponsor.
+- Payout methods: UPI, bank account, voucher at a partner outlet, or a nominee's account.
+- Caps: 4 paid pickups per payee account per month; a device identifier earns only once; per-address limits. Held payments are explained in plain language.
+- Incentives are not launched or increased while an election Model Code of Conduct is in force.
 
-### C2 Simple pickup request — Phase 1
-**Story:** As a citizen, I want to say "2 phones, 1 laptop, 1 mixer" and book, without listing brands and models.
+### C8 Status and receipt — Phase 1a
+**Acceptance criteria**
+- Messages at accepted, scheduled (with handover code), collector on the way, collected (weight, price paid), incentive paid, and recycled (attestation number and verification link).
+- Same timeline on the web. The citizen sees no data about other users.
+
+### C9 Drives — Phase 1a
+**Story:** As a society secretary, I want one collection day for the whole building.
 
 **Acceptance criteria**
-- Items entered as category + count. Brand, model, and photo are optional.
-- Categories include small household appliances (mixers, irons, fans) as listed in the e-waste schedule, with plain-language examples.
-- Modes: doorstep, drop at shop, society drive.
-- Doorstep requires society, wing/flat, landmark, pincode, and optional gate instructions and gate contact.
-- If no shop serves the location, show "EcoSure is not live in your area yet" and offer a waitlist. Never show an empty map.
+- A drive has host (society, office, school, or IMC ward), date, time, expected volume, and assigned agent.
+- Dispatch rule: the drive is confirmed when expected volume passes the corridor threshold (default 150 kg) or the operator overrides.
+- Residents register items by WhatsApp link or at the drive desk.
+- Batch weighing at the drive; each resident still gets a receipt, a handover code, and their incentive.
+- Option: residents can pool incentives for the society fund.
+- Host receives a certificate of participation (not an EPR certificate) with total weight and, later, attestation numbers.
 
-### C3 Wipe checklist — Phase 1
-**Story:** As a citizen, I want to be sure my personal data is gone before I hand over my phone.
-
-**Acceptance criteria**
-- Shown automatically when any item is data-bearing (phone, tablet, laptop, storage).
-- Steps in the citizen's language: back up, sign out of accounts, factory reset, remove SIM and memory card.
-- Citizen confirms, or asks the collector for help (recorded as "collector assisted").
-- A pickup with data-bearing items cannot be marked collected without a confirmation.
-- Collector photos show the sealed bag only, never a device screen.
-
-### C4 Scheduling and reschedule — Phase 1
-**Acceptance criteria**
-- Preferred window chosen from the shop's slots, including weekend mornings.
-- Up to 3 reschedules, by app or WhatsApp keyword `RESCHEDULE`.
-- `GATE` keyword notifies the collector that gate access is a problem.
-- Failed visits record a reason; the first failed visit carries no penalty.
-
-### C5 Status and receipt — Phase 1
-**Acceptance criteria**
-- WhatsApp messages at accepted, scheduled, collector on the way, collected, and sent for recycling.
-- Collected message shows weight, categories, shop name, and incentive amount.
-- Sent-for-recycling message shows the custody attestation number and a verification link.
-- Same timeline visible on the web page. The citizen sees no data about other users.
-
-### C6 UPI incentive — Phase 1
-**Story:** As a citizen, I want a small payment when I hand over my e-waste so it is worth my time.
+### C10 Bulk consumer disposal — Phase 1a
+**Story:** As an office admin, I need a disposal record that satisfies Rule 8.
 
 **Acceptance criteria**
-- Paid to the citizen's UPI ID when the pickup is marked collected.
-- Amount set per category by the programme operator; funded by the scheme budget or producer take-back pool.
-- Paid once per pickup (idempotent). Failures retry and are visible to the operator.
-- Reversible only by the operator with a recorded reason, for example proven fraud.
-- Limit: 4 paid pickups per citizen per month (configurable) to deter abuse.
+- Bulk consumers register as an organization and request collection.
+- Receipts name the registered recycler receiving the material, with weight and category.
+- Government offices get an assisted mode that records the GeM or MSTC disposal reference where e-auction rules apply.
 
-### C7 Nearby drop-off points — Phase 1
-**Acceptance criteria**
-- Lists approved and provisional shops within range, with address, hours, and categories accepted.
-- Works as a text list on low bandwidth; map is optional.
+### C11 Education — Phase 1a
+Short Hindi guides, voice clips, and posters: what counts as e-waste, how to wipe devices, battery safety, why formal recycling matters.
 
-### C8 Society drive — Phase 1
-**Story:** As a society secretary, I want to organise one collection day for the whole building.
-
-**Acceptance criteria**
-- Secretary creates a drive with date, time, and expected volume.
-- Residents register items against the drive by WhatsApp link.
-- One gate pass for the collection team.
-- Each resident still gets their own receipt and incentive.
-- Society receives a summary with total weight and attestation numbers once processed.
-
-### C9 Education — Phase 1
-**Acceptance criteria**
-- Short guides in each corridor language: what counts as e-waste, how to wipe devices, why formal recycling matters.
-- Content managed by the programme operator.
-
-### C10 Optional device list — Phase 2
-Citizens can keep a list of devices they plan to dispose of. Not required for any pickup.
-
-### C11 Recognition badges — Phase 3
-Optional civic badges, for example "Recycled 10 kg". No points balance, no redemption catalog.
+### C12 Recognition — Phase 2
+Optional civic badges (for example, "Recycled 10 kg"). No points balance or redemption catalog.
 
 ---
 
 ## 3. States each screen must handle
 
-Loading, empty, success, error, unauthorized (401 → sign in), forbidden (403 with message), offline (show last known status and queue actions).
+Loading, empty, success, error, unauthorized (401 → sign in), forbidden (403 with message), offline (show last known status and queue actions), payout held.
 
 ---
 
 ## 4. Out of scope
-- EcoPoints balance or catalog
-- Cash payment by the collector
+- Points balance or catalog
 - Viewing organization finances
+- Collection of loose or damaged batteries

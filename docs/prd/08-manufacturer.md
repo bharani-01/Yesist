@@ -1,76 +1,80 @@
-# EcoSure — Producer (Manufacturer) PRD
+# EcoSure — Producer (Manufacturer and Importer) PRD
 
-**Role:** `producer`  
-**Phase:** 2 (moved up from phase 4, available as soon as attestations exist)  
-**Last updated:** 2026-09-27 (v2)
+**Roles:** `producer`, `producer_delegate`  
+**Phase:** 1b (moved up from 2)  
+**Last updated:** 2026-09-27 (v3)
 
 ---
 
 ## 1. Summary
 
-Producers use EcoSure to collect custody evidence for their EPR obligations: attestation library, target-gap view, and exports that help them file on the CPCB / SPCB portal. EcoSure supports filing; it does not file and does not issue EPR certificates.
+Producers use EcoSure to register products they place on the Indian market, see what happened to them at end of life, prove that the CPCB portal certificates they hold are backed by real physical material, and report take-back results. EcoSure supports EPR compliance; the CPCB portal remains the only place targets, filings, and certificates exist.
 
-What changed from v1: moved to phase 2; attribution is conservative with a review queue; exports need internal approval; bilingual exports; target-gap view added; footprint charts deprioritised.
+Changes from v2: target-gap view and portal worksheets removed (EPR targets and certificates use units that only the CPCB portal can compute); product registry, certificate provenance, audit defence and BRSR packs added; PRO and consultant delegates; moved to phase 1b.
 
 ---
 
 ## 2. Features
 
-### P1 Onboarding — Phase 2
+### P1 Onboarding — Phase 1b
 **Acceptance criteria**
 - CPCB EPR registration number verified by the operator.
-- Brands and product categories recorded for attribution.
-- Org roles: owner, compliance approver, operator, viewer.
+- Brands and categories recorded.
+- Org roles: owner, approver, operator, viewer.
+- Delegates (PROs, consultants) added per producer with a signed mandate; delegates see only mandated producers.
 
-### P2 Attestation library — Phase 2
+### P2 Product registry — Phase 1b
+Register models, units, and placed-on-market batches. See [16-product-passport.md](./16-product-passport.md) PP1 and PP6.
+
+### P3 End-of-life view — Phase 1b
 **Acceptance criteria**
-- Lists attestations for lots with weight attributed to the producer.
-- Filters: period, state, category, recycler.
-- Each item links to public verification.
+- Own units by lifecycle state, category, and state of India.
+- Units collected, received, and processed through EcoSure by month, with attestation numbers.
+- No citizen identities; ward-level geography only.
 
-### P3 Attribution with review — Phase 2
-**Story:** As an EPR manager, I want only defensible weight counted toward my evidence.
+### P4 Certificate provenance — Phase 1b
+**Story:** As an EPR manager, I want to know that the certificates I bought are backed by real material, before an auditor asks.
 
 **Acceptance criteria**
-- Each attribution records method (brand match, bulk declaration, take-back programme, manual review), confidence, evidence, and ruleset version.
-- Low-confidence attributions go to a review queue and are excluded from exports until reviewed.
-- Producer can dispute an attribution with evidence.
+- Enter certificate references from the CPCB portal (number, quantity, and unit exactly as the portal shows, issuing recycler).
+- EcoSure links each certificate to attestations and inflow from that recycler and marks it fully backed, partially backed, or unbacked.
+- Unbacked certificates from EcoSure-participating recyclers raise a flag for the producer and the SPCB.
+- EcoSure never recalculates certificate quantities or targets.
 
-### P4 Target-gap view — Phase 2
+### P5 Evidence packs — Phase 1b
 **Acceptance criteria**
-- Producer enters its EPR target per category for the period.
-- Shows attested and attributed weight against target, and the gap.
-- Early warnings: lots attributed to the producer that are past dwell or missing attestation.
-
-### P5 Exports — Phase 2
-**Acceptance criteria**
-- Types: evidence summary, CPCB portal worksheet, SPCB portal worksheet (per state).
-- Languages: English, Hindi, or bilingual.
-- Each export stores template version, attribution ruleset version, and inputs, so it can be reproduced.
-- Template versions are reviewed by a compliance expert before release. Outdated templates block generation with a clear message.
-- Download requires approval by the producer's compliance approver.
-- Every file states: "Supports filing on the CPCB / SPCB portal. The producer is responsible for submission. EcoSure does not issue EPR certificates."
+- Pack types:
+  - **Audit defence:** certificate provenance with attestation, weigh, seal, GPS, and mass-balance evidence.
+  - **BRSR take-back:** take-back volumes and devices for the annual Business Responsibility and Sustainability Report.
+  - **Take-back programme:** results of producer-funded programmes.
+- English, Hindi, or bilingual.
+- Each pack stores inputs and template version so it can be reproduced.
+- Download needs approval by a different producer user.
+- Every file states: "Supports EPR compliance evidence. EcoSure does not issue EPR certificates. The producer is responsible for filings on the CPCB EPR portal."
 - Retained for 7 years.
 
-### P6 Recycler and hub directory — Phase 2
-Approved recyclers and hubs filtered by state and category, with statutory registration shown separately from platform approval.
-
-### P7 Take-back programme — Phase 2
+### P6 Take-back programmes — Phase 1b
 **Acceptance criteria**
-- Producer can fund citizen incentives for its brand or category in a corridor (producer take-back pool).
-- Lots from funded pickups are attributed with the `take_back_programme` method.
+- Producer funds citizen top-ups for its brand or category in a corridor from its own escrow.
+- Rules: budget, per-unit amount, eligible categories, dates.
+- Programme dashboard: units, weight, cost per unit, passports linked.
+- Gated on a signed letter of intent before the programme can go live.
 
-### P8 Bulk pickup requests — Phase 1
-Producers and offices can request bulk collection through shops and hubs.
+### P7 Recycler directory — Phase 1b
+Participating recyclers by state and category, with CPCB registration shown separately from platform approval.
+
+### P8 Bulk collection — Phase 1a
+Producers' offices, service centres, and warehouses request collection as bulk consumers.
 
 ---
 
 ## 3. Screen states
-Loading, empty (no attributed weight yet), success, error, 401, 403, awaiting approval, template outdated.
+Loading, empty (no registered units yet), success, error, 401, 403, awaiting approval, template outdated, upload validation errors.
 
 ---
 
 ## 4. Out of scope
-- Automatic portal submission
-- EPR certificate trading
+- EPR target calculation or gap views
+- Automatic CPCB portal submission
+- EPR certificate trading or brokering
 - Viewing citizen identities

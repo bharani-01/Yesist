@@ -6,6 +6,12 @@ const NAV = {
   citizen: [{ to: '/pickups', label: 'My pickups', end: true }, { to: '/pickups/new', label: 'Book a pickup' }],
   agent: [{ to: '/agent', label: 'Jobs and lots', end: true }],
   recycler: [{ to: '/recycler', label: 'Inbound lots', end: true }],
+  producer: [
+    { to: '/producer', label: 'Outcomes', end: true },
+    { to: '/producer/models', label: 'Models' },
+    { to: '/producer/batches', label: 'Batches' },
+    { to: '/producer/units', label: 'Units' },
+  ],
   oversight: [{ to: '/oversight', label: 'Overview and flags', end: true }],
 };
 

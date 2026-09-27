@@ -11,6 +11,12 @@ import { OversightPage } from '../features/oversight/OversightPage.jsx';
 import { NewPickupPage } from '../features/pickups/NewPickupPage.jsx';
 import { PickupDetailPage } from '../features/pickups/PickupDetailPage.jsx';
 import { PickupsListPage } from '../features/pickups/PickupsListPage.jsx';
+import { BatchDetailPage } from '../features/producer/BatchDetailPage.jsx';
+import { BatchesPage } from '../features/producer/BatchesPage.jsx';
+import { LabelsPage } from '../features/producer/LabelsPage.jsx';
+import { ModelsPage } from '../features/producer/ModelsPage.jsx';
+import { ProducerOverviewPage } from '../features/producer/ProducerOverviewPage.jsx';
+import { UnitsPage } from '../features/producer/UnitsPage.jsx';
 import { InboundLotsPage } from '../features/recycler/InboundLotsPage.jsx';
 import { LotDetailPage } from '../features/recycler/LotDetailPage.jsx';
 import { VerifyPage } from '../features/verify/VerifyPage.jsx';
@@ -55,6 +61,17 @@ export const router = createBrowserRouter([
         children: [
           { path: 'recycler', element: <InboundLotsPage /> },
           { path: 'recycler/lots/:id', element: <LotDetailPage /> },
+        ],
+      },
+      {
+        element: <RequireWorkspace workspace="producer" />,
+        children: [
+          { path: 'producer', element: <ProducerOverviewPage /> },
+          { path: 'producer/models', element: <ModelsPage /> },
+          { path: 'producer/batches', element: <BatchesPage /> },
+          { path: 'producer/batches/:id', element: <BatchDetailPage /> },
+          { path: 'producer/batches/:id/labels', element: <LabelsPage /> },
+          { path: 'producer/units', element: <UnitsPage /> },
         ],
       },
       {

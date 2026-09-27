@@ -48,6 +48,12 @@ const schema = z.object({
     fullName: z.string().min(2),
     role: z.enum(['ulb_officer', 'spcb_officer', 'cpcb_officer', 'programme_operator']),
   })),
+  // Manufacturers and importers: registry only, never part of the custody chain.
+  producers: z.array(z.object({
+    name: z.string().min(2),
+    registrationNo: z.string().min(3),
+    members: z.array(member).min(1),
+  })).default([]),
   citizens: z.array(z.object({
     email: z.email().toLowerCase(),
     fullName: z.string().min(2),
@@ -132,6 +138,11 @@ try {
     );
   }
 
+  for (const p of config.producers) {
+    const producerId = await upsertOrg({ orgType: 'producer', name: p.name, registrationNo: p.registrationNo });
+    await addMembers(producerId, p.members);
+  }
+
   for (const o of config.officers) await upsertUser(o, o.role);
   for (const c of config.citizens) {
     await client.query(
@@ -142,7 +153,10 @@ try {
   }
   await client.query('commit');
   console.log(`Onboarded from ${file}`);
-  console.log('Accounts:', [...config.citizens, ...r.members, ...config.agents.flatMap((a) => a.members), ...config.officers].map((m) => m.email).join(', '));
+  console.log('Accounts:', [
+    ...config.citizens, ...r.members, ...config.agents.flatMap((a) => a.members),
+    ...config.producers.flatMap((p) => p.members), ...config.officers,
+  ].map((m) => m.email).join(', '));
 } catch (err) {
   await client.query('rollback');
   console.error('Onboarding failed:', err.message);

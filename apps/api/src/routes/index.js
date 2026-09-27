@@ -8,6 +8,7 @@ import { intakeRoutes } from '../modules/intake/intake.routes.js';
 import { lotsRoutes } from '../modules/lots/lots.routes.js';
 import { oversightRoutes } from '../modules/oversight/oversight.routes.js';
 import { pickupsRoutes } from '../modules/pickups/pickups.routes.js';
+import { producerRoutes } from '../modules/producer/producer.routes.js';
 import { referenceRoutes } from '../modules/reference/reference.routes.js';
 import { verificationRoutes } from '../modules/verification/verification.routes.js';
 
@@ -28,6 +29,7 @@ export function buildApiRouter() {
   api.use('/recycler/lots', noStore, intakeRoutes);
   api.use('/recycler/attestations', noStore, attestationsRoutes);
   api.use('/oversight', noStore, oversightRoutes);
+  api.use('/producer', noStore, producerRoutes);
 
   return api;
 }

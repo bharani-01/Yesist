@@ -85,7 +85,7 @@ create index if not exists sessions_user_idx on sessions (user_id);
 create table if not exists organizations (
   id                          uuid primary key default gen_random_uuid(),
   org_type                    text not null check (org_type in
-                                ('local_shop','informal_collector','drop_point','pro_recycler','producer','ulb','spcb_office','cpcb_office','programme_operator')),
+                                ('local_shop','informal_collector','drop_point','regional_hub','pro_recycler','producer','ulb','spcb_office','cpcb_office','programme_operator')),
   name                        text not null check (length(name) between 2 and 160),
   registration_no             text,
   registration_valid_until    date,
@@ -96,9 +96,17 @@ create table if not exists organizations (
   updated_at                  timestamptz not null default now(),
   constraint recycler_needs_registration check (
     org_type <> 'pro_recycler' or (registration_no is not null and registration_valid_until is not null)
-  )
+  ),
+  constraint producer_needs_registration check (org_type <> 'producer' or registration_no is not null)
 );
 create unique index if not exists organizations_name_type_uq on organizations (org_type, lower(name));
+
+-- Existing databases: bring constraints to the definitions above.
+alter table organizations drop constraint if exists organizations_org_type_check;
+alter table organizations add constraint organizations_org_type_check check (org_type in
+  ('local_shop','informal_collector','drop_point','regional_hub','pro_recycler','producer','ulb','spcb_office','cpcb_office','programme_operator'));
+alter table organizations drop constraint if exists producer_needs_registration;
+alter table organizations add constraint producer_needs_registration check (org_type <> 'producer' or registration_no is not null);
 
 create table if not exists organization_members (
   org_id      uuid not null references organizations(id) on delete cascade,
@@ -146,6 +154,46 @@ create table if not exists rate_cards (
   check (price_per_unit is not null or price_per_kg is not null),
   unique (recycler_org_id, category_code, effective_from)
 );
+
+-- -----------------------------------------------------------------------------
+-- Product registry (manufacturers and importers; data only, PRD v3 §9.5 PP1, §13)
+-- Producers never appear in the custody chain: they register what they place on
+-- the market and read outcomes for their own units.
+-- -----------------------------------------------------------------------------
+
+create table if not exists product_models (
+  id               uuid primary key default gen_random_uuid(),
+  producer_org_id  uuid not null references organizations(id),
+  brand            text not null check (length(brand) between 1 and 80),
+  model_name       text not null check (length(model_name) between 1 and 120),
+  model_code       text check (model_code is null or model_code ~ '^[A-Za-z0-9._/-]{1,40}$'),
+  category_code    text not null references waste_categories(code),
+  typical_unit_kg  numeric(12,3) not null check (typical_unit_kg > 0 and typical_unit_kg <= 1000),
+  battery_type     text not null check (battery_type in ('none','li_ion','li_polymer','nimh','lead_acid','other')),
+  data_bearing     boolean not null,
+  created_by       uuid not null references users(id),
+  created_at       timestamptz not null default now()
+);
+create unique index if not exists product_models_name_uq on product_models (producer_org_id, lower(brand), lower(model_name));
+
+create table if not exists market_batches (
+  id               uuid primary key default gen_random_uuid(),
+  producer_org_id  uuid not null references organizations(id),
+  model_id         uuid not null references product_models(id),
+  batch_ref        text not null check (batch_ref ~ '^[A-Za-z0-9._/-]{2,40}$'),
+  market_month     date not null check (market_month = date_trunc('month', market_month)::date),
+  state_code       text not null check (state_code ~ '^[A-Z]{2}$'),
+  quantity         int not null check (quantity between 1 and 1000000),
+  status           text not null default 'draft' check (status in ('draft','placed')),
+  created_by       uuid not null references users(id),
+  placed_by        uuid references users(id),
+  placed_at        timestamptz,
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  unique (producer_org_id, batch_ref),
+  check (status = 'draft' or (placed_by is not null and placed_at is not null))
+);
+create index if not exists market_batches_model_idx on market_batches (model_id);
 
 -- -----------------------------------------------------------------------------
 -- Collection and custody
@@ -217,7 +265,7 @@ create table if not exists pickup_addresses (
 create table if not exists product_units (
   id               uuid primary key default gen_random_uuid(),
   category_code    text not null references waste_categories(code),
-  identifier_type  text not null check (identifier_type in ('imei','serial')),
+  identifier_type  text not null check (identifier_type in ('imei','serial','qr')),
   identifier_hash  text not null,
   last4            text not null check (length(last4) = 4),
   qr_public_id     text not null unique default encode(gen_random_bytes(9), 'hex'),
@@ -225,10 +273,24 @@ create table if not exists product_units (
                    check (state in ('registered','placed_on_market','claimed','handed_over','collected','in_lot',
                                     'received_at_recycler','processed','materials_recovered','refurbished','lost','disputed')),
   legacy           boolean not null default true,
+  producer_org_id  uuid references organizations(id),
+  model_id         uuid references product_models(id),
+  batch_id         uuid references market_batches(id),
   created_at       timestamptz not null default now(),
   updated_at       timestamptz not null default now(),
-  unique (identifier_type, identifier_hash)
+  unique (identifier_type, identifier_hash),
+  check (legacy or (producer_org_id is not null and model_id is not null and batch_id is not null))
 );
+alter table product_units add column if not exists producer_org_id uuid references organizations(id);
+alter table product_units add column if not exists model_id uuid references product_models(id);
+alter table product_units add column if not exists batch_id uuid references market_batches(id);
+alter table product_units drop constraint if exists product_units_identifier_type_check;
+alter table product_units add constraint product_units_identifier_type_check check (identifier_type in ('imei','serial','qr'));
+alter table product_units drop constraint if exists product_units_check;
+alter table product_units add constraint product_units_check
+  check (legacy or (producer_org_id is not null and model_id is not null and batch_id is not null));
+create index if not exists product_units_producer_idx on product_units (producer_org_id, state) where producer_org_id is not null;
+create index if not exists product_units_batch_idx on product_units (batch_id) where batch_id is not null;
 
 create table if not exists pickup_items (
   id                  uuid primary key default gen_random_uuid(),
@@ -382,6 +444,24 @@ create or replace function app.my_org_ids() returns setof uuid
 language sql stable security definer set search_path = public, pg_temp as $$
   select m.org_id from organization_members m
   join organizations o on o.id = m.org_id and o.status = 'active'
+  where m.user_id = app.uid()
+$$;
+
+-- True when the caller is an active member of the org with one of the given staff roles.
+create or replace function app.has_org_role(p_org uuid, p_roles text[]) returns boolean
+language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1 from organization_members m
+    join organizations o on o.id = m.org_id and o.status = 'active'
+    join users u on u.id = m.user_id and u.status = 'active'
+    where m.user_id = app.uid() and m.org_id = p_org and m.org_role = any(p_roles)
+  )
+$$;
+
+create or replace function app.my_producer_org_ids() returns setof uuid
+language sql stable security definer set search_path = public, pg_temp as $$
+  select m.org_id from organization_members m
+  join organizations o on o.id = m.org_id and o.status = 'active' and o.org_type = 'producer'
   where m.user_id = app.uid()
 $$;
 
@@ -590,6 +670,117 @@ begin
   return v_count;
 end $$;
 
+-- --- Product registry (producers only) --------------------------------------
+
+-- Registers units into a draft batch. p_rows: [{ "type": "imei|serial|qr", "hash": "...",
+-- "last4": "....", "qr": "<optional public id>" }]. Returns one row per input row with
+-- either the unit's QR id or an error code; rejected rows never abort the others.
+create or replace function app.register_units(p_batch uuid, p_rows jsonb)
+returns table (row_index int, qr_public_id text, error text)
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare
+  b market_batches%rowtype; v_category text; v_existing int; v_row jsonb; v_idx int := 0;
+  v_unit uuid; v_qr text;
+begin
+  select * into b from market_batches where id = p_batch for update;
+  if not found or not app.has_org_role(b.producer_org_id, array['owner','operator'])
+     or not exists (select 1 from organizations where id = b.producer_org_id and org_type = 'producer') then
+    raise exception 'not permitted' using errcode = '42501';
+  end if;
+  if b.status <> 'draft' then
+    raise exception 'batch already placed on the market' using errcode = '23514';
+  end if;
+  select category_code into v_category from product_models where id = b.model_id;
+  select count(*) into v_existing from product_units where batch_id = p_batch;
+  if v_existing + jsonb_array_length(p_rows) > b.quantity then
+    raise exception 'more units than the batch quantity' using errcode = '23514';
+  end if;
+
+  for v_row in select * from jsonb_array_elements(p_rows) loop
+    v_idx := v_idx + 1;
+    if (v_row->>'type') not in ('imei','serial','qr') or coalesce(v_row->>'hash','') !~ '^[0-9a-f]{64}$'
+       or length(coalesce(v_row->>'last4','')) <> 4 then
+      row_index := v_idx; qr_public_id := null; error := 'invalid'; return next; continue;
+    end if;
+    v_unit := null;
+    insert into product_units (category_code, identifier_type, identifier_hash, last4, qr_public_id, state, legacy,
+                               producer_org_id, model_id, batch_id)
+    values (v_category, v_row->>'type', v_row->>'hash', v_row->>'last4',
+            coalesce(v_row->>'qr', encode(gen_random_bytes(9), 'hex')), 'registered', false,
+            b.producer_org_id, b.model_id, b.id)
+    on conflict do nothing
+    returning id, product_units.qr_public_id into v_unit, v_qr;
+    if v_unit is null then
+      row_index := v_idx; qr_public_id := null; error := 'duplicate'; return next; continue;
+    end if;
+    insert into lifecycle_events (unit_id, state, actor_user_id, org_id) values (v_unit, 'registered', app.uid(), b.producer_org_id);
+    row_index := v_idx; qr_public_id := v_qr; error := null; return next;
+  end loop;
+end $$;
+
+-- Places a draft batch on the market; its units move to placed_on_market. Approver step.
+create or replace function app.place_batch(p_batch uuid)
+returns int
+language plpgsql security definer set search_path = public, pg_temp as $$
+declare b market_batches%rowtype; v_count int;
+begin
+  select * into b from market_batches where id = p_batch for update;
+  if not found or not app.has_org_role(b.producer_org_id, array['owner','approver']) then
+    raise exception 'not permitted' using errcode = '42501';
+  end if;
+  if b.status <> 'draft' then
+    raise exception 'batch already placed on the market' using errcode = '23514';
+  end if;
+  update market_batches set status = 'placed', placed_by = app.uid(), placed_at = now() where id = p_batch;
+  with upd as (
+    update product_units set state = 'placed_on_market', updated_at = now()
+     where batch_id = p_batch and state = 'registered' returning id
+  )
+  insert into lifecycle_events (unit_id, state, actor_user_id, org_id)
+  select id, 'placed_on_market', app.uid(), b.producer_org_id from upd;
+  get diagnostics v_count = row_count;
+  return v_count;
+end $$;
+
+-- Producer outcome view: own units with state and attestation number only.
+-- Never exposes pickups, lots, agents, hubs, wards, or people.
+create or replace function app.producer_unit_outcomes(p_state text, p_batch uuid, p_limit int)
+returns table (unit_id uuid, qr_public_id text, identifier_type text, last4 text, state text,
+               model_id uuid, brand text, model_name text, batch_id uuid, batch_ref text,
+               updated_at timestamptz, attestation_number text)
+language sql stable security definer set search_path = public, pg_temp as $$
+  select u.id, u.qr_public_id, u.identifier_type, u.last4, u.state, m.id, m.brand, m.model_name, b.id, b.batch_ref,
+         u.updated_at,
+         (select a.public_number from pickup_item_units piu
+            join pickup_items i on i.id = piu.pickup_item_id
+            join pickup_requests p on p.id = i.pickup_id
+            join attestations a on a.lot_id = p.lot_id and a.status = 'issued'
+           where piu.unit_id = u.id and not piu.duplicate limit 1)
+    from product_units u
+    join product_models m on m.id = u.model_id
+    join market_batches b on b.id = u.batch_id
+   where u.producer_org_id in (select app.my_producer_org_ids())
+     and (p_state is null or u.state = p_state)
+     and (p_batch is null or u.batch_id = p_batch)
+   order by u.updated_at desc
+   limit least(greatest(coalesce(p_limit, 100), 1), 500)
+$$;
+
+-- Monthly end-of-life counts for the caller's producer units (from the append-only lifecycle).
+create or replace function app.producer_monthly_outcomes(p_months int)
+returns table (month date, collected int, received int, processed int)
+language sql stable security definer set search_path = public, pg_temp as $$
+  select d.month::date,
+         count(*) filter (where e.state = 'collected')::int,
+         count(*) filter (where e.state = 'received_at_recycler')::int,
+         count(*) filter (where e.state = 'processed')::int
+    from generate_series(date_trunc('month', now()) - make_interval(months => greatest(coalesce(p_months, 6), 1) - 1),
+                         date_trunc('month', now()), interval '1 month') as d(month)
+    left join lifecycle_events e on date_trunc('month', e.created_at) = d.month
+     and e.unit_id in (select id from product_units where producer_org_id in (select app.my_producer_org_ids()))
+   group by d.month order by d.month
+$$;
+
 -- --- Compliance flags: raised only through this function (deduplicated) -----
 
 create or replace function app.raise_flag(
@@ -715,7 +906,7 @@ begin
     execute format('drop trigger if exists %I_append_only on %I', t, t);
     execute format('create trigger %I_append_only before update or delete on %I for each row execute function app.tg_append_only()', t, t);
   end loop;
-  foreach t in array array['users','organizations','lots','pickup_requests','product_units','citizen_incentives','compliance_flags'] loop
+  foreach t in array array['users','organizations','lots','pickup_requests','product_units','citizen_incentives','compliance_flags','market_batches'] loop
     execute format('drop trigger if exists %I_touch on %I', t, t);
     execute format('create trigger %I_touch before update on %I for each row execute function app.tg_touch_updated_at()', t, t);
   end loop;
@@ -744,6 +935,7 @@ grant select, update (full_name, phone) on users to ecosure_app;
 grant select, insert, update on pickup_requests, pickup_items, lots, attestations, citizen_incentives to ecosure_app;
 grant select, insert on pickup_addresses to ecosure_app;
 grant select on product_units, pickup_item_units, lifecycle_events to ecosure_app;
+grant select, insert on product_models, market_batches to ecosure_app;
 grant select, insert on custody_events, weigh_records, audit_log to ecosure_app;
 grant select, update (status, resolution_note, updated_by) on compliance_flags to ecosure_app;
 grant usage on all sequences in schema public to ecosure_app;
@@ -763,7 +955,8 @@ begin
     'waste_categories','wards','scheme_settings','users','sessions','organizations','organization_members',
     'agent_agreements','agent_service_wards','rate_cards','lots','pickup_requests','pickup_addresses',
     'product_units','pickup_items','pickup_item_units','lifecycle_events','handover_codes','custody_events',
-    'weigh_records','attestations','citizen_incentives','compliance_flags','audit_log'] loop
+    'weigh_records','attestations','citizen_incentives','compliance_flags','audit_log',
+    'product_models','market_batches'] loop
     execute format('alter table %I enable row level security', t);
     execute format('alter table %I force row level security', t);
   end loop;
@@ -849,19 +1042,45 @@ create policy items_update on pickup_items for update using (
   exists (select 1 from pickup_requests p where p.id = pickup_id and p.assigned_agent_org_id in (select app.my_org_ids()) and p.status = 'scheduled')
 );
 
--- Passport rows: visible when linked to a visible pickup, or to oversight.
+-- Passport rows: visible when linked to a visible pickup, to the registering producer, or to oversight.
 drop policy if exists units_read on product_units;
 create policy units_read on product_units for select using (
   app.is_oversight()
+  or producer_org_id in (select app.my_producer_org_ids())
   or exists (select 1 from pickup_item_units piu join pickup_items i on i.id = piu.pickup_item_id where piu.unit_id = product_units.id)
 );
 drop policy if exists item_units_read on pickup_item_units;
 create policy item_units_read on pickup_item_units for select using (
   exists (select 1 from pickup_items i where i.id = pickup_item_id)
 );
+-- Lifecycle rows carry custody org ids, so producers read outcomes only through
+-- app.producer_unit_outcomes(); direct access follows the custody chain.
 drop policy if exists lifecycle_read on lifecycle_events;
 create policy lifecycle_read on lifecycle_events for select using (
-  app.is_oversight() or exists (select 1 from product_units u where u.id = unit_id)
+  app.is_oversight()
+  or exists (select 1 from pickup_item_units piu join pickup_items i on i.id = piu.pickup_item_id where piu.unit_id = lifecycle_events.unit_id)
+);
+
+-- Product registry: the producer's own records (plus read-only oversight).
+drop policy if exists models_read on product_models;
+create policy models_read on product_models for select using (
+  producer_org_id in (select app.my_producer_org_ids()) or app.is_oversight()
+);
+drop policy if exists models_insert on product_models;
+create policy models_insert on product_models for insert with check (
+  producer_org_id in (select app.my_producer_org_ids())
+  and app.has_org_role(producer_org_id, array['owner','operator']) and created_by = app.uid()
+);
+drop policy if exists batches_read on market_batches;
+create policy batches_read on market_batches for select using (
+  producer_org_id in (select app.my_producer_org_ids()) or app.is_oversight()
+);
+drop policy if exists batches_insert on market_batches;
+create policy batches_insert on market_batches for insert with check (
+  producer_org_id in (select app.my_producer_org_ids())
+  and app.has_org_role(producer_org_id, array['owner','operator'])
+  and created_by = app.uid() and status = 'draft'
+  and exists (select 1 from product_models m where m.id = model_id and m.producer_org_id = market_batches.producer_org_id)
 );
 
 -- Lots.

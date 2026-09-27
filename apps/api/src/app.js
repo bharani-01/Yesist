@@ -15,6 +15,8 @@ import { requestContext } from './middleware/request-context.js';
 import { buildApiRouter } from './routes/index.js';
 
 const WEB_DIST = resolve(dirname(fileURLToPath(import.meta.url)), '../../web/dist');
+// Routes that parse their own (larger) JSON body.
+const OWN_BODY_PARSER = /^\/api\/v1\/producer\/batches\/[^/]+\/units$/;
 
 export function createApp() {
   const app = express();
@@ -35,7 +37,8 @@ export function createApp() {
       },
     },
   }));
-  app.use(express.json({ limit: '100kb' }));
+  const json = express.json({ limit: '100kb' });
+  app.use((req, res, next) => (OWN_BODY_PARSER.test(req.path) ? next() : json(req, res, next)));
   app.use(cookieParser());
 
   app.use(API_PREFIX, apiLimiter, originGuard, authenticate, buildApiRouter());

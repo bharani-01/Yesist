@@ -33,6 +33,16 @@
       ]
     }
   ],
+  "producers": [
+    {
+      "name": "Test Electronics Maker (local only)",
+      "registrationNo": "TEST-CPCB-EPR-PRODUCER-0001",
+      "members": [
+        { "email": "producer.owner@ecosure.test", "fullName": "Producer Compliance Owner (test)", "orgRole": "owner" },
+        { "email": "producer.approver@ecosure.test", "fullName": "Producer Approver (test)", "orgRole": "approver" }
+      ]
+    }
+  ],
   "officers": [
     { "email": "spcb@ecosure.test", "fullName": "SPCB Officer (test)", "role": "spcb_officer" },
     { "email": "imc@ecosure.test", "fullName": "IMC Officer (test)", "role": "ulb_officer" }

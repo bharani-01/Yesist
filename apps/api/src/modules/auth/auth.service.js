@@ -1,4 +1,4 @@
-import { AGENT_ORG_TYPES, OVERSIGHT_ROLES, RECYCLER_ORG_TYPES, SESSION } from '../../config/constants.js';
+import { AGENT_ORG_TYPES, OVERSIGHT_ROLES, PRODUCER_ORG_TYPES, RECYCLER_ORG_TYPES, SESSION } from '../../config/constants.js';
 import { withTx } from '../../core/db.js';
 import { AppError, Errors } from '../../core/errors.js';
 import { hashSessionToken, newSessionToken } from '../../core/security/hashing.js';
@@ -9,6 +9,7 @@ import * as repo from './auth.repository.js';
 export function workspaceFor(role, orgs) {
   if (role === 'citizen') return 'citizen';
   if (OVERSIGHT_ROLES.includes(role)) return 'oversight';
+  if (orgs.some((o) => PRODUCER_ORG_TYPES.includes(o.type))) return 'producer';
   if (orgs.some((o) => RECYCLER_ORG_TYPES.includes(o.type))) return 'recycler';
   if (orgs.some((o) => AGENT_ORG_TYPES.includes(o.type))) return 'agent';
   return 'none';

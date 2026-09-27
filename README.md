@@ -2,6 +2,8 @@
 
 E-waste custody and recovery platform for the Madhya Pradesh programme (Indore pilot). A citizen books a doorstep pickup; a verified collection agent weighs the items and confirms the handover with a one-time code from the citizen; sealed lots travel to an authorised recycler, which records the gate weight and issues a maker-checker custody attestation that anyone can verify. Oversight officers see programme aggregates and compliance flags in real time.
 
+Manufacturers (producers) only register data: product models, placed-on-market batches, and the individual units in each batch. Every unit gets a QR label (`/p/<id>`) that follows it through collection to the recycler; the manufacturer sees end-of-life outcomes for its own units but never touches pickups, lots, or custody partners.
+
 Product context lives in [`docs/prd`](docs/prd/README.md) and the field simulations in [`docs/research`](docs/research).
 
 ## Stack
@@ -34,6 +36,8 @@ Production: `npm run build` then `npm start`; the API serves `apps/web/dist` on 
 | `shop@ecosure.test` | Collection agent (repair shop, wards 1–10) |
 | `recycler.maker@ecosure.test` | Recycler operator (drafts attestations) |
 | `recycler.checker@ecosure.test` | Recycler approver (issues attestations) |
+| `producer.owner@ecosure.test` | Manufacturer owner (registers models, batches, and units) |
+| `producer.approver@ecosure.test` | Manufacturer approver (places batches on the market) |
 | `spcb@ecosure.test` | State pollution control board officer (triages flags) |
 | `imc@ecosure.test` | Municipal officer (read-only oversight) |
 
@@ -43,7 +47,7 @@ For local demos, set `DEMO_LOGIN_ENABLED=true` in `.env` and restart the API: th
 
 ## Tests
 
-`npm test` provisions an isolated `<database>_test` database (schema plus test accounts), then runs the integration suite against the real API and PostgreSQL: authentication and authorisation, the full custody chain with fraud controls, handover-code lockout, and direct row-level-security checks. Development data is never touched.
+`npm test` provisions an isolated `<database>_test` database (schema plus test accounts), then runs the integration suite against the real API and PostgreSQL: authentication and authorisation, the full custody chain with fraud controls, handover-code lockout, the manufacturer registry (per-row upload outcomes, maker-checker placing, workspace isolation), and direct row-level-security checks. Development data is never touched.
 
 ## Architecture
 

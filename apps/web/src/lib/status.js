@@ -50,6 +50,22 @@ export const FLAG_TYPE_LABELS = {
   incentive_cap: 'Incentive cap',
 };
 
+export const UNIT_STATE = {
+  registered: { label: 'Registered', tone: 'neutral' },
+  placed_on_market: { label: 'On the market', tone: 'neutral' },
+  claimed: { label: 'Claimed by owner', tone: 'info' },
+  collected: { label: 'Collected', tone: 'info' },
+  in_lot: { label: 'In a sealed lot', tone: 'info' },
+  at_hub: { label: 'At a hub', tone: 'info' },
+  received_at_recycler: { label: 'At recycler', tone: 'info' },
+  processed: { label: 'Recycled', tone: 'success' },
+};
+
+export const BATCH_STATUS = {
+  draft: { label: 'Draft', tone: 'warning' },
+  placed: { label: 'On the market', tone: 'success' },
+};
+
 export const TIMELINE_LABELS = {
   requested: 'Pickup requested',
   scheduled: 'Pickup scheduled',

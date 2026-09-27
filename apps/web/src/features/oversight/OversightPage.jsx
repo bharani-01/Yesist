@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AsyncView } from '../../components/feedback/AsyncView.jsx';
+import { Metric } from '../../components/ui/Metric.jsx';
 import { PageHeader } from '../../components/ui/PageHeader.jsx';
 import { Panel } from '../../components/ui/Panel.jsx';
 import { useAsync } from '../../hooks/useAsync.js';
@@ -75,15 +76,5 @@ function Overview({ data }) {
       </div>
       <p className="subtle">Updated {formatDateTime(data.generatedAt)}</p>
     </>
-  );
-}
-
-function Metric({ label, value, hint }) {
-  return (
-    <div className="metric">
-      <div className="metric__label">{label}</div>
-      <div className="metric__value">{value}</div>
-      {hint && <div className="metric__hint">{hint}</div>}
-    </div>
   );
 }

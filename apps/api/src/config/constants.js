@@ -7,6 +7,16 @@ export const SESSION = Object.freeze({
 
 export const AGENT_ORG_TYPES = Object.freeze(['local_shop', 'informal_collector', 'drop_point']);
 export const RECYCLER_ORG_TYPES = Object.freeze(['pro_recycler']);
+export const PRODUCER_ORG_TYPES = Object.freeze(['producer']);
+
+// Staff permission matrix inside an organisation (owner, operator, approver, finance, viewer).
+export const STAFF = Object.freeze({
+  work: Object.freeze(['owner', 'operator']),
+  approve: Object.freeze(['owner', 'approver']),
+  read: Object.freeze(['owner', 'operator', 'approver', 'finance', 'viewer']),
+});
+
+export const UNITS_PER_REQUEST = 2000;
 export const OVERSIGHT_ROLES = Object.freeze(['ulb_officer', 'spcb_officer', 'cpcb_officer', 'programme_operator']);
 
 // Maker-checker for attestations (PRD v3 §8.2, §8.6 rule 6).

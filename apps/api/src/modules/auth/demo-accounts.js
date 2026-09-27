@@ -30,6 +30,12 @@ function load() {
       label: m.orgRole === 'approver' ? 'Recycler checker' : 'Recycler maker',
       description: ORG_ROLE_DESCRIPTIONS[m.orgRole],
     })),
+    ...(config.producers ?? []).flatMap((p) => p.members.map((m) => ({
+      email: m.email,
+      workspace: 'producer',
+      label: m.orgRole === 'approver' ? 'Manufacturer approver' : 'Manufacturer',
+      description: m.orgRole === 'approver' ? 'Places batches on the market' : 'Registers models, batches, and unit QR labels',
+    }))),
     ...config.officers.map((o) => ({
       email: o.email,
       workspace: 'oversight',

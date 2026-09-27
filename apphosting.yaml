@@ -1,0 +1,44 @@
+# Firebase App Hosting: backend "yesist-12" in project "eco-sure-537d9" (asia-southeast1).
+# The build runs `npm run build` (web client); `npm start` runs the API, which also serves the client.
+# Secrets live in Cloud Secret Manager, never in this file:
+#   firebase apphosting:secrets:set <name> --project eco-sure-537d9
+runConfig:
+  minInstances: 0
+  maxInstances: 4
+  concurrency: 80
+  cpu: 1
+  memoryMiB: 512
+
+env:
+  # Runtime only: NODE_ENV=production during the build would skip the web client's build tools.
+  - variable: NODE_ENV
+    value: production
+    availability: [RUNTIME]
+  - variable: DEMO_LOGIN_ENABLED
+    value: "false"
+    availability: [RUNTIME]
+  - variable: WEB_ORIGIN
+    value: https://yesist-12--eco-sure-537d9.asia-southeast1.hosted.app
+    availability: [RUNTIME]
+  - variable: TRUST_PROXY
+    value: "true"
+    availability: [RUNTIME]
+  - variable: SESSION_COOKIE_NAME
+    value: __session
+    availability: [RUNTIME]
+  # Supabase certificates chain to Supabase's own root; TLS is verified against it.
+  - variable: DATABASE_CA_CERT_FILE
+    value: database/certs/supabase-root-ca.crt
+    availability: [RUNTIME]
+
+  # Supabase session pooler (IPv4) as the least-privilege ecosure_app role:
+  # postgresql://ecosure_app.<project-ref>:<password>@aws-0-ap-southeast-1.pooler.supabase.com:5432/postgres
+  - variable: DATABASE_URL
+    secret: ecosure-database-url
+    availability: [RUNTIME]
+  - variable: IDENTIFIER_HMAC_KEY
+    secret: ecosure-identifier-hmac
+    availability: [RUNTIME]
+  - variable: HANDOVER_HMAC_KEY
+    secret: ecosure-handover-hmac
+    availability: [RUNTIME]

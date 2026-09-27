@@ -35,21 +35,24 @@ Product context lives in [`docs/prd`](docs/prd/README.md) and the field simulati
 
 Production on a single server: `npm run build` then `npm start`; the API serves `apps/web/dist` on the same origin.
 
-### Deploying to Firebase Hosting (project `yesist-12`)
+### Deploying to Firebase App Hosting
 
-Firebase Hosting serves the built web client and forwards `/api/**` to the API running on Cloud Run (service `ecosure-api`, region `asia-south1`), so the browser still sees one origin. The database is Supabase PostgreSQL.
+The live deployment is App Hosting backend `yesist-12` in project `eco-sure-537d9` (region `asia-southeast1`): https://yesist-12--eco-sure-537d9.asia-southeast1.hosted.app. App Hosting builds the repository with `npm run build` and runs `npm start`, so the API serves the web client on one origin. [`apphosting.yaml`](apphosting.yaml) sets the production configuration; the database is Supabase PostgreSQL.
 
-1. **Database.** Put the Supabase connection details in a git-ignored `.env.supabase`: `DATABASE_ADMIN_URL` (the `postgres` user), `DATABASE_URL` (the `ecosure_app` runtime role), `ECOSURE_APP_DB_PASSWORD`, and `DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt`. Then run `node --env-file=.env.supabase apps/api/scripts/db-setup.js`. The schema also revokes Supabase's `anon` and `authenticated` roles from every table, because EcoSure never uses Supabase's REST API.
-2. **API on Cloud Run.** Store `DATABASE_URL`, `IDENTIFIER_HMAC_KEY`, and `HANDOVER_HMAC_KEY` in Secret Manager, then deploy from the repository root:
+1. **Database.** Keep the Supabase connection details in a git-ignored `.env.supabase`: `DATABASE_ADMIN_URL` (the `postgres` user), `DATABASE_URL` (the `ecosure_app` role through the session pooler), `ECOSURE_APP_DB_PASSWORD`, and `DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt`. Apply the schema with `node --env-file=.env.supabase apps/api/scripts/db-setup.js`. The schema revokes Supabase's `anon` and `authenticated` roles from every table, because EcoSure never uses Supabase's REST API.
+2. **Secrets.** Create the three secrets that `apphosting.yaml` references and give the backend access to them. Use the values from `.env.supabase`:
    ```
-   gcloud run deploy ecosure-api --source . --region asia-south1 --project yesist-12 --allow-unauthenticated \
-     --set-env-vars "^;^NODE_ENV=production;SESSION_COOKIE_NAME=__session;TRUST_PROXY=true;DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt;WEB_ORIGIN=https://yesist-12.web.app,https://yesist-12.firebaseapp.com" \
-     --set-secrets DATABASE_URL=ecosure-database-url:latest,IDENTIFIER_HMAC_KEY=ecosure-identifier-hmac:latest,HANDOVER_HMAC_KEY=ecosure-handover-hmac:latest
+   firebase apphosting:secrets:set ecosure-database-url --project eco-sure-537d9
+   firebase apphosting:secrets:set ecosure-identifier-hmac --project eco-sure-537d9
+   firebase apphosting:secrets:set ecosure-handover-hmac --project eco-sure-537d9
+   firebase apphosting:secrets:grantaccess ecosure-database-url,ecosure-identifier-hmac,ecosure-handover-hmac --backend yesist-12 --project eco-sure-537d9
    ```
-   `SESSION_COOKIE_NAME=__session` is required: Firebase Hosting strips every other cookie before forwarding requests to Cloud Run.
-3. **Web client.** `npm install -g firebase-tools`, `firebase login`, then `firebase deploy --only hosting`. The build runs as a predeploy step. Deploy the Cloud Run service first, because the hosting rewrite points at it.
+   `DATABASE_URL` must use the Supabase **session pooler** (`aws-0-ap-southeast-1.pooler.supabase.com`, user `ecosure_app.<project-ref>`): the direct `db.<ref>.supabase.co` address is IPv6-only and unreachable from App Hosting, and transaction mode would break the live flag listener.
+3. **Roll out from GitHub.** Trigger rollouts from the connected repository. It never contains `.env`, so local development settings (a `localhost` database, demo login) cannot reach production. `apphosting.yaml` also sets `DEMO_LOGIN_ENABLED=false` and `NODE_ENV=production` explicitly, and the API refuses demo login in production.
 
-Hosting forwards a request to Cloud Run for at most 60 seconds, so the live flag stream reconnects about once a minute. Never set `DEMO_LOGIN_ENABLED` or run `onboard:pilot` against the hosted database; the API refuses demo login in production.
+Never run `onboard:pilot` against the hosted database; its accounts are for local testing only.
+
+[`firebase.json`](firebase.json) and the [`Dockerfile`](Dockerfile) support the alternative setup: classic Firebase Hosting for the web client, with `/api/**` rewritten to a Cloud Run service `ecosure-api`. There, set `SESSION_COOKIE_NAME=__session`, because Hosting forwards no other cookie to Cloud Run.
 
 ### Local test accounts
 
@@ -58,7 +61,7 @@ Hosting forwards a request to Cloud Run for at most 60 seconds, so the live flag
 | Email | Workspace |
 | --- | --- |
 | `citizen@ecosure.test` | Citizen |
-| `shop@ecosure.test` | Collection agent (repair shop, wards 1–10) |
+| `shop@ecosure.test` | Collection agent (repair shop, wards 1â€“10) |
 | `recycler.maker@ecosure.test` | Recycler operator (drafts attestations) |
 | `recycler.checker@ecosure.test` | Recycler approver (issues attestations) |
 | `hub@ecosure.test` | Regional hub supervisor (records arrivals, ships to the recycler) |

@@ -10,12 +10,20 @@ runConfig:
   memoryMiB: 512
 
 env:
-  # Runtime only: NODE_ENV=production during the build would skip the web client's build tools.
+  # DEVELOPMENT STAGE: demo sign-in lists the onboarding test accounts and their shared password
+  # to anyone with the URL. At go-live set NODE_ENV=production, set DEMO_LOGIN_ENABLED to "false",
+  # and remove PILOT_ACCOUNT_PASSWORD; the API refuses to start with demo login in production.
   - variable: NODE_ENV
-    value: production
+    value: development
     availability: [RUNTIME]
   - variable: DEMO_LOGIN_ENABLED
-    value: "false"
+    value: "true"
+    availability: [RUNTIME]
+  - variable: PILOT_ACCOUNT_PASSWORD
+    secret: ecosure-pilot-password
+    availability: [RUNTIME]
+  - variable: COOKIE_SECURE
+    value: "true"
     availability: [RUNTIME]
   - variable: WEB_ORIGIN
     value: https://yesist-12--eco-sure-537d9.asia-southeast1.hosted.app

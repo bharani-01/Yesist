@@ -23,6 +23,7 @@ end $$;
 create schema if not exists app;
 grant usage on schema app to ecosure_app;
 grant usage on schema public to ecosure_app;
+grant usage on schema extensions to ecosure_app;
 
 -- -----------------------------------------------------------------------------
 -- Reference data
@@ -772,7 +773,7 @@ end $$;
 -- either the unit's QR id or an error code; rejected rows never abort the others.
 create or replace function app.register_units(p_batch uuid, p_rows jsonb)
 returns table (row_index int, qr_public_id text, error text)
-language plpgsql security definer set search_path = public, pg_temp as $$
+language plpgsql security definer set search_path = public, extensions, pg_temp as $$
 declare
   b market_batches%rowtype; v_category text; v_existing int; v_row jsonb; v_idx int := 0;
   v_unit uuid; v_qr text;

@@ -76,7 +76,7 @@ await client.connect();
 async function upsertUser({ email, fullName }, role) {
   const { rows } = await client.query(
     `insert into users (email, full_name, password_hash, platform_role) values ($1,$2,$3,$4)
-     on conflict (email) do update set full_name = excluded.full_name, platform_role = excluded.platform_role
+     on conflict (email) do update set full_name = excluded.full_name, platform_role = excluded.platform_role, password_hash = excluded.password_hash
      returning id`,
     [email, fullName, passwordHash, role],
   );
@@ -166,7 +166,7 @@ try {
   for (const c of config.citizens) {
     await client.query(
       `insert into users (email, phone, full_name, password_hash, platform_role) values ($1,$2,$3,$4,'citizen')
-       on conflict (email) do update set phone = excluded.phone, full_name = excluded.full_name`,
+       on conflict (email) do update set phone = excluded.phone, full_name = excluded.full_name, password_hash = excluded.password_hash`,
       [c.email, c.phone, c.fullName, passwordHash],
     );
   }

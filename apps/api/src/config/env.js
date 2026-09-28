@@ -22,6 +22,9 @@ if (!/^[A-Za-z0-9_]{1,64}$/.test(sessionCookieName)) {
   throw new Error('SESSION_COOKIE_NAME may contain only letters, digits, and underscores');
 }
 
+// Always on in production; a hosted development stage served over HTTPS sets it explicitly.
+const secureCookies = nodeEnv === 'production' || process.env.COOKIE_SECURE === 'true';
+
 // "true" trusts one proxy hop; a number trusts that many (Firebase Hosting in front of Cloud Run adds more than one).
 function trustProxyHops(value) {
   if (!value || value === 'false') return false;
@@ -43,6 +46,7 @@ export const env = Object.freeze({
   webOrigins: Object.freeze((process.env.WEB_ORIGIN ?? 'http://localhost:5173').split(',').map((o) => o.trim()).filter(Boolean)),
   trustProxy: trustProxyHops(process.env.TRUST_PROXY),
   sessionCookieName,
+  secureCookies,
   demoLogin,
   demoPassword: demoLogin ? required('PILOT_ACCOUNT_PASSWORD') : null,
 });

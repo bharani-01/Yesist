@@ -7,7 +7,7 @@ import { demoAccounts } from './demo-accounts.js';
 
 const cookieOptions = {
   httpOnly: true,
-  secure: env.isProduction,
+  secure: env.secureCookies,
   sameSite: 'strict',
   path: '/',
 };

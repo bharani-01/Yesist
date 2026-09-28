@@ -37,20 +37,28 @@ Production on a single server: `npm run build` then `npm start`; the API serves 
 
 ### Deploying to Firebase App Hosting
 
-The live deployment is App Hosting backend `yesist-12` in project `eco-sure-537d9` (region `asia-southeast1`): https://yesist-12--eco-sure-537d9.asia-southeast1.hosted.app. App Hosting builds the repository with `npm run build` and runs `npm start`, so the API serves the web client on one origin. [`apphosting.yaml`](apphosting.yaml) sets the production configuration; the database is Supabase PostgreSQL.
+The hosted **development stage** is App Hosting backend `yesist-12` in project `eco-sure-537d9` (region `asia-southeast1`): https://yesist-12--eco-sure-537d9.asia-southeast1.hosted.app. App Hosting builds the repository with `npm run build` and runs `npm start`, so the API serves the web client on one origin. [`apphosting.yaml`](apphosting.yaml) holds its configuration; the database is Supabase PostgreSQL.
 
-1. **Database.** Keep the Supabase connection details in a git-ignored `.env.supabase`: `DATABASE_ADMIN_URL` (the `postgres` user), `DATABASE_URL` (the `ecosure_app` role through the session pooler), `ECOSURE_APP_DB_PASSWORD`, and `DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt`. Apply the schema with `node --env-file=.env.supabase apps/api/scripts/db-setup.js`. The schema revokes Supabase's `anon` and `authenticated` roles from every table, because EcoSure never uses Supabase's REST API.
-2. **Secrets.** Create the three secrets that `apphosting.yaml` references and give the backend access to them. Use the values from `.env.supabase`:
+While in development, the hosted sign-in page lists the onboarding test accounts and their shared password, which anyone with the URL can see. It uses `NODE_ENV=development`, `DEMO_LOGIN_ENABLED=true`, and `COOKIE_SECURE=true`, so the session cookie stays HTTPS-only.
+
+1. **Database.** Keep the Supabase connection details in a git-ignored `.env.supabase`: `DATABASE_ADMIN_URL` (the `postgres` user), `DATABASE_URL` (the `ecosure_app` role through the session pooler), `ECOSURE_APP_DB_PASSWORD`, `PILOT_ACCOUNT_PASSWORD`, and `DATABASE_CA_CERT_FILE=database/certs/supabase-root-ca.crt`. Apply the schema, then create the test accounts:
+   ```
+   node --env-file=.env.supabase apps/api/scripts/db-setup.js
+   node --env-file=.env.supabase apps/api/scripts/onboard-pilot.js
+   ```
+   The schema revokes Supabase's `anon` and `authenticated` roles from every table, because EcoSure never uses Supabase's REST API.
+2. **Secrets.** Create the secrets that `apphosting.yaml` references and give the backend access to them. Use the values from `.env.supabase`:
    ```
    firebase apphosting:secrets:set ecosure-database-url --project eco-sure-537d9
    firebase apphosting:secrets:set ecosure-identifier-hmac --project eco-sure-537d9
    firebase apphosting:secrets:set ecosure-handover-hmac --project eco-sure-537d9
-   firebase apphosting:secrets:grantaccess ecosure-database-url,ecosure-identifier-hmac,ecosure-handover-hmac --backend yesist-12 --project eco-sure-537d9
+   firebase apphosting:secrets:set ecosure-pilot-password --project eco-sure-537d9
+   firebase apphosting:secrets:grantaccess ecosure-database-url,ecosure-identifier-hmac,ecosure-handover-hmac,ecosure-pilot-password --backend yesist-12 --project eco-sure-537d9
    ```
    `DATABASE_URL` must use the Supabase **session pooler** (`aws-0-ap-southeast-1.pooler.supabase.com`, user `ecosure_app.<project-ref>`): the direct `db.<ref>.supabase.co` address is IPv6-only and unreachable from App Hosting, and transaction mode would break the live flag listener.
-3. **Roll out from GitHub.** Trigger rollouts from the connected repository. It never contains `.env`, so local development settings (a `localhost` database, demo login) cannot reach production. `apphosting.yaml` also sets `DEMO_LOGIN_ENABLED=false` and `NODE_ENV=production` explicitly, and the API refuses demo login in production.
+3. **Roll out from GitHub.** Trigger rollouts from the connected repository. It never contains `.env`, so a local `localhost` database or local password cannot reach the hosted stage.
 
-Never run `onboard:pilot` against the hosted database; its accounts are for local testing only.
+**Going live.** In `apphosting.yaml`, set `NODE_ENV=production` and `DEMO_LOGIN_ENABLED` to `"false"`, and remove `PILOT_ACCOUNT_PASSWORD` and `COOKIE_SECURE`. The API refuses to start with demo login in production. Also remove the test organisations and accounts from the hosted database.
 
 [`firebase.json`](firebase.json) and the [`Dockerfile`](Dockerfile) support the alternative setup: classic Firebase Hosting for the web client, with `/api/**` rewritten to a Cloud Run service `ecosure-api`. There, set `SESSION_COOKIE_NAME=__session`, because Hosting forwards no other cookie to Cloud Run.
 
@@ -61,7 +69,7 @@ Never run `onboard:pilot` against the hosted database; its accounts are for loca
 | Email | Workspace |
 | --- | --- |
 | `citizen@ecosure.test` | Citizen |
-| `shop@ecosure.test` | Collection agent (repair shop, wards 1â€“10) |
+| `shop@ecosure.test` | Collection agent (repair shop, wards 1Ã¢â‚¬â€œ10) |
 | `recycler.maker@ecosure.test` | Recycler operator (drafts attestations) |
 | `recycler.checker@ecosure.test` | Recycler approver (issues attestations) |
 | `hub@ecosure.test` | Regional hub supervisor (records arrivals, ships to the recycler) |

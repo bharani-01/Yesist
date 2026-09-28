@@ -32,9 +32,44 @@ export function HubLotsPage() {
   const [filter, setFilter] = useState('open');
   const count = (f) => query.data?.filter((l) => IN_FILTER[f].includes(l.stage)).length ?? 0;
 
+  const lots = query.data ?? [];
+  const inboundCount = lots.filter((l) => l.stage === 'inbound').length;
+  const atHubLots = lots.filter((l) => l.stage === 'at_hub');
+  const atHubWeight = atHubLots.reduce((acc, l) => acc + (Number(l.hubNetKg) || 0), 0);
+  const shippedCount = lots.filter((l) => l.stage === 'shipped' || l.stage === 'delivered').length;
+
   return (
     <div className="page">
-      <PageHeader title="Lots" description="Sealed lots routed through your hub. Weigh each one on arrival, then load it on a shipment to the recycler." />
+      <PageHeader
+        title="Lots Inventory"
+        eyebrow="REGIONAL HUB DASHBOARD"
+        description="Sealed lots routed through your hub. Weigh each one on arrival, then load it on a shipment to the recycler."
+      />
+
+      {/* Real Backend Metrics */}
+      <div className="metrics metrics--4">
+        <Metric
+          label="Inbound on the road"
+          value={inboundCount.toString()}
+          hint="Dispatched by agents, awaiting hub arrival"
+        />
+        <Metric
+          label="In hub inventory"
+          value={atHubLots.length.toString()}
+          hint="Weighed & stored at hub"
+        />
+        <Metric
+          label="Hub inventory weight"
+          value={formatKg(atHubWeight)}
+          hint="Total verified weight at hub"
+        />
+        <Metric
+          label="Processed & shipped"
+          value={shippedCount.toString()}
+          hint="Shipped or delivered to recycler"
+        />
+      </div>
+
       <Segmented
         name="hub-lot-filter"
         value={filter}

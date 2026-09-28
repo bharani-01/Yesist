@@ -28,6 +28,7 @@ export const listForRequester = (tx, requesterId) =>
     tx,
     `select p.id, p.reference, p.status, p.preferred_date as "preferredDate", p.preferred_window as "preferredWindow",
             p.scheduled_for as "scheduledFor", p.scheduled_window as "scheduledWindow", p.created_at as "createdAt",
+            p.collected_net_kg as "collectedNetKg", p.material_paid_amount as "materialPaidAmount",
             w.name as "wardName",
             coalesce(sum(i.quantity), 0)::int as "itemCount",
             string_agg(wc.name, ', ' order by wc.sort_order) as categories

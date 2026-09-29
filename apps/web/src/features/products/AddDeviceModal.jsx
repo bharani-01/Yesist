@@ -116,7 +116,7 @@ function ScanningView({ onScanResult, onBack, scanError, setScanError }) {
     try {
       const result = await QrScannerLib.scanImage(file, { returnDetailedScanResult: true });
       const id = parseQrId(result.data);
-      if (!id) { setScanError('That image doesn't contain an EcoSure QR code. Try again.'); }
+      if (!id) { setScanError("That image doesn't contain an EcoSure QR code. Try again."); }
       else { onScanResult(id); }
     } catch {
       setScanError('No QR code found in that image. Try a clearer photo.');

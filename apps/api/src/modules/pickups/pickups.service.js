@@ -25,9 +25,10 @@ export async function createPickup(input, ctx) {
     throw Errors.conflict('date_out_of_range', `Choose a date between today and ${BOOKING_HORIZON_DAYS} days from now.`);
   }
   return withTx(ctx.userId, async (tx) => {
-    if (await repo.hasActivePickup(tx, ctx.userId)) {
-      throw Errors.conflict('already_active', 'You already have an active pickup request.');
-    }
+    // Removed active pickup restriction to allow multiple bookings for different devices
+    // if (await repo.hasActivePickup(tx, ctx.userId)) {
+    //   throw Errors.conflict('already_active', 'You already have an active pickup request.');
+    // }
     if (!(await repo.wardExists(tx, input.wardId))) throw Errors.conflict('unknown_ward', 'Select a ward from the list.');
     const codes = input.items.map((i) => i.categoryCode);
     if ((await repo.countActiveCategories(tx, codes)) !== codes.length) {

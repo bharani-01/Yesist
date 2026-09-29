@@ -77,17 +77,7 @@ export function NewPickupPage() {
             {(devices) => (
               <AsyncView query={pickupsQ}>
                 {(pickups) => {
-                  const hasActive = pickups.some((p) => p.status === 'requested' || p.status === 'scheduled');
-                  if (hasActive) {
-                    return (
-                      <EmptyState 
-                        icon="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" 
-                        title="Active pickup exists" 
-                        description="You already have an active pickup request. Please wait until it is collected before booking another." 
-                      />
-                    );
-                  }
-                  return <Wizard refData={ref} devices={devices} />;
+                  return <Wizard refData={ref} devices={devices} pickups={pickups} />;
                 }}
               </AsyncView>
             )}
@@ -98,7 +88,7 @@ export function NewPickupPage() {
   );
 }
 
-function Wizard({ refData, devices }) {
+function Wizard({ refData, devices, pickups = [] }) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -244,8 +234,31 @@ function Wizard({ refData, devices }) {
             <div className="device-picker">
               {availableDevices.map((d) => {
                 const deviceId = d.qrPublicId || d.id || `dev-${Math.random()}`;
+                const activeBooking = pickups.find(p => (p.status === 'requested' || p.status === 'scheduled') && p.categories?.toLowerCase().includes(d.categoryName?.toLowerCase()));
+
+                const cardContent = (
+                  <>
+                    <div className="device-card__avatar">
+                      <DeviceIcon categoryCode={d.categoryCode} />
+                    </div>
+                    <div className="device-card__info">
+                      <strong>{[d.brand, d.modelName].filter(Boolean).join(' ') || d.categoryName}</strong>
+                      <span>{d.categoryName} • ID: {deviceId.slice(0, 6)}</span>
+                    </div>
+                  </>
+                );
+
+                if (activeBooking) {
+                  return (
+                    <div key={deviceId} className="device-card" style={{ opacity: 0.65, cursor: 'default' }}>
+                      {cardContent}
+                      <Link to={`/pickups/${activeBooking.id}`} className="btn btn--secondary btn--sm tap-effect" style={{ textDecoration: 'none' }}>View Booking</Link>
+                    </div>
+                  );
+                }
+
                 return (
-                  <label key={deviceId} className={`device-card ${selectedDeviceId === deviceId ? 'is-selected' : ''}`}>
+                  <label key={deviceId} className={`device-card tap-effect ${selectedDeviceId === deviceId ? 'is-selected' : ''}`}>
                     <input 
                       type="radio" 
                       name="device" 
@@ -254,13 +267,7 @@ function Wizard({ refData, devices }) {
                       onChange={() => setSelectedDeviceId(deviceId)} 
                       className="sr-only"
                     />
-                    <div className="device-card__avatar">
-                      <DeviceIcon categoryCode={d.categoryCode} />
-                    </div>
-                    <div className="device-card__info">
-                      <strong>{[d.brand, d.modelName].filter(Boolean).join(' ') || d.categoryName}</strong>
-                      <span>{d.categoryName} • ID: {deviceId.slice(0, 6)}</span>
-                    </div>
+                    {cardContent}
                     <div className="device-card__radio" />
                   </label>
                 );

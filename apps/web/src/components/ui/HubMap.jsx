@@ -35,8 +35,8 @@ export function HubMap() {
       attributionControl={interactive}
     >
       <TileLayer
-        attribution='&copy; OpenStreetMap'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
       />
       {hubs.map(hub => (
         <Marker key={hub.id} position={hub.position}>

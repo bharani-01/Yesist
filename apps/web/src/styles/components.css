@@ -925,53 +925,238 @@
 .photo-upload__hint { font-size: var(--text-xs); font-weight: 400; color: var(--color-ink-subtle); }
 .photo-upload__img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
-/* ── Plan-mode iOS-style toggle ── */
-.plan-mode-toggle {
+/* ═══════════════════════════════════════════════════════════
+   QR Guide overlay
+   ═══════════════════════════════════════════════════════════ */
+.qr-guide {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-6);
+  animation: fade-down 200ms var(--ease) both;
+}
+.qr-guide__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+.qr-guide__title {
+  font-size: var(--text-xl);
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  margin-top: 2px;
+}
+.qr-guide__img {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+  max-height: 200px;
+}
+.qr-guide__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+.qr-guide__steps li {
+  display: flex;
   gap: var(--space-3);
-  padding: var(--space-4);
-  background: var(--color-surface-muted);
-  border-radius: var(--radius-md);
-  cursor: pointer;
+  align-items: flex-start;
 }
-.plan-mode-toggle input { position: absolute; opacity: 0; pointer-events: none; }
-.plan-mode-toggle__track {
-  flex-shrink: 0;
-  width: 44px;
-  height: 26px;
-  background: var(--color-border-strong);
-  border-radius: 999px;
-  position: relative;
-  transition: background 200ms var(--ease);
-}
-.plan-mode-toggle input:checked ~ .plan-mode-toggle__track { background: var(--color-brand); }
-.plan-mode-toggle__thumb {
-  position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 20px;
-  height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  box-shadow: 0 1px 3px rgba(0,0,0,.18);
-  transition: transform 200ms var(--ease);
-}
-.plan-mode-toggle input:checked ~ .plan-mode-toggle__track .plan-mode-toggle__thumb {
-  transform: translateX(18px);
-}
-.plan-mode-toggle__label {
-  display: flex;
-  flex-direction: column;
+.qr-guide__steps li div {
+  display: grid;
   gap: 2px;
+}
+.qr-guide__steps li strong {
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-ink);
 }
-.plan-mode-toggle__hint {
-  font-size: var(--text-xs);
-  font-weight: 400;
+.qr-guide__steps li p {
+  font-size: var(--text-sm);
   color: var(--color-ink-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+.qr-guide__step-num {
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  color: #fff;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.qr-guide__actions { display: grid; gap: var(--space-3); }
+
+/* ── QR row update: icon + label side ── */
+.add-device-qr-row__text {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Scanning view
+   ═══════════════════════════════════════════════════════════ */
+.scanning-view {
+  display: grid;
+  gap: var(--space-4);
+  animation: fade-down 180ms var(--ease) both;
+}
+.scanning-view__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  background: transparent;
+  border: 0;
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  width: fit-content;
+  transition: color 120ms var(--ease);
+}
+.scanning-view__back:hover { color: var(--color-ink); }
+.scanning-view__camera {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.scanning-view__or {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--color-ink-subtle);
+  font-weight: 500;
+}
+.scanning-view__or::before,
+.scanning-view__or::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+.scanning-view__upload-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 48px;
+  border: 1.5px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-canvas);
+  color: var(--color-ink-muted);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease), background 150ms var(--ease), color 150ms var(--ease);
+}
+.scanning-view__upload-btn:hover:not(:disabled) {
+  border-color: var(--color-brand);
+  background: var(--color-brand-weak);
+  color: var(--color-ink);
+}
+.scanning-view__upload-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* ═══════════════════════════════════════════════════════════
+   Confirmation card
+   ═══════════════════════════════════════════════════════════ */
+.confirm-view {
+  display: grid;
+  gap: var(--space-5);
+  animation: fade-down 200ms var(--ease) both;
+}
+.confirm-view__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 5px 12px;
+  background: var(--color-success-weak);
+  color: var(--color-success);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  width: fit-content;
+}
+.confirm-view__card {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-4);
+}
+.confirm-view__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.confirm-view__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  background: var(--color-ink);
+  color: #fff;
+  font-size: var(--text-xl);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: -0.02em;
+}
+.confirm-view__name {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.confirm-view__category {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  margin: 2px 0 0;
+}
+.confirm-view__divider { height: 1px; background: var(--color-border); }
+.confirm-view__details {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-2) var(--space-4);
+  margin: 0;
+  font-size: var(--text-sm);
+}
+.confirm-view__details dt {
+  color: var(--color-ink-muted);
+  font-weight: 500;
+  white-space: nowrap;
+}
+.confirm-view__details dd {
+  color: var(--color-ink);
+  font-weight: 500;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.confirm-view__notice {
+  font-size: var(--text-xs);
+  color: var(--color-ink-subtle);
+  line-height: 1.6;
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-sm);
 }
 
 /* ── Device list thumbnail ── */

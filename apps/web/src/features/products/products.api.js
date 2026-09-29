@@ -4,6 +4,11 @@ export const productsApi = {
   journey: (qr, signal) => http.get(`/public/products/${encodeURIComponent(qr)}`, { signal }).then((r) => r.product),
   myDevices: (signal) => http.get('/devices', { signal }).then((r) => r.devices),
   claim: (qr) => http.post('/devices/claim', { qr }),
+  /** Register a product the user entered manually (no EcoSure QR label required). */
+  addManual: (payload) => http.post('/devices/manual', payload).then((r) => r.device),
+  /** Upload a product photo; returns the public URL string. */
+  uploadPhoto: (formData) =>
+    http.upload('/devices/photo', formData).then((r) => r.url),
 };
 
 /** Stages a labelled product moves through, in order. */

@@ -30,8 +30,9 @@ export function createApp() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:'],
-        styleSrc: ["'self'", "'unsafe-inline'"],
+        imgSrc: ["'self'", 'data:', 'https://*.tile.openstreetmap.org', 'https://unpkg.com'],
+        styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
+        fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         connectSrc: ["'self'"],
         frameAncestors: ["'none'"],
       },

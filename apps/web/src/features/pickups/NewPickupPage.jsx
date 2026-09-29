@@ -393,8 +393,8 @@ function Wizard({ refData, devices }) {
             <h2 className="wizard-title">Final Confirmation</h2>
             <p className="wizard-desc">Please review the handover instructions before confirming.</p>
             
-            <div className="instruction-card" style={{ background: 'var(--color-surface-muted)', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', marginTop: 'var(--space-2)' }}>
-              <img src="/handover-guide.jpg" alt="Handover instructions" style={{ width: '100%', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-4)', objectFit: 'cover', aspectRatio: '16/9' }} />
+            <div className="instruction-card" style={{ background: '#ffffff', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', marginTop: 'var(--space-2)', border: '1px solid var(--color-border)' }}>
+              <img src="/handover-guide.jpg" alt="Handover instructions" style={{ width: '100%', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-4)', objectFit: 'contain', aspectRatio: '4/3' }} />
               <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-md)', color: 'var(--color-ink)' }}>Handover Instructions</h3>
               <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', color: 'var(--color-ink-subtle)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>
                 <li>A verified EcoSure collector will arrive at your location.</li>

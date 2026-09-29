@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoSure - Map</title>
+    
+    <!-- SOTA Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Leaflet CSS for Real Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        background: '#FFFFFF',
+                        ink: {
+                            900: '#000000',
+                            500: '#86868B',
+                            200: '#E5E5EA',
+                        },
+                        brand: {
+                            500: '#00D15E',
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 -10px 40px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; /* Prevent scrolling, map is full screen */
+        }
+
+        .tap-effect { transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease; }
+        .tap-effect:active { transform: scale(0.96); opacity: 0.7; }
+        .tap-effect:hover { transform: scale(1.02); }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 50ms; }
+        .delay-200 { transition-delay: 100ms; }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-top: 0.5px solid rgba(0,0,0,0.08);
+        }
+
+        /* Leaflet Map overrides for premium feel */
+        #map {
+            width: 100%;
+            height: 100%;
+            z-index: 10;
+        }
+        .leaflet-control-zoom {
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important;
+            border-radius: 12px !important;
+            overflow: hidden;
+            margin-right: 24px !important;
+            margin-bottom: 24px !important;
+        }
+        .leaflet-control-zoom a {
+            color: #000 !important;
+            background: #fff !important;
+            border-bottom: 1px solid #E5E5EA !important;
+        }
+        
+        /* Custom Map Marker */
+        .custom-marker {
+            background: none;
+            border: none;
+        }
+        .marker-pin {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #000;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .marker-pin::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 8px;
+            background: #000;
+        }
+    </style>
+</head>
+<body class="lg:bg-[#FAFAFA]">
+
+    <!-- Mobile Header overlay -->
+    <header class="lg:hidden absolute top-0 left-0 right-0 px-6 pt-12 pb-6 z-40 fade-up">
+        <div class="bg-white/90 backdrop-blur-md rounded-2xl px-5 py-3 shadow-glass flex items-center justify-between border border-ink-200">
+            <h1 class="text-lg font-semibold tracking-tight">Nearby Hubs</h1>
+            <button class="w-8 h-8 rounded-full bg-ink-200/50 flex items-center justify-center tap-effect">
+                <i data-lucide="search" class="w-4 h-4 text-ink-900"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="lg:flex lg:max-w-7xl lg:mx-auto lg:h-screen lg:relative">
+        
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex flex-col w-64 border-r border-ink-200 bg-white h-full absolute left-0 top-0 pt-12 px-8 pb-8 z-50">
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold tracking-tight text-brand-500 flex items-center gap-2">
+                    <i data-lucide="leaf" class="w-6 h-6"></i> EcoSure
+                </h2>
+            </div>
+            
+            <nav class="flex-1 space-y-4">
+                <a href="Dashboard.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="products.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="smartphone" class="w-5 h-5"></i> My Products
+                </a>
+                <a href="wallet.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="wallet" class="w-5 h-5"></i> Wallet
+                </a>
+                <a href="#" class="flex items-center gap-3 text-ink-900 font-semibold tap-effect px-4 py-3 bg-ink-200/40 rounded-xl">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i> Map
+                </a>
+            </nav>
+
+            <button onclick="logout()" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl mt-auto">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </button>
+        </aside>
+
+        <!-- Main Content Area (Full Screen Real Map) -->
+        <main class="lg:ml-64 flex-1 h-screen relative bg-[#F5F5F7]">
+            
+            <!-- Real Leaflet Map Container -->
+            <div id="map"></div>
+
+            <!-- Floating Info Panel (Desktop) / Bottom Sheet (Mobile) -->
+            <div id="hubDetailsCard" class="absolute bottom-28 lg:bottom-12 left-6 right-6 lg:left-auto lg:right-12 lg:w-96 bg-white/95 backdrop-blur-2xl border border-ink-200 rounded-3xl shadow-glass overflow-hidden z-[400] fade-up delay-100 hidden">
+                <div class="p-6 border-b border-ink-200">
+                    <h3 id="hubName" class="text-lg font-semibold text-ink-900">Select a Hub</h3>
+                    <p id="hubTime" class="text-sm text-brand-500 font-medium mt-1">Open now</p>
+                </div>
+                <div class="p-6 bg-white space-y-4">
+                    <div class="flex items-start gap-4">
+                        <i data-lucide="map-pin" class="w-5 h-5 text-ink-500 shrink-0"></i>
+                        <p id="hubAddress" class="text-sm text-ink-900 font-medium">Click a pin on the map to see details here.</p>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <i data-lucide="box" class="w-5 h-5 text-ink-500 shrink-0"></i>
+                        <p id="hubAccepts" class="text-sm text-ink-900 font-medium">Accepts: Various E-Waste</p>
+                    </div>
+                </div>
+                <div class="p-4 bg-[#FAFAFA] border-t border-ink-200 flex gap-3">
+                    <button class="flex-1 bg-ink-900 text-white rounded-xl py-3 font-medium text-sm tap-effect shadow-md flex justify-center items-center gap-2">
+                        <i data-lucide="navigation" class="w-4 h-4"></i> Directions
+                    </button>
+                    <button class="flex-1 bg-white border border-ink-200 text-ink-900 rounded-xl py-3 font-medium text-sm tap-effect flex justify-center items-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Drop here
+                    </button>
+                </div>
+            </div>
+            
+        </main>
+
+        <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
+        <nav class="lg:hidden fixed bottom-0 w-full glass-nav pb-safe pt-3 px-6 z-50">
+            <div class="flex justify-between items-center pb-6">
+                <button onclick="window.location.href='Dashboard.html'" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Home</span>
+                </button>
+                <button onclick="window.location.href='products.html'" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="smartphone" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Products</span>
+                </button>
+                <!-- FAB -->
+                <div class="relative -top-5">
+                    <button class="w-12 h-12 rounded-full bg-ink-900 text-white flex items-center justify-center shadow-lg tap-effect">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <button onclick="window.location.href='wallet.html'" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="wallet" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Wallet</span>
+                </button>
+                <button class="flex flex-col items-center gap-1 tap-effect w-16 group">
+                    <i data-lucide="map-pin" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-semibold text-ink-900">Map</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Logic & API Integration -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        lucide.createIcons();
+
+        function triggerAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-up').forEach((el) => observer.observe(el));
+        }
+
+        async function initMap() {
+            // Initialize map centered on Chennai
+            const map = L.map('map', {
+                zoomControl: false 
+            }).setView([13.0827, 80.2707], 12);
+
+            // Add zoom control to bottom right
+            L.control.zoom({
+                position: 'bottomright'
+            }).addTo(map);
+
+            // Use Standard OpenStreetMap tiles (100% Free, No API Key Required)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Custom Marker Icon
+            const customIcon = L.divIcon({
+                className: 'custom-marker',
+                html: '<div class="marker-pin"></div>',
+                iconSize: [24, 32],
+                iconAnchor: [12, 32]
+            });
+
+            // Add mock hubs in Chennai
+            const hubs = [
+                { 
+                    lat: 13.0418, lng: 80.2341, 
+                    name: "T-Nagar E-Waste Hub", 
+                    time: "Open now • Closes 8 PM",
+                    address: "South Usman Road<br><span class='text-ink-500 font-normal'>T-Nagar, Chennai 600017</span>",
+                    accepts: "Accepts: Phones, Laptops, Batteries"
+                },
+                { 
+                    lat: 13.0012, lng: 80.2565, 
+                    name: "Adyar Recycling Center", 
+                    time: "Open now • Closes 6 PM",
+                    address: "LB Road, Near Depot<br><span class='text-ink-500 font-normal'>Adyar, Chennai 600020</span>",
+                    accepts: "Accepts: Large Appliances, TVs, PCs"
+                },
+                { 
+                    lat: 13.0067, lng: 80.2206, 
+                    name: "Guindy Drop-off", 
+                    time: "Open now • 24/7 Kiosk",
+                    address: "Industrial Estate<br><span class='text-ink-500 font-normal'>Guindy, Chennai 600032</span>",
+                    accepts: "Accepts: Cables, Small Electronics"
+                }
+            ];
+
+            // Try to fetch real shops from API
+            try {
+                const token = localStorage.getItem('ecosure_jwt');
+                if (token) {
+                    const res = await fetch('/api/consumer/shops', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const json = await res.json();
+                    if (json.success && json.data.length > 0) {
+                        hubs = json.data;
+                    }
+                }
+            } catch(e) {
+                console.error("Failed to fetch shops, falling back to mock data", e);
+            }
+
+            const hubDetailsCard = document.getElementById('hubDetailsCard');
+            const hubName = document.getElementById('hubName');
+            const hubTime = document.getElementById('hubTime');
+            const hubAddress = document.getElementById('hubAddress');
+            const hubAccepts = document.getElementById('hubAccepts');
+
+            hubs.forEach(hub => {
+                const marker = L.marker([hub.latitude || hub.lat, hub.longitude || hub.lng], { icon: customIcon }).addTo(map);
+                
+                // When pin is clicked, populate and show the details panel
+                marker.on('click', () => {
+                    hubName.textContent = hub.shop_name || hub.name;
+                    hubTime.textContent = hub.operating_hours || hub.time || "Open now";
+                    hubAddress.innerHTML = hub.shop_address || hub.address || hub.operating_city || "Address not provided";
+                    hubAccepts.textContent = hub.accepts || "Accepts: Various E-Waste";
+                    
+                    hubDetailsCard.classList.remove('hidden');
+                    // Fly to the marker for a premium interaction feel
+                    map.flyTo([hub.latitude || hub.lat, hub.longitude || hub.lng], 14, { duration: 1.5 });
+                });
+            });
+        }
+
+        // Initialize map immediately
+        initMap();
+
+        function logout() {
+            localStorage.removeItem('ecosure_jwt');
+            localStorage.removeItem('ecosure_user');
+            window.location.href = '../auth.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            triggerAnimations();
+            initMap();
+        });
+    </script>
+</body>
+</html>

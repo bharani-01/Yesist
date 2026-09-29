@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoSure - Wallet</title>
+    
+    <!-- SOTA Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        background: '#FFFFFF',
+                        ink: {
+                            900: '#000000',
+                            500: '#86868B',
+                            200: '#E5E5EA',
+                        },
+                        brand: {
+                            500: '#00D15E',
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 -10px 40px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .tap-effect { transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease; }
+        .tap-effect:active { transform: scale(0.96); opacity: 0.7; }
+        .tap-effect:hover { transform: scale(1.02); }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 50ms; }
+        .delay-200 { transition-delay: 100ms; }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-top: 0.5px solid rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="pb-28 lg:pb-0 lg:bg-[#FAFAFA]">
+
+    <!-- Mobile Header -->
+    <header class="lg:hidden px-6 pt-12 pb-6 sticky top-0 bg-white/90 backdrop-blur-md z-40 fade-up">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="text-xs font-medium text-ink-500 uppercase tracking-widest mb-1">Balance</p>
+                <h1 class="text-2xl font-semibold tracking-tight">EcoWallet</h1>
+            </div>
+            <button class="w-10 h-10 rounded-full bg-ink-200/50 text-ink-900 flex items-center justify-center tap-effect">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="lg:flex lg:max-w-7xl lg:mx-auto lg:h-screen">
+        
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex flex-col w-64 border-r border-ink-200 bg-white h-full fixed left-0 top-0 pt-12 px-8 pb-8 z-50">
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold tracking-tight text-brand-500 flex items-center gap-2">
+                    <i data-lucide="leaf" class="w-6 h-6"></i> EcoSure
+                </h2>
+            </div>
+            
+            <nav class="flex-1 space-y-4">
+                <a href="Dashboard.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="products.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="smartphone" class="w-5 h-5"></i> My Products
+                </a>
+                <a href="#" class="flex items-center gap-3 text-ink-900 font-semibold tap-effect px-4 py-3 bg-ink-200/40 rounded-xl">
+                    <i data-lucide="wallet" class="w-5 h-5"></i> Wallet
+                </a>
+                <a href="map.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="map-pin" class="w-5 h-5"></i> Map
+                </a>
+            </nav>
+
+            <button onclick="logout()" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl mt-auto">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="lg:ml-64 flex-1 lg:p-12 lg:bg-[#FAFAFA] min-h-screen">
+            
+            <!-- Desktop Header -->
+            <header class="hidden lg:flex justify-between items-center mb-12 fade-up">
+                <div>
+                    <p class="text-sm font-medium text-ink-500 uppercase tracking-widest mb-1">Balance</p>
+                    <h1 class="text-4xl font-semibold tracking-tight">EcoWallet</h1>
+                </div>
+                <button class="px-6 py-3 bg-ink-200/50 text-ink-900 rounded-full font-medium tap-effect flex items-center gap-2 hover:bg-ink-200 transition-colors">
+                    <i data-lucide="settings" class="w-4 h-4"></i> Settings
+                </button>
+            </header>
+
+            <div class="px-6 lg:px-0">
+                <section class="fade-up delay-100 bg-white lg:p-12 lg:rounded-3xl lg:border lg:border-ink-200 lg:shadow-sm">
+                    
+                    <!-- Massive Balance Display -->
+                    <div class="text-center py-10 lg:py-16 border-b border-ink-200 mb-8">
+                        <p class="text-sm font-medium text-ink-500 mb-3">Available Payout</p>
+                        <div class="flex items-center justify-center gap-2">
+                            <span class="text-4xl lg:text-5xl font-medium text-ink-500">₹</span>
+                            <h2 class="text-7xl lg:text-8xl font-light tracking-tighter text-ink-900" id="walletBalance">0.00</h2>
+                        </div>
+                        <div class="mt-10 flex justify-center gap-4">
+                            <button class="px-8 py-3.5 bg-ink-900 text-white rounded-full font-medium shadow-lg hover:bg-black tap-effect flex items-center gap-2">
+                                <i data-lucide="arrow-down-to-line" class="w-5 h-5"></i> Withdraw
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Transactions List -->
+                    <div class="max-w-2xl mx-auto">
+                        <h3 class="text-xl font-semibold tracking-tight mb-6">Recent Transactions</h3>
+                        
+                        <div id="transactionsContainer" class="flex flex-col">
+                            <!-- Empty State -->
+                            <div id="emptyTransactionsState" class="hidden flex flex-col items-center justify-center py-12 text-center">
+                                <div class="w-16 h-16 bg-ink-200/30 rounded-full flex items-center justify-center mb-4">
+                                    <i data-lucide="receipt" class="w-8 h-8 text-ink-500"></i>
+                                </div>
+                                <h4 class="text-lg font-medium text-ink-900">No transactions yet</h4>
+                                <p class="text-sm text-ink-500 mt-1">When your recycled products are processed, payouts will appear here.</p>
+                            </div>
+                            
+                            <!-- List -->
+                            <div id="transactionsList" class="hidden flex-col space-y-2">
+                                <!-- JS Injected Items -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Mobile Bottom Navigation (Hidden on Desktop) -->
+        <nav class="lg:hidden fixed bottom-0 w-full glass-nav pb-safe pt-3 px-6 z-50">
+            <div class="flex justify-between items-center pb-6">
+                <button onclick="window.location.href='Dashboard.html'" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="layout-dashboard" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Home</span>
+                </button>
+                <button onclick="window.location.href='products.html'" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="smartphone" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Products</span>
+                </button>
+                <!-- FAB -->
+                <div class="relative -top-5">
+                    <button class="w-12 h-12 rounded-full bg-ink-900 text-white flex items-center justify-center shadow-lg tap-effect">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </button>
+                </div>
+                <button class="flex flex-col items-center gap-1 tap-effect w-16 group">
+                    <i data-lucide="wallet" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-semibold text-ink-900">Wallet</span>
+                </button>
+                <button onclick="window.location.href='map.html'" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="map-pin" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Map</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Logic & API Integration -->
+    <script>
+        lucide.createIcons();
+
+        async function loadWallet() {
+            const token = localStorage.getItem('ecosure_jwt');
+            if (!token) {
+                window.location.href = '../auth.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/consumer/dashboard', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '../auth.html';
+                    return;
+                }
+
+                const json = await response.json();
+                if (json.success) {
+                    renderWallet(json.data);
+                }
+            } catch (err) {
+                console.error("Wallet fetch error:", err);
+            }
+        }
+
+        function renderWallet(data) {
+            document.getElementById('walletBalance').textContent = data.walletBalance;
+
+            const transactionsList = document.getElementById('transactionsList');
+            const emptyTransactions = document.getElementById('emptyTransactionsState');
+
+            // Find recycled items to mock as transactions
+            const recycledItems = data.devices.filter(d => d.status === 'certificate_issued');
+
+            if (recycledItems.length === 0) {
+                emptyTransactions.classList.remove('hidden');
+                transactionsList.classList.add('hidden');
+            } else {
+                emptyTransactions.classList.add('hidden');
+                transactionsList.classList.remove('hidden');
+                transactionsList.innerHTML = '';
+                
+                recycledItems.forEach(item => {
+                    const payout = (parseFloat(item.gross_weight_kg || 0) * 15).toFixed(2);
+                    transactionsList.innerHTML += `
+                        <div class="py-4 flex items-center justify-between tap-effect cursor-pointer group border-b border-ink-200 last:border-0">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 bg-brand-500/10 rounded-full flex items-center justify-center">
+                                    <i data-lucide="arrow-down-left" class="w-5 h-5 text-brand-500"></i>
+                                </div>
+                                <div>
+                                    <p class="text-base font-medium text-ink-900 capitalize">${item.category.replace(/_/g, ' ')} Recycled</p>
+                                    <p class="text-xs text-ink-500 mt-0.5">${new Date(item.created_at).toLocaleDateString()} • From Manifest ${item.manifest_number}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-semibold text-ink-900">+₹${payout}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+                lucide.createIcons();
+            }
+
+            triggerAnimations();
+        }
+
+        function triggerAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-up').forEach((el) => observer.observe(el));
+        }
+
+        function logout() {
+            localStorage.removeItem('ecosure_jwt');
+            localStorage.removeItem('ecosure_user');
+            window.location.href = '../auth.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', loadWallet);
+    </script>
+</body>
+</html>

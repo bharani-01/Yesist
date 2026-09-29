@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSure | Authentication</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        .input-field {
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #000000;
+            box-shadow: 0 0 0 1px #000000;
+        }
+
+        .btn-primary {
+            transition: transform 0.1s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .role-card {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .role-card:hover {
+            border-color: #000000;
+        }
+
+        .role-card.active {
+            border-color: #000000;
+            background-color: #fafafa;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .fade-enter {
+            animation: fade 0.3s ease forwards;
+        }
+
+        @keyframes fade {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #e5e5e5;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #d4d4d4;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-black selection:text-white">
+
+    <div class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <!-- Left Side: Minimalist Branding -->
+        <div class="hidden md:flex flex-col justify-center space-y-8 pr-8 border-r border-gray-100 h-full py-12">
+            <div>
+                <div class="w-12 h-12 bg-black text-white flex items-center justify-center rounded-xl mb-8">
+                    <i data-lucide="leaf" class="w-6 h-6"></i>
+                </div>
+                <h1 class="text-4xl font-semibold tracking-tight leading-tight mb-4 text-black">
+                    Enterprise <br>E-Waste OS
+                </h1>
+                <p class="text-gray-500 text-sm leading-relaxed max-w-sm">
+                    A streamlined, closed-loop infrastructure for transparent e-waste management and EPR compliance.
+                </p>
+            </div>
+
+
+        </div>
+
+        <!-- Right Side: Auth Forms -->
+        <div class="w-full max-w-md mx-auto">
+            <!-- Tab Switcher -->
+            <div class="flex items-center space-x-1 bg-gray-50 p-1 rounded-lg mb-8 w-max border border-gray-100">
+                <button onclick="switchTab('login')" id="tabLogin"
+                    class="px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-black transition-all">Sign
+                    In</button>
+                <button onclick="switchTab('signup')" id="tabSignup"
+                    class="px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-black transition-all">Create
+                    Account</button>
+            </div>
+
+            <!-- Login View -->
+            <div id="viewLogin" class="fade-enter">
+                <h2 class="text-2xl font-semibold tracking-tight mb-1">Welcome back</h2>
+                <p class="text-sm text-gray-500 mb-8">Enter your details to access your workspace.</p>
+
+                <form onsubmit="handleAuth(event, 'login')" class="space-y-5">
+                    <div class="space-y-1.5">
+                        <label class="block text-xs font-medium text-gray-700">Email</label>
+                        <input type="email" id="loginEmail" required
+                            class="input-field w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm placeholder-gray-400"
+                            placeholder="name@company.com">
+                    </div>
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-xs font-medium text-gray-700">Password</label>
+                            <a href="#" class="text-xs text-gray-500 hover:text-black">Forgot?</a>
+                        </div>
+                        <input type="password" id="loginPassword" required
+                            class="input-field w-full px-3 py-2.5 bg-white border border-gray-200 rounded-lg text-sm placeholder-gray-400"
+                            placeholder="••••••••">
+                    </div>
+                    <button type="submit" id="btnLogin"
+                        class="btn-primary w-full bg-black text-white text-sm font-medium py-2.5 rounded-lg flex justify-center items-center gap-2 mt-2">
+                        <span>Sign In</span>
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Signup View -->
+            <div id="viewSignup" class="hidden fade-enter">
+                <h2 class="text-2xl font-semibold tracking-tight mb-1">Create an account</h2>
+                <p class="text-sm text-gray-500 mb-6">Select your role to configure your workspace.</p>
+
+                <form onsubmit="handleAuth(event, 'signup')" class="space-y-5">
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-medium text-gray-700">Role</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div onclick="selectRole('consumer')" id="role-consumer"
+                                class="role-card active border border-black p-2 rounded-lg flex flex-col items-center gap-1 bg-gray-50 text-black">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-medium">Consumer</span>
+                            </div>
+                            <div onclick="selectRole('collector')" id="role-collector"
+                                class="role-card border border-gray-200 p-2 rounded-lg flex flex-col items-center gap-1 text-gray-500 hover:text-black">
+                                <i data-lucide="truck" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-medium">Collector</span>
+                            </div>
+                            <div onclick="selectRole('aggregator')" id="role-aggregator"
+                                class="role-card border border-gray-200 p-2 rounded-lg flex flex-col items-center gap-1 text-gray-500 hover:text-black">
+                                <i data-lucide="box" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-medium">Hub</span>
+                            </div>
+                            <div onclick="selectRole('recycler')" id="role-recycler"
+                                class="role-card border border-gray-200 p-2 rounded-lg flex flex-col items-center gap-1 text-gray-500 hover:text-black">
+                                <i data-lucide="recycle" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-medium">Recycler</span>
+                            </div>
+                            <div onclick="selectRole('manufacturer')" id="role-manufacturer"
+                                class="role-card border border-gray-200 p-2 rounded-lg flex flex-col items-center gap-1 text-gray-500 hover:text-black">
+                                <i data-lucide="factory" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-medium">OEM</span>
+                            </div>
+                            <div onclick="selectRole('regulatory')" id="role-regulatory"
+                                class="role-card border border-gray-200 p-2 rounded-lg flex flex-col items-center gap-1 text-gray-500 hover:text-black">
+                                <i data-lucide="shield-check" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-medium">Govt</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dynamic fields based on role -->
+                    <div id="dynamicFields"
+                        class="space-y-4 max-h-[220px] overflow-y-auto pr-2 border-t border-b border-gray-100 py-4 my-2">
+                        <!-- Default Consumer -->
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-medium text-gray-700">Email</label>
+                            <input type="email" id="signupEmail" required
+                                class="input-field w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                                placeholder="you@company.com">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-medium text-gray-700">Password</label>
+                            <input type="password" id="signupPassword" required minlength="8"
+                                class="input-field w-full px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm"
+                                placeholder="Min 8 chars">
+                        </div>
+                    </div>
+
+                    <button type="submit" id="btnSignup"
+                        class="btn-primary w-full bg-black text-white text-sm font-medium py-2.5 rounded-lg flex justify-center items-center mt-2">
+                        Create Account
+                    </button>
+                </form>
+            </div>
+
+            <!-- Alert/Error Box -->
+            <div id="alertBox"
+                class="hidden mt-4 p-3 rounded-lg text-xs font-medium border border-gray-200 bg-gray-50 text-black fade-enter flex items-start gap-2">
+                <i data-lucide="info" class="w-4 h-4 shrink-0"></i>
+                <span id="alertMessage"></span>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        let currentRole = 'consumer';
+
+        const roleForms = {
+            consumer: `
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Full Name</label><input type="text" id="fieldName" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Mobile Number</label><input type="tel" id="fieldPhone" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm" placeholder="+91"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Address</label><input type="text" id="fieldAddress" class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+            `,
+            collector: `
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Shop Name</label><input type="text" id="fieldShopName" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Shop Address</label><input type="text" id="fieldShopAddress" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Operating City</label><input type="text" id="fieldOperatingCity" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+            `,
+            aggregator: `
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Hub Name</label><input type="text" id="fieldHubName" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">GSTIN</label><input type="text" id="fieldGstin" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm uppercase"></div>
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">SPCB Auth No.</label><input type="text" id="fieldSpcbAuth" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                </div>
+            `,
+            recycler: `
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Facility Name</label><input type="text" id="fieldFacilityName" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Plant Address</label><input type="text" id="fieldPlantAddress" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">CPCB Reg No.</label><input type="text" id="fieldCpcbRegNo" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm uppercase"></div>
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Capacity (MT/yr)</label><input type="number" id="fieldCapacityAnnual" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                </div>
+            `,
+            manufacturer: `
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Company Name</label><input type="text" id="fieldCompanyName" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">CIN Number</label><input type="text" id="fieldCinNumber" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm uppercase"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">GSTIN</label><input type="text" id="fieldGstin" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm uppercase"></div>
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">EPR Reg No.</label><input type="text" id="fieldEprRegNo" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                </div>
+            `,
+            regulatory: `
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Official Name</label><input type="text" id="fieldOfficialName" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Government Body (e.g. CPCB)</label><input type="text" id="fieldGovBody" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Official ID No.</label><input type="text" id="fieldOfficialId" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                    <div class="space-y-1.5"><label class="block text-[11px] font-medium text-gray-500 uppercase tracking-wider">Jurisdiction</label><input type="text" id="fieldJurisdiction" required class="input-field w-full px-3 py-2 border border-gray-200 rounded-md text-sm"></div>
+                </div>
+            `
+        };
+
+        // Initialize default role fields
+        document.getElementById('dynamicFields').innerHTML = roleForms.consumer;
+
+        function switchTab(tab) {
+            document.getElementById('alertBox').classList.add('hidden');
+
+            const vLogin = document.getElementById('viewLogin');
+            const vSignup = document.getElementById('viewSignup');
+            const tLogin = document.getElementById('tabLogin');
+            const tSignup = document.getElementById('tabSignup');
+
+            if (tab === 'login') {
+                vSignup.classList.add('hidden');
+                vLogin.classList.remove('hidden');
+                tLogin.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-black transition-all";
+                tSignup.className = "px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-black transition-all";
+            } else {
+                vLogin.classList.add('hidden');
+                vSignup.classList.remove('hidden');
+                tSignup.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white shadow-sm text-black transition-all";
+                tLogin.className = "px-4 py-1.5 text-sm font-medium rounded-md text-gray-500 hover:text-black transition-all";
+            }
+        }
+
+        function selectRole(role) {
+            currentRole = role;
+            const roles = ['consumer', 'collector', 'aggregator', 'recycler', 'manufacturer'];
+            roles.forEach(r => {
+                const el = document.getElementById('role-' + r);
+                if (r === role) {
+                    el.className = "role-card active border border-black p-2 rounded-lg flex flex-col items-center gap-1 bg-gray-50 text-black";
+                } else {
+                    el.className = "role-card border border-gray-200 p-2 rounded-lg flex flex-col items-center gap-1 text-gray-500 hover:text-black";
+                }
+            });
+            document.getElementById('dynamicFields').innerHTML = roleForms[role];
+        }
+
+        function showAlert(msg, isSuccess = false) {
+            const box = document.getElementById('alertBox');
+            document.getElementById('alertMessage').innerText = msg;
+
+            if (isSuccess) {
+                box.className = 'mt-4 p-3 rounded-lg text-xs font-medium border border-green-200 bg-green-50 text-green-800 fade-enter flex items-start gap-2';
+                box.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i><span id="alertMessage">${msg}</span>`;
+            } else {
+                box.className = 'mt-4 p-3 rounded-lg text-xs font-medium border border-gray-200 bg-gray-50 text-black fade-enter flex items-start gap-2';
+                box.innerHTML = `<i data-lucide="info" class="w-4 h-4 shrink-0"></i><span id="alertMessage">${msg}</span>`;
+            }
+            lucide.createIcons();
+            box.classList.remove('hidden');
+        }
+
+        async function handleAuth(e, type) {
+            e.preventDefault();
+            document.getElementById('alertBox').classList.add('hidden');
+
+            const btn = type === 'login' ? document.getElementById('btnLogin') : document.getElementById('btnSignup');
+            const originalContent = btn.innerHTML;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>`;
+            lucide.createIcons();
+            btn.disabled = true;
+
+            try {
+                let payload = {};
+                let endpoint = '';
+
+                if (type === 'login') {
+                    endpoint = '/api/auth/login';
+                    payload = {
+                        email: document.getElementById('loginEmail').value,
+                        password: document.getElementById('loginPassword').value
+                    };
+                } else {
+                    endpoint = '/api/auth/signup';
+                    payload = {
+                        email: document.getElementById('signupEmail').value,
+                        password: document.getElementById('signupPassword').value,
+                        role: currentRole
+                    };
+
+                    if (currentRole === 'consumer') {
+                        payload.fullName = document.getElementById('fieldName')?.value;
+                        payload.phone = document.getElementById('fieldPhone')?.value;
+                        payload.address = document.getElementById('fieldAddress')?.value;
+                    } else if (currentRole === 'collector') {
+                        payload.shopName = document.getElementById('fieldShopName')?.value;
+                        payload.shopAddress = document.getElementById('fieldShopAddress')?.value;
+                        payload.operatingCity = document.getElementById('fieldOperatingCity')?.value;
+                    } else if (currentRole === 'aggregator') {
+                        payload.hubName = document.getElementById('fieldHubName')?.value;
+                        payload.gstin = document.getElementById('fieldGstin')?.value;
+                        payload.spcbAuthNo = document.getElementById('fieldSpcbAuth')?.value;
+                    } else if (currentRole === 'recycler') {
+                        payload.facilityName = document.getElementById('fieldFacilityName')?.value;
+                        payload.plantAddress = document.getElementById('fieldPlantAddress')?.value;
+                        payload.cpcbRegNo = document.getElementById('fieldCpcbRegNo')?.value;
+                        payload.processingCapacityMtPa = document.getElementById('fieldCapacityAnnual')?.value;
+                    } else if (currentRole === 'manufacturer') {
+                        payload.companyName = document.getElementById('fieldCompanyName')?.value;
+                        payload.cinNumber = document.getElementById('fieldCinNumber')?.value;
+                        payload.gstin = document.getElementById('fieldGstin')?.value;
+                        payload.cpcbEprRegNo = document.getElementById('fieldEprRegNo')?.value;
+                    } else if (currentRole === 'regulatory') {
+                        payload.officialName = document.getElementById('fieldOfficialName')?.value;
+                        payload.governmentBody = document.getElementById('fieldGovBody')?.value;
+                        payload.officialId = document.getElementById('fieldOfficialId')?.value;
+                        payload.jurisdiction = document.getElementById('fieldJurisdiction')?.value;
+                    }
+                }
+
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error?.message || data.error || 'Authentication failed');
+
+                if (data.data?.token) {
+                    localStorage.setItem('ecosure_jwt', data.data.token);
+                    localStorage.setItem('ecosure_user', JSON.stringify(data.data.user));
+                }
+
+                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4"></i>`;
+                lucide.createIcons();
+
+                const actionText = type === 'login' ? 'Sign in' : 'Registration';
+                showAlert(`${actionText} successful! Redirecting to workspace...`, true);
+
+                setTimeout(() => {
+                    const fallbackRoutes = {
+                        consumer: 'Consumer_Dashboard/Dashboard.html',
+                        collector: 'Collector_Dashboard/Dashboard.html',
+                        aggregator: 'Aggregator_Dashboard/Dashboard.html',
+                        recycler: 'Recycler_Dashboard/Dashboard.html',
+                        regulatory: 'Regulatory_Dashboard/Dashboard.html',
+                        manufacturer: 'Manufacturer_Dashboard/Dashboard.html'
+                    };
+                    const role = data.data?.user?.user_metadata?.role || currentRole;
+                    window.location.href = data.data?.redirectUrl || fallbackRoutes[role] || 'index.html';
+                }, 1500);
+
+            } catch (err) {
+                showAlert(err.message, false);
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>

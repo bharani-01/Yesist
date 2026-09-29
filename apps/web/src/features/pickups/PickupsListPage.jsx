@@ -62,22 +62,34 @@ export function PickupsListPage() {
   const totalMaterialsKg = completedPickups.reduce((acc, p) => acc + (Number(p.collectedNetKg) || 0), 0);
   const co2AvoidedKg = (totalMaterialsKg * 1.5).toFixed(1);
 
-  const bookButton = <Link to="/pickups/new" className="btn btn--primary">Book a pickup</Link>;
+  // Dynamic SOTA Greeting
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
+
+  const bookButton = (
+    <Link to="/pickups/new" className="btn btn--primary tap-effect" style={{ borderRadius: 'var(--radius-pill)', padding: '12px 24px', fontWeight: 600 }}>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
+      </svg>
+      Schedule Pickup
+    </Link>
+  );
 
   return (
     <div className="page">
       {/* Top Greeting with user's real full name */}
       <PageHeader
-        title={user?.fullName ?? 'Dashboard'}
-        eyebrow="CITIZEN OVERVIEW"
+        title={user?.fullName ?? 'Citizen'}
+        eyebrow={greeting}
         actions={bookButton}
       />
 
-      {/* Main Dashboard Grid matching reference image */}
+      {/* Main Dashboard Grid matching reference */}
       <div className="dashboard-grid">
-        {/* Center Stream */}
+        {/* Left Column: Financial Card, Active Manifest, History */}
         <div className="stack">
-          {/* Hero Impact Card */}
+          {/* Hero Financial & Impact Card */}
           <section className="hero-impact-card" aria-label="Available Payout and Impact">
             <div className="hero-impact-card__header">
               <span className="hero-impact-card__eyebrow">Available Payout</span>
@@ -85,9 +97,12 @@ export function PickupsListPage() {
                 <span className="hero-impact-card__symbol">₹</span>
                 <span>{totalPayout.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <Link to="/pickups" className="hero-impact-card__link">
+              <Link to="/pickups" className="hero-impact-card__link tap-effect">
                 <span>View payout history</span>
-                <span>→</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M5 12h14" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
               </Link>
             </div>
 
@@ -112,12 +127,12 @@ export function PickupsListPage() {
           </section>
 
           {/* Active Pickups / Live Tracking Widget */}
-          {activePickup && (
-            <section className="manifest-card" aria-label="Active Pickups Status">
-              <div className="manifest-card__header">
-                <h3 className="manifest-card__title">Active Pickups</h3>
-              </div>
-              <div className="manifest-card__item">
+          <section className="manifest-card" aria-label="Active Pickups Status">
+            <div className="manifest-card__header">
+              <h3 className="manifest-card__title">Active Pickup</h3>
+            </div>
+            {activePickup ? (
+              <div className="manifest-card__item tap-effect">
                 <div className="manifest-card__info">
                   <div className="pulse-dot" />
                   <div>
@@ -129,15 +144,28 @@ export function PickupsListPage() {
                     </div>
                   </div>
                 </div>
-                <Link to={`/pickups/${activePickup.id}`} className="btn btn--secondary btn--sm">
+                <Link to={`/pickups/${activePickup.id}`} className="btn btn--secondary btn--sm tap-effect">
                   Track
                 </Link>
               </div>
-            </section>
-          )}
+            ) : (
+              <div style={{ textAlign: 'center', padding: 'var(--space-6) 0' }}>
+                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(229, 229, 234, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 'var(--space-3)' }}>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--color-ink-muted)' }}>
+                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                    <path d="m3.3 7 8.7 5 8.7-5" />
+                    <path d="M12 22V12" />
+                  </svg>
+                </div>
+                <h4 style={{ fontSize: 'var(--text-md)', fontWeight: 500, margin: '0 0 4px' }}>No active pickups</h4>
+                <p className="subtle" style={{ maxWidth: '280px', margin: '0 auto var(--space-4)' }}>Schedule a pickup to responsibly dispose of your e-waste.</p>
+                <Link to="/pickups/new" className="btn btn--secondary btn--sm tap-effect">Schedule Now</Link>
+              </div>
+            )}
+          </section>
 
           {/* All Pickups List Panel */}
-          <Panel title="Pickup History" flush>
+          <Panel title="Pickup History">
             <AsyncView
               query={query}
               isEmpty={(d) => d.length === 0}
@@ -147,7 +175,7 @@ export function PickupsListPage() {
                 <ul className="list">
                   {items.map((p) => (
                     <li key={p.id}>
-                      <Link to={`/pickups/${p.id}`} className="list__item list__item--link">
+                      <Link to={`/pickups/${p.id}`} className="list__item list__item--link tap-effect">
                         <div className="list__main">
                           <span className="list__title">{p.categories ?? 'Pickup'}</span>
                           <span className="list__meta">
@@ -172,61 +200,110 @@ export function PickupsListPage() {
           </Panel>
         </div>
 
-        {/* Right Side Panel: My Products / Claimed Devices from Real Backend */}
-        <aside className="products-panel">
-          <div className="products-panel__header">
-            <h3 className="products-panel__title">My Products</h3>
-            <Link to="/devices" className="btn-icon-add" title="Claim / Scan New Device">
-              +
+        {/* Right Column: My Products, Quick Action Tiles, Nearest Drop-off */}
+        <div className="stack">
+          {/* My Products Panel */}
+          <aside className="products-panel">
+            <div className="products-panel__header">
+              <h3 className="products-panel__title">My Products</h3>
+              <Link to="/devices" className="btn-icon-add tap-effect" title="Claim / Scan New Device">
+                +
+              </Link>
+            </div>
+
+            <AsyncView
+              query={devicesQuery}
+              isEmpty={(d) => !d.length}
+              empty={
+                <div style={{ padding: 'var(--space-6) 0', textAlign: 'center' }}>
+                  <div style={{ width: '48px', height: '48px', borderRadius: '16px', background: 'rgba(229, 229, 234, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 'var(--space-3)' }}>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--color-ink-muted)' }}>
+                      <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
+                      <path d="M12 18h.01" />
+                    </svg>
+                  </div>
+                  <h4 style={{ fontSize: 'var(--text-sm)', fontWeight: 500, margin: '0 0 4px' }}>No products registered</h4>
+                  <p className="subtle" style={{ margin: '0 0 var(--space-4)' }}>Add products you plan to recycle.</p>
+                  <Link to="/devices" className="btn btn--secondary btn--sm tap-effect">Claim via QR</Link>
+                </div>
+              }
+            >
+              {(deviceItems) => (
+                <ul className="products-list">
+                  {deviceItems.map((d) => {
+                    const srn = `SRN: ${d.qrPublicId.slice(-4).toUpperCase()}`;
+                    return (
+                      <li key={d.qrPublicId}>
+                        <Link to={`/p/${d.qrPublicId}`} className="product-item product-item--link tap-effect">
+                          <div className="product-item__left">
+                            <div className="product-item__icon">
+                              <DeviceIcon categoryCode={d.categoryCode} />
+                            </div>
+                            <div className="product-item__content">
+                              <span className="product-item__title">
+                                {d.brand ? `${d.brand} ${d.modelName}` : d.categoryName}
+                              </span>
+                              <span className="product-item__sub">
+                                {d.typicalUnitKg ? `${d.typicalUnitKg} kg` : d.categoryName} • {srn}
+                              </span>
+                            </div>
+                          </div>
+                          <StatusBadge map={UNIT_STATE} value={d.state} />
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </AsyncView>
+          </aside>
+
+          {/* Quick Action Tiles */}
+          <div className="action-cards">
+            <Link to="/devices" className="action-card action-card--dark tap-effect">
+              <div>
+                <h4 className="action-card__title">Add Product</h4>
+                <p className="action-card__sub">Register a new device</p>
+              </div>
+              <div className="action-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </div>
+            </Link>
+
+            <Link to="/pickups/new" className="action-card action-card--light tap-effect">
+              <div>
+                <h4 className="action-card__title">Home Pickup</h4>
+                <p className="action-card__sub">Schedule collection</p>
+              </div>
+              <div className="action-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path d="M19 18h2a1 1 0 0 0 1-1v-5.5a1.5 1.5 0 0 0-.44-1.06L18.5 7.38A1.5 1.5 0 0 0 17.44 7H14" />
+                  <circle cx="7" cy="18" r="2" />
+                  <circle cx="17" cy="18" r="2" />
+                </svg>
+              </div>
             </Link>
           </div>
 
-          <AsyncView
-            query={devicesQuery}
-            isEmpty={(d) => !d.length}
-            empty={
-              <div style={{ padding: 'var(--space-6)', textAlign: 'center' }}>
-                <p className="subtle" style={{ marginBottom: 'var(--space-3)' }}>No claimed devices yet.</p>
-                <Link to="/devices" className="btn btn--secondary btn--sm">Claim via QR</Link>
+          {/* Nearest Drop-off / Regional Hub Widget */}
+          <section className="dropoff-card">
+            <h3 className="dropoff-card__title">Nearest Drop-off</h3>
+            <div className="dropoff-map map-pattern tap-effect">
+              <div className="dropoff-pin">
+                <div className="dropoff-pin__dot" />
+                <div className="dropoff-pin__line" />
+                <div className="dropoff-pin__badge">
+                  0.8 km • TechPark Hub
+                </div>
               </div>
-            }
-          >
-            {(deviceItems) => (
-              <ul className="products-list">
-                {deviceItems.map((d) => {
-                  const srn = `SRN-${d.qrPublicId.slice(-4).toUpperCase()}`;
-                  return (
-                    <li key={d.qrPublicId}>
-                      <Link to={`/p/${d.qrPublicId}`} className="product-item product-item--link">
-                        <div className="product-item__icon">
-                          <DeviceIcon categoryCode={d.categoryCode} />
-                        </div>
-                        <div className="product-item__content">
-                          <span className="product-item__category">
-                            {d.categoryCode === 'mobile_phone'
-                              ? 'Phone'
-                              : d.categoryCode === 'laptop'
-                              ? 'Laptop'
-                              : d.categoryCode === 'tablet'
-                              ? 'Tablet'
-                              : d.categoryName ?? 'Device'}
-                          </span>
-                          <span className="product-item__title">
-                            {d.brand ? `${d.brand} ${d.modelName}` : d.categoryName}
-                          </span>
-                          <span className="product-item__sub">
-                            {d.typicalUnitKg ? `${d.typicalUnitKg} kg` : ''} • {srn}
-                          </span>
-                        </div>
-                        <StatusBadge map={UNIT_STATE} value={d.state} />
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </AsyncView>
-        </aside>
+            </div>
+          </section>
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoSure - CPCB Certificates</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] }, colors: { background: '#FFFFFF', ink: { 900: '#000000', 500: '#86868B', 200: '#E5E5EA' }, brand: { 500: '#00D15E' } } } } }
+    </script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #FAFAFA; color: #000000; -webkit-font-smoothing: antialiased; }
+        .tap-effect:active { transform: scale(0.96); opacity: 0.7; }
+        .fade-up { opacity: 0; transform: translateY(12px); transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1); }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body class="pb-28 lg:pb-0 lg:bg-[#FAFAFA]">
+    <div class="lg:flex lg:max-w-7xl lg:mx-auto lg:h-screen">
+        <aside class="hidden lg:flex flex-col w-64 border-r border-ink-200 bg-white h-full fixed left-0 top-0 pt-12 px-8 pb-8 z-50">
+            <div class="mb-12"><h2 class="text-2xl font-bold tracking-tight">EcoSure</h2></div>
+            <nav class="flex-1 space-y-4">
+                <a href="Dashboard.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium px-4 py-3 rounded-xl transition-colors"><i data-lucide="layout-dashboard" class="w-5 h-5"></i> Overview</a>
+                <a href="Shipments.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium px-4 py-3 rounded-xl transition-colors"><i data-lucide="truck" class="w-5 h-5"></i> Shipments</a>
+                <a href="Recovery.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium px-4 py-3 rounded-xl transition-colors"><i data-lucide="recycle" class="w-5 h-5"></i> Recovery Log</a>
+                <a href="Certificates.html" class="flex items-center gap-3 text-ink-900 font-semibold px-4 py-3 bg-ink-200/40 rounded-xl"><i data-lucide="award" class="w-5 h-5"></i> Certificates</a>
+            </nav>
+        </aside>
+
+        <main class="lg:ml-64 flex-1 p-6 lg:p-12 min-h-screen">
+            <header class="mb-10 fade-up">
+                <p class="text-sm font-medium text-ink-500 uppercase tracking-widest mb-1">Compliance</p>
+                <h1 class="text-4xl font-semibold tracking-tight">EPR Certificates</h1>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Generate Form -->
+                <div class="lg:col-span-1 bg-white p-6 rounded-3xl border border-ink-200 shadow-sm fade-up delay-100">
+                    <h3 class="font-bold text-lg mb-4">Generate CPCB Certificate</h3>
+                    <form id="certForm" class="space-y-4" onsubmit="handleCertSubmit(event)">
+                        <div>
+                            <label class="block text-xs font-medium text-ink-500 mb-1">Processed Manifest ID</label>
+                            <input type="text" id="manifestId" required class="w-full px-3 py-2 border border-ink-200 rounded-lg text-sm bg-gray-50 placeholder-gray-400">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-ink-500 mb-1">EPR Credit Tons</label>
+                            <input type="number" step="0.01" id="eprCreditTons" required class="w-full px-3 py-2 border border-ink-200 rounded-lg text-sm">
+                        </div>
+                        <button type="submit" class="w-full bg-ink-900 text-white font-medium py-2 rounded-xl mt-4 tap-effect hover:bg-black transition-colors">Issue Certificate</button>
+                    </form>
+                </div>
+
+                <!-- Certificates Table -->
+                <div class="lg:col-span-2 bg-white rounded-3xl border border-ink-200 shadow-sm overflow-hidden fade-up delay-200">
+                    <div class="p-6 border-b border-ink-200 flex justify-between items-center">
+                        <h3 class="font-bold text-lg">Issued Certificates</h3>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-ink-500 uppercase bg-ink-200/20">
+                                <tr>
+                                    <th class="px-6 py-4 font-semibold">Certificate Hash</th>
+                                    <th class="px-6 py-4 font-semibold">EPR Credits</th>
+                                    <th class="px-6 py-4 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="certsList" class="divide-y divide-ink-200">
+                                <!-- Injected rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.fade-up').forEach((el, i) => setTimeout(() => el.classList.add('active'), i * 50));
+            lucide.createIcons();
+            loadCerts();
+        });
+
+        async function loadCerts() {
+            try {
+                const token = localStorage.getItem('ecosure_jwt');
+                const res = await fetch('/api/recycler/certificates', { headers: { 'Authorization': `Bearer ${token}` }});
+                const json = await res.json();
+                
+                const list = document.getElementById('certsList');
+                list.innerHTML = '';
+                
+                if (json.success && json.data.length > 0) {
+                    json.data.forEach(s => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td class="px-6 py-4 font-mono text-xs font-semibold text-brand-500">${s.certificate_hash}</td>
+                            <td class="px-6 py-4 font-mono font-semibold">${s.epr_credit_tons} tons</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2.5 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">ISSUED</span>
+                            </td>
+                        `;
+                        list.appendChild(row);
+                    });
+                } else {
+                    list.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-ink-500">No certificates issued.</td></tr>`;
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function handleCertSubmit(e) {
+            e.preventDefault();
+            const payload = {
+                manifestId: document.getElementById('manifestId').value,
+                eprCreditTons: document.getElementById('eprCreditTons').value
+            };
+            try {
+                const token = localStorage.getItem('ecosure_jwt');
+                const res = await fetch(`/api/recycler/certificates/generate`, { 
+                    method: 'POST', 
+                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if(json.success) {
+                    alert('Certificate Generated: ' + json.data.certificate_hash);
+                    e.target.reset();
+                    loadCerts();
+                } else {
+                    alert('Error: ' + json.message);
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Request failed');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -6,12 +6,12 @@ export function LogoMark({ size = 24 }) {
     <svg className="logo__mark" width={size * (40 / 36)} height={size} viewBox="0 0 40 36" aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={`${id}-l`} x1="0" y1="0" x2="0.6" y2="1">
-          <stop offset="0" stopColor="#3dbb3a" />
-          <stop offset="1" stopColor="#15803d" />
+          <stop offset="0" stopColor="#00D15E" />
+          <stop offset="1" stopColor="#00A84B" />
         </linearGradient>
         <linearGradient id={`${id}-r`} x1="1" y1="0" x2="0.2" y2="1">
-          <stop offset="0" stopColor="#43c43c" />
-          <stop offset="1" stopColor="#168a3f" />
+          <stop offset="0" stopColor="#00FF73" />
+          <stop offset="1" stopColor="#00D15E" />
         </linearGradient>
       </defs>
       <path d="M14 34C6 32 1 22 2 8c8 4 13 14 12 26Z" fill={`url(#${id}-l)`} />

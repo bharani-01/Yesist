@@ -1,46 +1,48 @@
 :root {
-  /* Neutrals */
-  --color-canvas: #f8fafc;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f1f5f9;
-  --color-surface-hover: #f8fafc;
-  --color-border: #e2e8f0;
-  --color-border-subtle: #f1f5f9;
-  --color-border-strong: #cbd5e1;
-  --color-ink: #0f172a;
-  --color-ink-muted: #64748b;
-  --color-ink-subtle: #94a3b8;
+  /* SOTA Apple/Fintech Neutrals */
+  --color-canvas: #FAFAFA;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F5F5F7;
+  --color-surface-hover: #F5F5F7;
+  --color-border: #E5E5EA;
+  --color-border-subtle: #F2F2F7;
+  --color-border-strong: #D1D1D6;
+  --color-ink: #000000;
+  --color-ink-muted: #86868B;
+  --color-ink-subtle: #86868B;
 
   /* Primary & Brand */
-  --color-primary: #0f172a;
-  --color-primary-hover: #1e293b;
-  --color-brand: #10b981;
-  --color-brand-hover: #059669;
-  --color-brand-weak: #ecfdf5;
-  --color-accent: #10b981;
-  --color-logo-ink: #0f172a;
-  --color-logo-green: #10b981;
+  --color-primary: #000000;
+  --color-primary-hover: #1A1A1A;
+  --color-brand: #00D15E;
+  --color-brand-hover: #00B350;
+  --color-brand-weak: rgba(0, 209, 94, 0.08);
+  --color-accent: #00D15E;
+  --color-logo-ink: #000000;
+  --color-logo-green: #00D15E;
 
   /* Semantic status */
-  --color-success: #10b981;
-  --color-success-weak: #ecfdf5;
-  --color-warning: #f59e0b;
-  --color-warning-weak: #fffbeb;
-  --color-danger: #ef4444;
-  --color-danger-weak: #fef2f2;
-  --color-info: #3b82f6;
-  --color-info-weak: #eff6ff;
+  --color-success: #00D15E;
+  --color-success-weak: rgba(0, 209, 94, 0.08);
+  --color-warning: #F59E0B;
+  --color-warning-weak: #FFFBEB;
+  --color-danger: #FF3B30;
+  --color-danger-weak: #FEF2F2;
+  --color-info: #007AFF;
+  --color-info-weak: #EFF6FF;
 
-  /* Type */
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, monospace;
+  /* SOTA Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;
   --text-md: 1rem;
   --text-lg: 1.125rem;
-  --text-xl: 1.375rem;
-  --text-2xl: 1.875rem;
-  --text-display: 2.75rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 2rem;
+  --text-4xl: 2.25rem;
+  --text-display: 3.5rem;
 
   /* Space, radius, elevation */
   --space-1: 4px;
@@ -51,17 +53,21 @@
   --space-6: 24px;
   --space-8: 32px;
   --space-10: 40px;
+  --space-12: 48px;
+
   --radius-sm: 8px;
   --radius-md: 12px;
-  --radius-lg: 18px;
+  --radius-lg: 16px;
   --radius-xl: 24px;
-  --radius-pill: 999px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
-  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02);
-  --shadow-md: 0 10px 30px -4px rgba(15, 23, 42, 0.06);
+  --radius-pill: 9999px;
 
-  --sidebar-width: 240px;
-  --content-width: 1240px;
-  --focus-ring: 0 0 0 3px rgba(16, 185, 129, 0.25);
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.02);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.02), 0 20px 40px -15px rgba(0, 0, 0, 0.03);
+  --shadow-glass: 0 -10px 40px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
+
+  --sidebar-width: 256px;
+  --content-width: 1280px;
+  --focus-ring: 0 0 0 3px rgba(0, 209, 94, 0.25);
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }

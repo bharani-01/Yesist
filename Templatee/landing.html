@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoSure — Making Everything Count</title>
+    
+    <!-- SOTA Typography: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (Configured for SOTA Design System) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        surface: '#F5F5F7', // Apple light gray
+                        surfaceAlt: '#FFFFFF',
+                        brand: {
+                            500: '#00D15E', // Razorpay/Stripe precision accent
+                            900: '#0B1A14', // Deep eco-black
+                        },
+                        borderLight: 'rgba(0,0,0,0.06)'
+                    },
+                    transitionTimingFunction: {
+                        'sota': 'cubic-bezier(0.16, 1, 0.3, 1)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base Reset & Core UX */
+        body {
+            background-color: #F5F5F7;
+            color: #1D1D1F;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Fluid Typography & Tracking */
+        .tracking-tightest { letter-spacing: -0.04em; }
+        .text-balance { text-wrap: balance; }
+
+        /* No-Card Architecture: Grid Lines & Spatial Separation */
+        .architectural-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+        }
+
+        /* Glassmorphism (Strictly Light Mode) */
+        .glass-nav {
+            background: rgba(245, 245, 247, 0.72);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        /* Animation Engine (JS triggered) */
+        .reveal {
+            opacity: 0;
+            transform: translateY(40px) scale(0.98);
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Staggered delays */
+        .delay-100 { transition-delay: 100ms; }
+        .delay-200 { transition-delay: 200ms; }
+        .delay-300 { transition-delay: 300ms; }
+
+        /* Floating UI Abstractions (Instead of basic images) */
+        .ui-element {
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.08), 
+                        0 0 0 1px rgba(0,0,0,0.04);
+            border-radius: 24px;
+            background: #ffffff;
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-brand-500 selection:text-white">
+
+    <!-- SOTA Navigation -->
+    <nav class="fixed w-full top-0 z-50 glass-nav transition-all duration-500">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <!-- Abstract minimal logo -->
+                <div class="w-6 h-6 bg-brand-900 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 bg-brand-500 rounded-full"></div>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-brand-900">EcoSure</span>
+            </div>
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
+                <a href="#" class="hover:text-black transition-colors">Infrastructure</a>
+                <a href="#" class="hover:text-black transition-colors">Logistics</a>
+                <a href="#" class="hover:text-black transition-colors">Compliance</a>
+            </div>
+            <div class="flex items-center gap-4">
+                <a href="auth.html?mode=login" class="text-sm font-semibold text-brand-900 hover:text-black transition-colors">
+                    Log in
+                </a>
+                <a href="auth.html?mode=signup" class="text-sm font-semibold bg-brand-900 text-white px-6 py-2.5 rounded-full hover:bg-black transition-all duration-300 hover:shadow-lg hover:shadow-black/20">
+                    Sign Up
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section (Apple/Stripe Inspired) -->
+    <section class="relative pt-48 pb-32 overflow-hidden architectural-grid">
+        <!-- Ambient Background Glow -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-brand-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 relative z-10 text-center">
+            <h1 class="text-6xl md:text-8xl font-bold tracking-tightest text-brand-900 mb-6 text-balance reveal leading-[0.95]">
+                Make every <br/> component count.
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-500 mb-10 max-w-2xl mx-auto font-light reveal delay-100">
+                The operating system for enterprise e-waste. End-to-end chain of custody, ESG compliance, and real-time asset recovery infrastructure.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 reveal delay-200">
+                <a href="auth.html?mode=signup" class="bg-brand-500 text-white font-semibold text-lg px-8 py-4 rounded-full hover:bg-green-500 transition-colors shadow-xl shadow-brand-500/20 w-full sm:w-auto">
+                    Deploy EcoSure
+                </a>
+                <a href="#" class="text-brand-900 font-medium text-lg px-8 py-4 flex items-center gap-2 hover:opacity-70 transition-opacity w-full sm:w-auto justify-center">
+                    Read the Docs <span class="text-xl">→</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Abstract Product Hero Image (Depth UI) -->
+        <div class="mt-24 max-w-5xl mx-auto px-6 relative reveal delay-300">
+            <div class="ui-element aspect-[16/9] w-full overflow-hidden relative group">
+                <!-- Simulated Interface -->
+                <div class="absolute inset-0 bg-surfaceAlt flex flex-col">
+                    <!-- Header of UI -->
+                    <div class="h-14 border-b border-borderLight flex items-center px-6 gap-4">
+                        <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                        <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-400"></div>
+                    </div>
+                    <!-- Body of UI with animated lines -->
+                    <div class="flex-1 p-8 grid grid-cols-3 gap-8">
+                        <div class="col-span-2 space-y-6">
+                            <div class="h-8 w-64 bg-surface rounded-md"></div>
+                            <div class="h-64 w-full bg-surface rounded-xl relative overflow-hidden">
+                                <!-- Simulated Chart Line -->
+                                <svg class="absolute bottom-0 w-full h-full text-brand-500" preserveAspectRatio="none" viewBox="0 0 100 100">
+                                    <path d="M0 100 C 20 80, 40 90, 60 40 S 80 50, 100 20 L 100 100 Z" fill="currentColor" opacity="0.1"/>
+                                    <path d="M0 100 C 20 80, 40 90, 60 40 S 80 50, 100 20" fill="none" stroke="currentColor" stroke-width="2"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="h-24 w-full bg-surface rounded-xl p-4 flex flex-col justify-end">
+                                <div class="text-xs text-gray-400">Carbon Offset</div>
+                                <div class="text-2xl font-bold">14,204 kg</div>
+                            </div>
+                            <div class="h-24 w-full bg-surface rounded-xl p-4 flex flex-col justify-end">
+                                <div class="text-xs text-gray-400">Recovered Value</div>
+                                <div class="text-2xl font-bold">$84,000</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sticky Scroll Feature Section (SOTA UX Pattern) -->
+    <section class="bg-surfaceAlt border-y border-borderLight relative">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-start relative">
+            
+            <!-- Sticky Left Column -->
+            <div class="md:w-1/2 md:sticky top-0 pt-32 pb-16 md:h-screen flex flex-col justify-center reveal">
+                <h2 class="text-4xl md:text-6xl font-bold tracking-tightest mb-6">
+                    Logistics, <br/> engineered for hardware.
+                </h2>
+                <p class="text-lg text-gray-500 max-w-md mb-8">
+                    Like Swiggy for e-waste, but built for enterprise security protocols. Track fleets, monitor chain of custody, and ensure secure data destruction en route.
+                </p>
+                <div class="w-16 h-1 bg-black mb-8"></div>
+            </div>
+
+            <!-- Scrolling Right Column (Features without white cards - just typography and borders) -->
+            <div class="md:w-1/2 py-16 md:py-32 space-y-24">
+                
+                <div class="border-l border-black pl-8 reveal">
+                    <h3 class="text-2xl font-semibold mb-3">Live Fleet Tracking</h3>
+                    <p class="text-gray-500 mb-6">Sub-second geolocation updates for all disposal vehicles. Integrated seamlessly with native transport APIs.</p>
+                    <!-- Abstract representation instead of an image -->
+                    <div class="h-48 w-full rounded-2xl bg-surface relative overflow-hidden flex items-center justify-center">
+                        <div class="absolute w-full h-[1px] bg-borderLight top-1/2"></div>
+                        <div class="absolute h-full w-[1px] bg-borderLight left-1/2"></div>
+                        <div class="w-4 h-4 bg-brand-500 rounded-full shadow-[0_0_0_8px_rgba(0,209,94,0.2)] animate-pulse"></div>
+                    </div>
+                </div>
+
+                <div class="border-l border-borderLight pl-8 reveal">
+                    <h3 class="text-2xl font-semibold mb-3">Immutable Chain of Custody</h3>
+                    <p class="text-gray-500 mb-6">Cryptographically verified handoffs. Know exactly who touched an asset, where, and when.</p>
+                    <div class="h-48 w-full rounded-2xl bg-surface p-6 flex flex-col justify-between">
+                        <div class="flex justify-between items-center border-b border-borderLight pb-3">
+                            <span class="text-sm font-mono text-gray-400">ID: A849-B</span>
+                            <span class="text-xs bg-black text-white px-2 py-1 rounded">Verified</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-borderLight pb-3">
+                            <span class="text-sm font-mono text-gray-400">ID: X721-C</span>
+                            <span class="text-xs bg-black text-white px-2 py-1 rounded">Verified</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- Financials / ESG Section (Stripe/Razorpay Inspired Data Density) -->
+    <section class="py-32 bg-surface overflow-hidden relative">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12">
+            <div class="mb-20 md:w-2/3 reveal">
+                <h2 class="text-4xl md:text-5xl font-bold tracking-tightest mb-6">Automated ESG & Value Recovery.</h2>
+                <p class="text-xl text-gray-500">Transform depreciated hardware into structured financial and environmental assets. Generate auditor-ready reports in one click.</p>
+            </div>
+
+            <!-- Grid Layout without "Cards" - Just pure borders and spatial design -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-x-12 gap-y-16">
+                <!-- Metric 1 -->
+                <div class="reveal delay-100 border-t border-black pt-6">
+                    <div class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-2">Scope 3 Emissions</div>
+                    <div class="text-5xl font-light tracking-tight mb-4">-42.5<span class="text-2xl text-gray-400">kT</span></div>
+                    <p class="text-sm text-gray-500">Automatically calculate carbon offsets from recycled rare-earth materials.</p>
+                </div>
+                
+                <!-- Metric 2 -->
+                <div class="reveal delay-200 border-t border-borderLight pt-6">
+                    <div class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-2">Recovered Capital</div>
+                    <div class="text-5xl font-light tracking-tight mb-4 text-brand-500">$2.4<span class="text-2xl text-gray-400">M</span></div>
+                    <p class="text-sm text-gray-500">Directly route secondary market sales to your corporate treasury.</p>
+                </div>
+
+                <!-- Metric 3 -->
+                <div class="reveal delay-300 border-t border-borderLight pt-6">
+                    <div class="text-sm font-semibold uppercase tracking-widest text-gray-400 mb-2">Compliance Score</div>
+                    <div class="text-5xl font-light tracking-tight mb-4">99.9<span class="text-2xl text-gray-400">%</span></div>
+                    <p class="text-sm text-gray-500">Continuous ISO and R2v3 compliance mapping across your entire organization.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Global Scale (Netflix/Google Scale Typography) -->
+    <section class="py-32 bg-brand-900 text-white flex items-center justify-center text-center px-6">
+        <div class="max-w-4xl reveal">
+            <h2 class="text-3xl md:text-5xl font-medium tracking-tight mb-8 leading-tight">
+                "EcoSure completely refactored how we handle hardware lifecycle. What used to be a liability is now a measurable ESG asset."
+            </h2>
+            <div class="text-gray-400 font-mono text-sm tracking-widest uppercase">VP of Infrastructure, Global Tech Inc.</div>
+        </div>
+    </section>
+
+    <!-- Large CTA (Apple Style Edge-to-Edge) -->
+    <section class="py-32 bg-surfaceAlt architectural-grid border-b border-borderLight">
+        <div class="max-w-7xl mx-auto px-6 text-center reveal">
+            <h2 class="text-6xl md:text-8xl font-bold tracking-tightest mb-8">Ready to integrate.</h2>
+            <p class="text-xl text-gray-500 mb-10 max-w-xl mx-auto">Stop managing spreadsheets. Start managing infrastructure. Get up and running in days, not months.</p>
+            <a href="#" class="inline-block bg-black text-white font-semibold text-xl px-10 py-5 rounded-full hover:scale-105 transition-transform duration-300 shadow-2xl">
+                Start Building Today
+            </a>
+        </div>
+    </section>
+
+    <!-- SOTA Minimalist Footer -->
+    <footer class="bg-surface py-16">
+        <div class="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-2">
+                <div class="w-6 h-6 bg-brand-900 rounded-full flex items-center justify-center">
+                    <div class="w-2 h-2 bg-brand-500 rounded-full"></div>
+                </div>
+                <span class="font-bold text-xl tracking-tight text-brand-900">EcoSure</span>
+            </div>
+            
+            <div class="flex gap-8 text-sm font-medium text-gray-500">
+                <a href="#" class="hover:text-black transition-colors">API Reference</a>
+                <a href="#" class="hover:text-black transition-colors">Security</a>
+                <a href="#" class="hover:text-black transition-colors">Terms</a>
+                <a href="#" class="hover:text-black transition-colors">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SOTA Intersection Observer Animation Logic -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        // Optional: Unobserve after revealing to animate only once
+                        // observer.unobserve(entry.target); 
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.reveal').forEach((el) => {
+                observer.observe(el);
+            });
+
+            // Navbar Blur effect on scroll
+            const nav = document.querySelector('nav');
+            window.addEventListener('scroll', () => {
+                if(window.scrollY > 50) {
+                    nav.classList.add('shadow-sm');
+                } else {
+                    nav.classList.remove('shadow-sm');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

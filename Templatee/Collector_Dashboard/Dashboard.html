@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>EcoSure - Recycle Shop Dashboard</title>
+    
+    <!-- SOTA Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        background: '#FFFFFF',
+                        ink: {
+                            900: '#000000',
+                            500: '#86868B',
+                            200: '#E5E5EA',
+                        },
+                        brand: {
+                            500: '#00D15E',
+                        }
+                    },
+                    boxShadow: {
+                        'glass': '0 -10px 40px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+
+    <style>
+        body {
+            background-color: #FFFFFF;
+            color: #000000;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .tap-effect { transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.15s ease; }
+        .tap-effect:active { transform: scale(0.96); opacity: 0.7; }
+        .tap-effect:hover { transform: scale(1.02); }
+
+        .fade-up {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fade-up.active { opacity: 1; transform: translateY(0); }
+        .delay-100 { transition-delay: 50ms; }
+        .delay-200 { transition-delay: 100ms; }
+        .delay-300 { transition-delay: 150ms; }
+
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
+            border-top: 0.5px solid rgba(0,0,0,0.08);
+        }
+    </style>
+</head>
+<body class="pb-28 lg:pb-0 lg:bg-[#FAFAFA]">
+
+    <!-- Mobile Header -->
+    <header class="lg:hidden px-6 pt-12 pb-6 sticky top-0 bg-white/90 backdrop-blur-md z-40 fade-up">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="text-xs font-medium text-ink-500 uppercase tracking-widest mb-1" id="mobileDate"></p>
+                <h1 class="text-2xl font-semibold tracking-tight" id="mobileAgencyName">Loading...</h1>
+            </div>
+            <button class="w-10 h-10 rounded-full bg-ink-200/50 text-ink-900 flex items-center justify-center tap-effect">
+                <i data-lucide="bell" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="lg:flex lg:max-w-7xl lg:mx-auto lg:h-screen">
+        
+        <!-- Desktop Sidebar -->
+        <aside class="hidden lg:flex flex-col w-64 border-r border-ink-200 bg-white h-full fixed left-0 top-0 pt-12 px-8 pb-8 z-50">
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold tracking-tight text-ink-900 flex items-center gap-2">
+                    <i data-lucide="store" class="w-6 h-6"></i> Shop
+                </h2>
+            </div>
+            
+            <nav class="flex-1 space-y-4">
+                <a href="Dashboard.html" class="flex items-center gap-3 text-ink-900 font-semibold tap-effect px-4 py-3 bg-ink-200/40 rounded-xl">
+                    <i data-lucide="layout-dashboard" class="w-5 h-5"></i> Dashboard
+                </a>
+                <a href="Collections.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="package-check" class="w-5 h-5"></i> Collections
+                </a>
+                <a href="Settings.html" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl transition-colors">
+                    <i data-lucide="settings" class="w-5 h-5"></i> Store Settings
+                </a>
+            </nav>
+
+            <button onclick="logout()" class="flex items-center gap-3 text-ink-500 hover:text-ink-900 font-medium tap-effect px-4 py-3 rounded-xl mt-auto">
+                <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+            </button>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="lg:ml-64 flex-1 lg:p-12 lg:bg-[#FAFAFA] min-h-screen">
+            
+            <!-- Desktop Header -->
+            <header class="hidden lg:flex justify-between items-center mb-12 fade-up">
+                <div>
+                    <p class="text-sm font-medium text-ink-500 uppercase tracking-widest mb-1" id="desktopDate"></p>
+                    <h1 class="text-4xl font-semibold tracking-tight" id="desktopAgencyName">Loading...</h1>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="px-4 py-2 bg-ink-200/40 rounded-full border border-ink-200 flex items-center gap-2">
+                        <i data-lucide="store" class="w-4 h-4 text-ink-500"></i>
+                        <span class="text-sm font-semibold uppercase tracking-wider text-ink-900" id="desktopShopAddress">--</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="px-6 lg:px-0 space-y-8">
+                
+                <!-- Quick Stats -->
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-ink-900 text-white p-6 rounded-3xl shadow-lg relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <p class="text-xs font-medium text-white/60 uppercase tracking-wider mb-2 relative z-10">Pending</p>
+                        <h2 class="text-4xl font-semibold tracking-tight relative z-10" id="statPending">0</h2>
+                        <p class="text-sm text-white/80 mt-2 relative z-10">Incoming drop-offs</p>
+                    </div>
+                    <div class="bg-white border border-ink-200 p-6 rounded-3xl shadow-sm relative overflow-hidden group">
+                        <div class="absolute inset-0 bg-ink-200/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        <p class="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2 relative z-10">Collected</p>
+                        <h2 class="text-4xl font-semibold tracking-tight text-ink-900 relative z-10" id="statCompleted">0</h2>
+                        <p class="text-sm text-ink-500 mt-2 relative z-10">Items received</p>
+                    </div>
+                </div>
+
+                <!-- Action Row -->
+                <div class="flex gap-4 mb-8 fade-up delay-100">
+                    <button onclick="openScanner()" class="flex-1 bg-brand-500 text-white rounded-2xl p-4 text-left tap-effect shadow-md flex items-center justify-between group hover:bg-brand-600 transition-colors">
+                        <div>
+                            <h3 class="font-semibold text-lg">Scan Barcode</h3>
+                            <p class="text-xs text-white/80 mt-1">Receive packages</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                            <i data-lucide="scan-line" class="w-5 h-5"></i>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- Assigned Pickups List -->
+                <section class="fade-up delay-200 bg-white lg:p-8 lg:rounded-3xl lg:border lg:border-ink-200 lg:shadow-sm">
+                    <div class="flex justify-between items-end mb-6">
+                        <h3 class="text-xl font-semibold tracking-tight">Today's Local Collections</h3>
+                        <button class="text-sm font-medium text-ink-900 tap-effect"><i data-lucide="filter" class="w-5 h-5"></i></button>
+                    </div>
+
+                    <div id="pickupsContainer" class="flex flex-col">
+                        <!-- Empty State -->
+                        <div id="emptyPickupsState" class="hidden flex flex-col items-center justify-center py-16 text-center">
+                            <div class="w-16 h-16 bg-ink-200/30 rounded-full flex items-center justify-center mb-4">
+                                <i data-lucide="check-circle-2" class="w-8 h-8 text-ink-500"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-ink-900">Store is quiet!</h4>
+                            <p class="text-sm text-ink-500 mt-1 max-w-sm">No incoming drop-offs or home pickup requests for your shop right now.</p>
+                        </div>
+                        
+                        <!-- List -->
+                        <div id="pickupsList" class="hidden flex-col space-y-4">
+                            <!-- JS Injected Items -->
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+
+        <!-- Mobile Bottom Navigation -->
+        <nav class="lg:hidden fixed bottom-0 w-full glass-nav pb-safe pt-3 px-6 z-50">
+            <div class="flex justify-around items-center w-full max-w-md mx-auto pb-6">
+                <a href="Dashboard.html" class="flex flex-col items-center gap-1 tap-effect w-16">
+                    <i data-lucide="home" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-semibold text-ink-900">Home</span>
+                </a>
+                <a href="Collections.html" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="package-check" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Jobs</span>
+                </a>
+                <div class="relative -top-5">
+                    <button onclick="openScanner()" class="w-12 h-12 rounded-full bg-brand-500 text-white flex items-center justify-center shadow-lg tap-effect">
+                        <i data-lucide="scan-line" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                <a href="Settings.html" class="flex flex-col items-center gap-1 tap-effect w-16 group opacity-50">
+                    <i data-lucide="settings" class="w-6 h-6 text-ink-900"></i>
+                    <span class="text-[10px] font-medium text-ink-900">Store</span>
+                </a>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Scanner Modal (Hidden) -->
+    <div id="scannerModal" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl scale-95 transition-transform duration-300" id="scannerModalContent">
+            <div class="p-6 border-b border-ink-200 flex justify-between items-center">
+                <h3 class="text-xl font-semibold text-ink-900">Scan Package Barcode</h3>
+                <button onclick="closeScanner()" class="w-8 h-8 flex items-center justify-center bg-ink-200/50 rounded-full text-ink-500 hover:text-ink-900 transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="reader" class="w-full bg-ink-900 rounded-xl overflow-hidden mb-4 min-h-[250px] flex items-center justify-center">
+                    <p class="text-white/50 text-sm">Requesting camera permissions...</p>
+                </div>
+                <div class="text-center" id="scanInputSection">
+                    <p class="text-xs text-ink-500 mb-2">Enter Manifest Number or Product SRN:</p>
+                    <div class="flex flex-col gap-2">
+                        <input type="text" id="manualBarcode" placeholder="e.g. M-1726715 or SN-9982X" class="w-full border border-ink-200 rounded-xl px-4 py-2 text-sm outline-none focus:border-brand-500 transition-colors">
+                        <div class="flex gap-2">
+                            <button onclick="processScan(document.getElementById('manualBarcode').value)" class="flex-1 bg-ink-900 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-black transition-colors">Receive Manifest</button>
+                            <button onclick="lookupSRN(document.getElementById('manualBarcode').value)" class="flex-1 bg-brand-500 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-600 transition-colors">Find by SRN</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Details View (Hidden initially) -->
+                <div id="srnResultSection" class="hidden text-left mt-4 border-t border-ink-200 pt-4">
+                    <p class="text-xs font-medium text-ink-500 uppercase tracking-wider mb-2">Product Found</p>
+                    <div class="bg-gray-50 rounded-xl p-4 border border-ink-200 mb-4">
+                        <h4 class="font-bold text-ink-900" id="srnModel">--</h4>
+                        <p class="text-sm text-ink-500 mt-1" id="srnManufacturer">--</p>
+                        <div class="flex gap-4 mt-3 text-sm">
+                            <div><span class="text-ink-500">Weight:</span> <span class="font-semibold" id="srnWeight">--</span> kg</div>
+                            <div><span class="text-ink-500">Category:</span> <span class="font-semibold" id="srnCategory">--</span></div>
+                        </div>
+                    </div>
+                    <button id="btnPickProduct" class="w-full bg-brand-500 text-white font-medium py-3 rounded-xl tap-effect hover:bg-brand-600 transition-colors">
+                        Pick Product & Generate Manifest
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Set Date
+        const dateOptions = { weekday: 'long', month: 'short', day: 'numeric' };
+        const today = new Date().toLocaleDateString('en-US', dateOptions);
+        document.getElementById('mobileDate').textContent = today;
+        document.getElementById('desktopDate').textContent = today;
+
+        async function loadDashboard() {
+            const token = localStorage.getItem('ecosure_jwt');
+            if (!token) {
+                window.location.href = '../auth.html';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/collector/dashboard', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.status === 401 || response.status === 403) {
+                    window.location.href = '../auth.html';
+                    return;
+                }
+
+                const json = await response.json();
+                if (json.success) {
+                    renderDashboard(json.data);
+                }
+            } catch (err) {
+                console.error("Dashboard fetch error:", err);
+            }
+        }
+
+        function renderDashboard(data) {
+            // Profile & Headers
+            const shopName = data.profile.shop_name || 'Recycle Shop';
+            document.getElementById('mobileAgencyName').textContent = shopName;
+            document.getElementById('desktopAgencyName').textContent = shopName;
+            
+            // Format address nicely (e.g. max 15 chars)
+            let addr = data.profile.shop_address || 'Address Not Set';
+            if (addr.length > 25) addr = addr.substring(0, 22) + '...';
+            document.getElementById('desktopShopAddress').textContent = addr;
+
+            // Stats
+            document.getElementById('statPending').textContent = data.metrics.pendingPickups;
+            document.getElementById('statCompleted').textContent = data.metrics.completedPickups;
+
+            // Pickups List
+            const pickupsList = document.getElementById('pickupsList');
+            const emptyState = document.getElementById('emptyPickupsState');
+
+            const pendingPickups = data.pickups.filter(p => p.status === 'pickup_scheduled');
+
+            if (pendingPickups.length === 0) {
+                emptyState.classList.remove('hidden');
+                pickupsList.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                pickupsList.classList.remove('hidden');
+                pickupsList.innerHTML = '';
+                
+                pendingPickups.forEach(pickup => {
+                    const consumerName = pickup.consumer_profiles?.full_name || 'Consumer';
+                    const address = pickup.consumer_profiles?.address || 'Address not provided';
+
+                    pickupsList.innerHTML += `
+                        <div class="p-5 border border-ink-200 rounded-2xl bg-white hover:border-ink-500 transition-colors group relative overflow-hidden">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-ink-200/40 rounded-full flex items-center justify-center">
+                                        <i data-lucide="package" class="w-5 h-5 text-ink-900"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-sm font-semibold text-ink-900 uppercase tracking-wide">${pickup.manifest_number}</h4>
+                                        <p class="text-xs text-ink-500 mt-0.5">${pickup.category.replace(/_/g, ' ')} • ${pickup.gross_weight_kg} kg</p>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-semibold text-brand-500 bg-brand-500/10 px-2 py-1 rounded-full uppercase tracking-widest">Incoming</span>
+                            </div>
+                            
+                            <div class="bg-[#FAFAFA] p-4 rounded-xl border border-ink-200 mb-4">
+                                <p class="text-sm font-medium text-ink-900 mb-1">${consumerName}</p>
+                                <p class="text-xs text-ink-500 leading-relaxed flex items-start gap-1">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 mt-0.5 shrink-0"></i>
+                                    ${address}
+                                </p>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button class="flex-1 bg-white border border-ink-200 text-ink-900 text-xs font-semibold py-2.5 rounded-lg tap-effect flex items-center justify-center gap-1.5 shadow-sm">
+                                    <i data-lucide="map" class="w-3.5 h-3.5"></i> Directions
+                                </button>
+                                <button onclick="markReceived('${pickup.manifest_number}')" class="flex-1 bg-ink-900 text-white text-xs font-semibold py-2.5 rounded-lg tap-effect shadow-md flex items-center justify-center gap-1.5 hover:bg-black transition-colors">
+                                    <i data-lucide="check" class="w-3.5 h-3.5"></i> Mark Received
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                lucide.createIcons();
+            }
+
+            triggerAnimations();
+        }
+
+        function triggerAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.fade-up').forEach((el) => observer.observe(el));
+        }
+
+        function logout() {
+            localStorage.removeItem('ecosure_jwt');
+            localStorage.removeItem('ecosure_user');
+            window.location.href = '../auth.html';
+        }
+
+        let html5QrcodeScanner = null;
+
+        function openScanner() {
+            document.getElementById('scannerModal').classList.remove('hidden');
+            setTimeout(() => {
+                document.getElementById('scannerModalContent').classList.remove('scale-95');
+                document.getElementById('scannerModalContent').classList.add('scale-100');
+            }, 10);
+
+            // Initialize scanner
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5QrcodeScanner(
+                    "reader", { fps: 10, qrbox: 250 });
+                html5QrcodeScanner.render(onScanSuccess);
+            }
+        }
+
+        function closeScanner() {
+            document.getElementById('scannerModalContent').classList.remove('scale-100');
+            document.getElementById('scannerModalContent').classList.add('scale-95');
+            
+            // Reset UI
+            document.getElementById('scanInputSection').classList.remove('hidden');
+            document.getElementById('srnResultSection').classList.add('hidden');
+            document.getElementById('manualBarcode').value = '';
+
+            setTimeout(() => {
+                document.getElementById('scannerModal').classList.add('hidden');
+            }, 300);
+            
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.clear();
+                html5QrcodeScanner = null;
+            }
+        }
+
+        function onScanSuccess(decodedText, decodedResult) {
+            closeScanner();
+            processScan(decodedText);
+        }
+
+        async function processScan(manifestNumber) {
+            if (!manifestNumber) return alert('Please enter a manifest number');
+            
+            try {
+                const token = localStorage.getItem('ecosure_jwt');
+                const response = await fetch('/api/collector/scan', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ manifestNumber })
+                });
+                
+                const json = await response.json();
+                if (json.success) {
+                    alert(`Success! Package ${manifestNumber} received.`);
+                    loadDashboard(); // Refresh stats
+                } else {
+                    alert('Error processing scan: ' + (json.error?.message || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function lookupSRN(srn) {
+            if (!srn) return alert('Please enter an SRN');
+            
+            try {
+                const token = localStorage.getItem('ecosure_jwt');
+                const response = await fetch(`/api/collector/products/${srn}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                const json = await response.json();
+                if (json.success) {
+                    const product = json.data;
+                    document.getElementById('srnModel').textContent = product.product_model;
+                    document.getElementById('srnManufacturer').textContent = product.manufacturer?.company_name || 'Unknown OEM';
+                    document.getElementById('srnWeight').textContent = product.weight_kg;
+                    document.getElementById('srnCategory').textContent = product.category.replace(/_/g, ' ');
+                    
+                    document.getElementById('scanInputSection').classList.add('hidden');
+                    document.getElementById('srnResultSection').classList.remove('hidden');
+                    
+                    document.getElementById('btnPickProduct').onclick = () => pickProduct(srn);
+                } else {
+                    alert('Error finding product: ' + (json.error?.message || json.error || 'Not found'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function pickProduct(srn) {
+            try {
+                const token = localStorage.getItem('ecosure_jwt');
+                const response = await fetch('/api/collector/pick-product', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ serialNumber: srn })
+                });
+                
+                const json = await response.json();
+                if (json.success) {
+                    alert(`Success! Product picked and Manifest ${json.data.manifest_number} generated.`);
+                    closeScanner();
+                    loadDashboard();
+                } else {
+                    alert('Error: ' + (json.error?.message || json.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Connection error');
+            }
+        }
+
+        async function markReceived(manifestNumber) {
+            await processScan(manifestNumber);
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

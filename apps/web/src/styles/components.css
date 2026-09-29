@@ -840,44 +840,63 @@
 }
 .modal__close:hover { background: var(--color-border-strong); color: var(--color-ink); }
 
-.modal__tabs {
-  display: flex;
-  gap: 2px;
-  padding: var(--space-3) var(--space-6);
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-}
-.modal__tab {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: 0;
-  background: transparent;
-  border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-  font-weight: 550;
-  color: var(--color-ink-muted);
-  cursor: pointer;
-  transition: background 120ms var(--ease), color 120ms var(--ease);
-  white-space: nowrap;
-}
-.modal__tab:hover { background: var(--color-surface-muted); color: var(--color-ink); }
-.modal__tab--active { background: var(--color-ink); color: #fff; }
-
 .modal__body {
   flex: 1;
   padding: var(--space-6);
   overflow-y: auto;
 }
 
-/* ── Add device tab bodies ── */
-.add-device-tab { display: grid; gap: var(--space-5); }
-.add-device-tab__desc { font-size: var(--text-sm); color: var(--color-ink-muted); line-height: 1.6; }
-.add-device-tab__status { font-size: var(--text-sm); color: var(--color-ink-muted); text-align: center; }
+/* ── Add device form ── */
+.add-device-form { display: grid; gap: var(--space-5); }
 
-/* manual tab gets more breathing room between sections */
-.add-device-tab--manual { gap: var(--space-6); }
+/* Inline QR row */
+.add-device-qr-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+}
+.add-device-qr-label {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  font-weight: 500;
+}
+
+/* Collapsible scanner reveal */
+.add-device-scanner-wrap {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  background: var(--color-canvas);
+  animation: fade-down 180ms var(--ease) both;
+}
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Divider with centred label */
+.add-device-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-ink-subtle);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+.add-device-divider::before,
+.add-device-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* Required star */
+.field__required { color: var(--color-danger); margin-left: 2px; }
 
 /* ── Photo upload area ── */
 .photo-upload {

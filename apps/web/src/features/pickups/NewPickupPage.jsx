@@ -58,6 +58,7 @@ const CONDITIONS = [
 export function NewPickupPage() {
   const reference = useReference();
   const devicesQ = useAsync(productsApi.myDevices);
+  const pickupsQ = useAsync((signal) => pickupsApi.list(signal).then((r) => r.pickups), []);
 
   return (
     <div className="page pickup-wizard-page">
@@ -73,7 +74,23 @@ export function NewPickupPage() {
       <AsyncView query={reference}>
         {(ref) => (
           <AsyncView query={devicesQ}>
-            {(devices) => <Wizard refData={ref} devices={devices} />}
+            {(devices) => (
+              <AsyncView query={pickupsQ}>
+                {(pickups) => {
+                  const hasActive = pickups.some((p) => p.status === 'requested' || p.status === 'scheduled');
+                  if (hasActive) {
+                    return (
+                      <EmptyState 
+                        icon="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" 
+                        title="Active pickup exists" 
+                        description="You already have an active pickup request. Please wait until it is collected before booking another." 
+                      />
+                    );
+                  }
+                  return <Wizard refData={ref} devices={devices} />;
+                }}
+              </AsyncView>
+            )}
           </AsyncView>
         )}
       </AsyncView>

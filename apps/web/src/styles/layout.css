@@ -48,7 +48,7 @@
 
 .logo { display: inline-flex; align-items: center; gap: var(--space-2); }
 .logo__mark { flex: none; color: var(--color-brand); }
-.logo__word { font-size: var(--text-2xl); font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.logo__word { font-family: var(--font-sans); font-size: var(--text-2xl); font-weight: 800; letter-spacing: -0.04em; line-height: 1; }
 .logo__eco { color: var(--color-logo-ink); }
 .logo__sure { color: var(--color-logo-green); }
 

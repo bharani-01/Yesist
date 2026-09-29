@@ -182,7 +182,7 @@ export function AppShell() {
           <Link to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} className="brand" onClick={() => setMobileOpen(false)}>
             <Logo />
           </Link>
-          {user && <span className="brand__workspace">{WORKSPACE_LABELS[user.workspace]}</span>}
+          {user && user.workspace !== 'citizen' && <span className="brand__workspace">{WORKSPACE_LABELS[user.workspace]}</span>}
         </div>
 
         <nav className="sidebar__nav" aria-label="Primary Navigation">

@@ -6,6 +6,9 @@ export const wardExists = async (tx, wardId) =>
 export const countActiveCategories = async (tx, codes) =>
   (await queryOne(tx, 'select count(*)::int as n from waste_categories where active and code = any($1)', [codes])).n;
 
+export const hasActivePickup = async (tx, requesterId) =>
+  Boolean(await queryOne(tx, `select 1 from pickup_requests where requester_id = $1 and status in ('requested', 'scheduled') limit 1`, [requesterId]));
+
 export const insertPickup = (tx, { requesterId, wardId, preferredDate, preferredWindow }) =>
   queryOne(
     tx,

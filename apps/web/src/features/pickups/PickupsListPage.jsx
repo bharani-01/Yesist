@@ -167,12 +167,6 @@ export function PickupsListPage() {
           {/* Link to Dedicated History Page */}
           <Link to="/pickups/history" className="panel tap-effect" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--color-brand-weak)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-brand)' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M3 3v18h18" />
-                  <path d="m19 9-5 5-4-4-3 3" />
-                </svg>
-              </div>
               <div>
                 <h3 style={{ fontSize: 'var(--text-md)', margin: 0, color: 'var(--color-ink)' }}>Pickup History</h3>
                 <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-ink-subtle)' }}>View and manage all past requests</p>

@@ -55,20 +55,7 @@ function Journey({ product, onChange }) {
         <div className="stack">
           <Panel title="Journey">
             <div className="stack">
-              {product.registered && (
-                <ol className="stepper" style={{ '--steps': JOURNEY_STEPS.length }} aria-label="Product journey">
-                  {JOURNEY_STEPS.map((step, i) => {
-                    const done = i < currentIndex || product.state === 'processed';
-                    const state = done ? 'is-done' : i === currentIndex ? 'is-current' : '';
-                    return (
-                      <li key={step.key} className={`stepper__step ${state}`} aria-current={i === currentIndex ? 'step' : undefined}>
-                        <span className="stepper__bar" />
-                        <span className="stepper__label">{step.label}</span>
-                      </li>
-                    );
-                  })}
-                </ol>
-              )}
+              {/* Removed complex stepper by request */}
               {product.events.length ? (
                 <ol className="timeline">
                   {product.events.map((e) => (

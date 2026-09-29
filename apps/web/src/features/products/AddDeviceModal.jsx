@@ -102,58 +102,92 @@ function QrGuide({ onStartScanning, onClose }) {
   );
 }
 
-// ─── STAGE 2 — Scanning (camera + upload) ────────────────────────────────────
+// ─── STAGE 2 — Auto-start camera viewfinder ──────────────────────────────────
 
-function ScanningView({ onScanResult, onBack, scanError, setScanError }) {
-  const uploadRef = useRef(null);
-  const [decoding, setDecoding] = useState(false);
+function ScanningView({ onScanResult, onBack, scanError }) {
+  const videoRef   = useRef(null);
+  const scannerRef = useRef(null);
+  const [camState, setCamState] = useState('starting'); // 'starting' | 'on' | 'error'
+  const [camError, setCamError] = useState(null);
+  const onScanRef  = useRef(onScanResult);
+  onScanRef.current = onScanResult;
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setDecoding(true);
-    setScanError(null);
-    try {
-      const result = await QrScannerLib.scanImage(file, { returnDetailedScanResult: true });
-      const id = parseQrId(result.data);
-      if (!id) { setScanError("That image doesn't contain an EcoSure QR code. Try again."); }
-      else { onScanResult(id); }
-    } catch {
-      setScanError('No QR code found in that image. Try a clearer photo.');
-    } finally {
-      setDecoding(false);
-      e.target.value = '';
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
+    const scanner = new QrScannerLib(
+      videoRef.current,
+      (result) => {
+        const id = parseQrId(result.data);
+        if (id) onScanRef.current(id);
+      },
+      {
+        returnDetailedScanResult: true,
+        preferredCamera: 'environment',
+        highlightScanRegion: true,
+        maxScansPerSecond: 6,
+      },
+    );
+    scannerRef.current = scanner;
+    scanner.start()
+      .then(() => { if (!cancelled) setCamState('on'); })
+      .catch(async () => {
+        if (cancelled) return;
+        const hasCamera = await QrScannerLib.hasCamera().catch(() => false);
+        const msg = !navigator.mediaDevices
+          ? 'Camera not supported in this browser.'
+          : !hasCamera
+          ? 'No camera found on this device.'
+          : 'Camera access blocked — allow it in your browser settings.';
+        setCamError(msg);
+        setCamState('error');
+      });
+    return () => {
+      cancelled = true;
+      scanner.destroy();
+      scannerRef.current = null;
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="scanning-view">
+      {/* Back link */}
       <button className="scanning-view__back" type="button" onClick={onBack}>
         <Icon d={ICONS.arrow} size={16} /> Back
       </button>
 
-      <div className="scanning-view__camera">
-        <QrScanner label="" onScan={onScanResult} />
+      {/* Viewfinder */}
+      <div className="scanning-view__frame">
+        <video
+          ref={videoRef}
+          className="scanning-view__video"
+          muted playsInline
+          aria-label="Camera viewfinder for QR scanning"
+        />
+        {/* Corner brackets */}
+        <span className="scanning-view__corner scanning-view__corner--tl" aria-hidden="true" />
+        <span className="scanning-view__corner scanning-view__corner--tr" aria-hidden="true" />
+        <span className="scanning-view__corner scanning-view__corner--bl" aria-hidden="true" />
+        <span className="scanning-view__corner scanning-view__corner--br" aria-hidden="true" />
+        {camState === 'starting' && (
+          <div className="scanning-view__overlay">
+            <span className="spinner" aria-hidden="true" style={{ width: 24, height: 24, borderWidth: 3, color: '#fff' }} />
+            <span>Starting camera…</span>
+          </div>
+        )}
       </div>
 
-      <div className="scanning-view__or">
-        <span>or upload a photo of the label</span>
-      </div>
+      {/* Hint */}
+      {camState === 'on' && (
+        <p className="scanning-view__hint">
+          Point the camera at the green <strong>EcoSure</strong> QR label on your device
+        </p>
+      )}
 
-      <button
-        type="button"
-        className="scanning-view__upload-btn"
-        onClick={() => uploadRef.current?.click()}
-        disabled={decoding}
-      >
-        {decoding
-          ? <><span className="spinner" aria-hidden="true" /> Decoding…</>
-          : <><Icon d={ICONS.upload} size={16} /> Upload label photo</>
-        }
-      </button>
-      <input ref={uploadRef} type="file" accept="image/*" hidden onChange={handleUpload} />
-
-      {scanError && <p className="field__error" role="alert">{scanError}</p>}
+      {/* Errors */}
+      {(camError || scanError) && (
+        <p className="field__error" role="alert">{camError ?? scanError}</p>
+      )}
     </div>
   );
 }
@@ -352,7 +386,6 @@ export function AddDeviceModal({ onClose, onSuccess }) {
                   onScanResult={handleScanResult}
                   onBack={() => { setScanError(null); setMode('form'); }}
                   scanError={scanError}
-                  setScanError={setScanError}
                 />
               )}
 

@@ -951,8 +951,8 @@
   width: 100%;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  object-fit: cover;
-  max-height: 200px;
+  display: block;
+  background: var(--color-surface-muted);
 }
 .qr-guide__steps {
   list-style: none;
@@ -1005,7 +1005,7 @@
 }
 
 /* ═══════════════════════════════════════════════════════════
-   Scanning view
+   Scanning view — auto-start camera
    ═══════════════════════════════════════════════════════════ */
 .scanning-view {
   display: grid;
@@ -1027,48 +1027,61 @@
   transition: color 120ms var(--ease);
 }
 .scanning-view__back:hover { color: var(--color-ink); }
-.scanning-view__camera {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
+
+/* Viewfinder container */
+.scanning-view__frame {
+  position: relative;
+  border-radius: var(--radius-lg);
   overflow: hidden;
+  background: #0a0a0a;
+  aspect-ratio: 4 / 3;
 }
-.scanning-view__or {
+.scanning-view__video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Animated corner brackets */
+.scanning-view__corner {
+  position: absolute;
+  width: 28px;
+  height: 28px;
+  border-color: var(--color-brand);
+  border-style: solid;
+  border-width: 0;
+}
+.scanning-view__corner--tl { top: 16px;  left: 16px;  border-top-width: 3px; border-left-width: 3px;  border-top-left-radius: 4px; }
+.scanning-view__corner--tr { top: 16px;  right: 16px; border-top-width: 3px; border-right-width: 3px; border-top-right-radius: 4px; }
+.scanning-view__corner--bl { bottom: 16px; left: 16px;  border-bottom-width: 3px; border-left-width: 3px;  border-bottom-left-radius: 4px; }
+.scanning-view__corner--br { bottom: 16px; right: 16px; border-bottom-width: 3px; border-right-width: 3px; border-bottom-right-radius: 4px; }
+
+/* Starting overlay */
+.scanning-view__overlay {
+  position: absolute;
+  inset: 0;
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  font-size: var(--text-xs);
-  color: var(--color-ink-subtle);
-  font-weight: 500;
-}
-.scanning-view__or::before,
-.scanning-view__or::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: var(--color-border);
-}
-.scanning-view__upload-btn {
-  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
-  width: 100%;
-  min-height: 48px;
-  border: 1.5px dashed var(--color-border-strong);
-  border-radius: var(--radius-md);
-  background: var(--color-canvas);
-  color: var(--color-ink-muted);
+  gap: var(--space-3);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
   font-size: var(--text-sm);
   font-weight: 500;
-  cursor: pointer;
-  transition: border-color 150ms var(--ease), background 150ms var(--ease), color 150ms var(--ease);
 }
-.scanning-view__upload-btn:hover:not(:disabled) {
-  border-color: var(--color-brand);
-  background: var(--color-brand-weak);
-  color: var(--color-ink);
+
+/* Hint below frame */
+.scanning-view__hint {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  text-align: center;
+  margin: 0;
+  line-height: 1.5;
 }
-.scanning-view__upload-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+
 
 /* ═══════════════════════════════════════════════════════════
    Confirmation card

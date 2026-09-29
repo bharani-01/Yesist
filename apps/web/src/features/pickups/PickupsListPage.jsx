@@ -270,14 +270,22 @@ export function PickupsListPage() {
 
           {/* Nearest Drop-off / Regional Hub Widget */}
           <section className="dropoff-card">
-            <h3 className="dropoff-card__title">Nearest Drop-off</h3>
-            <div className="dropoff-map map-pattern tap-effect">
-              <div className="dropoff-pin">
-                <div className="dropoff-pin__dot" />
-                <div className="dropoff-pin__line" />
-                <div className="dropoff-pin__badge">
-                  0.8 km • TechPark Hub
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+              <h3 className="dropoff-card__title" style={{ marginBottom: 0 }}>Nearest Drop-off</h3>
+              <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--color-ink-subtle)' }}>0.8 km</span>
+            </div>
+            <div className="dropoff-map tap-effect" style={{ padding: 0, position: 'relative', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
+              <iframe 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0, pointerEvents: 'none', filter: 'contrast(1.1)' }}
+                src="https://www.openstreetmap.org/export/embed.html?bbox=75.8500%2C22.7100%2C75.8900%2C22.7300&amp;layer=mapnik&amp;marker=22.7200%2C75.8700" 
+                title="Nearest Drop-off Hub"
+                loading="lazy"
+              ></iframe>
+              <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'var(--color-surface)', padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: '0.75rem', fontWeight: 600, boxShadow: 'var(--shadow-card)', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-brand)' }} />
+                TechPark Hub
               </div>
             </div>
           </section>

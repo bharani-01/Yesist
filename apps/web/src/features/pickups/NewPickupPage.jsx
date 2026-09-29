@@ -64,7 +64,7 @@ export function NewPickupPage() {
       <PageHeader 
         title="Book a pickup" 
         description="Schedule a doorstep collection for your registered devices." 
-        back={{ to: '/pickups', label: 'My pickups' }} 
+        back={{ to: '/pickups', label: 'Manage pickups' }} 
       />
       <AsyncView query={reference}>
         {(ref) => (
@@ -174,12 +174,13 @@ function Wizard({ refData, devices }) {
     setPending(true);
     setError(null);
     try {
+      const sanitizedPhone = form.contactPhone.replace(/\D/g, '').slice(-10);
       const { pickup } = await pickupsApi.create({
         wardId: refData.wards[0]?.id || 1,
         addressLine: form.addressLine,
         landmark: form.landmark || undefined,
         contactName: form.contactName,
-        contactPhone: form.contactPhone,
+        contactPhone: sanitizedPhone,
         preferredDate: form.preferredDate,
         preferredWindow: form.preferredWindow,
         // Send the category code of the selected device with quantity 1
@@ -394,7 +395,9 @@ function Wizard({ refData, devices }) {
             <p className="wizard-desc">Please review the handover instructions before confirming.</p>
             
             <div className="instruction-card" style={{ background: '#ffffff', padding: 'var(--space-4)', borderRadius: 'var(--radius-lg)', marginTop: 'var(--space-2)', border: '1px solid var(--color-border)' }}>
-              <img src="/handover-guide.jpg" alt="Handover instructions" style={{ width: '100%', borderRadius: 'var(--radius-md)', marginBottom: 'var(--space-4)', objectFit: 'contain', aspectRatio: '4/3' }} />
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 'var(--space-5)' }}>
+                <img src="/handover-guide.jpg" alt="Handover instructions" style={{ height: '140px', objectFit: 'contain' }} />
+              </div>
               <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-md)', color: 'var(--color-ink)' }}>Handover Instructions</h3>
               <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', color: 'var(--color-ink-subtle)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>
                 <li>A verified EcoSure collector will arrive at your location.</li>

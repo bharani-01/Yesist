@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { AsyncView, EmptyState } from '../../components/feedback/AsyncView.jsx';
 import { ErrorAlert } from '../../components/ui/Alert.jsx';
 import { Button } from '../../components/ui/Button.jsx';

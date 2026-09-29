@@ -78,7 +78,7 @@ function Wizard({ refData, devices }) {
     );
   }
 
-  const selectedDevice = availableDevices.find((d) => d.id === selectedDeviceId);
+  const selectedDevice = availableDevices.find((d) => (d.qrPublicId || d.id) === selectedDeviceId);
 
   const handleNext = () => {
     if (step === 1 && !selectedDeviceId) return;
@@ -133,24 +133,27 @@ function Wizard({ refData, devices }) {
             <h2 className="wizard-title">Select device</h2>
             <p className="wizard-desc">Choose a registered device to hand over.</p>
             <div className="device-picker">
-              {availableDevices.map((d) => (
-                <label key={d.id} className={`device-card ${selectedDeviceId === d.id ? 'is-selected' : ''}`}>
-                  <input 
-                    type="radio" 
-                    name="device" 
-                    value={d.id} 
-                    checked={selectedDeviceId === d.id} 
-                    onChange={() => setSelectedDeviceId(d.id)} 
-                    className="sr-only"
-                  />
-                  <div className="device-card__avatar">{d.categoryName?.charAt(0) || 'D'}</div>
-                  <div className="device-card__info">
-                    <strong>{[d.brand, d.modelName].filter(Boolean).join(' ') || d.categoryName}</strong>
-                    <span>{d.categoryName} • ID: {d.id.slice(0, 6)}</span>
-                  </div>
-                  <div className="device-card__radio" />
-                </label>
-              ))}
+              {availableDevices.map((d) => {
+                const deviceId = d.qrPublicId || d.id || `dev-${Math.random()}`;
+                return (
+                  <label key={deviceId} className={`device-card ${selectedDeviceId === deviceId ? 'is-selected' : ''}`}>
+                    <input 
+                      type="radio" 
+                      name="device" 
+                      value={deviceId} 
+                      checked={selectedDeviceId === deviceId} 
+                      onChange={() => setSelectedDeviceId(deviceId)} 
+                      className="sr-only"
+                    />
+                    <div className="device-card__avatar">{d.categoryName?.charAt(0) || 'D'}</div>
+                    <div className="device-card__info">
+                      <strong>{[d.brand, d.modelName].filter(Boolean).join(' ') || d.categoryName}</strong>
+                      <span>{d.categoryName} • ID: {deviceId.slice(0, 6)}</span>
+                    </div>
+                    <div className="device-card__radio" />
+                  </label>
+                );
+              })}
             </div>
           </div>
         )}

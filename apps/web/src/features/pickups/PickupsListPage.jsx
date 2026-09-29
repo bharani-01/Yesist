@@ -278,8 +278,8 @@ export function PickupsListPage() {
               <iframe 
                 width="100%" 
                 height="100%" 
-                style={{ border: 0, pointerEvents: 'none', filter: 'contrast(1.1)' }}
-                src="https://www.openstreetmap.org/export/embed.html?bbox=75.8500%2C22.7100%2C75.8900%2C22.7300&amp;layer=mapnik&amp;marker=22.7200%2C75.8700" 
+                style={{ border: 0, pointerEvents: 'none' }}
+                src="https://maps.google.com/maps?q=Indore,Madhya+Pradesh&t=&z=13&ie=UTF8&iwloc=&output=embed" 
                 title="Nearest Drop-off Hub"
                 loading="lazy"
               ></iframe>

@@ -96,7 +96,7 @@ function Wizard({ refData, devices }) {
     setError(null);
     try {
       const { pickup } = await pickupsApi.create({
-        wardId: Number(form.wardId),
+        wardId: refData.wards[0]?.id || 1,
         addressLine: form.addressLine,
         landmark: form.landmark || undefined,
         contactName: form.contactName,
@@ -232,44 +232,65 @@ function Wizard({ refData, devices }) {
             <h2 className="wizard-title">Location</h2>
             <p className="wizard-desc">Where should we pick this up?</p>
             
-            <div className="map-visual">
-              <div className="map-visual__bg"></div>
-              <div className="map-visual__pin">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="var(--color-brand)" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div className="form-grid" style={{ marginBottom: 'var(--space-4)' }}>
+              <div className="field" style={{ position: 'relative' }}>
+                <label className="field__label">Search address</label>
+                <input 
+                  type="text" 
+                  className="input" 
+                  placeholder="Start typing your address..." 
+                  value={form.addressLine} 
+                  onChange={set('addressLine')} 
+                  autoComplete="off"
+                />
+                {form.addressLine.length > 2 && !form.addressLine.includes(' ') && (
+                  <div className="address-suggestions">
+                    <div onClick={() => setForm({...form, addressLine: form.addressLine + ' Society, Scheme 140'})}>
+                      <strong>{form.addressLine} Society</strong>, Scheme 140, Indore
+                    </div>
+                    <div onClick={() => setForm({...form, addressLine: form.addressLine + ' Enclave, Vijay Nagar'})}>
+                      <strong>{form.addressLine} Enclave</strong>, Vijay Nagar, Indore
+                    </div>
+                    <div onClick={() => setForm({...form, addressLine: form.addressLine + ' Apartments, Palasia'})}>
+                      <strong>{form.addressLine} Apartments</strong>, Palasia, Indore
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="map-visual" style={{ height: 220, padding: 0 }}>
+              <iframe 
+                title="Map view"
+                width="100%" 
+                height="100%" 
+                style={{ border: 0, pointerEvents: 'none', filter: 'grayscale(0.2) contrast(1.1)' }} 
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=75.75,22.65,75.95,22.85&layer=mapnik&marker=22.7196,75.8577`}
+              />
+              <div className="map-visual__pin" style={{ zIndex: 10 }}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--color-brand)" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
                   <circle cx="12" cy="10" r="3" fill="#fff"></circle>
                 </svg>
               </div>
-              <div className="map-visual__overlay">
-                <Button size="sm" variant="secondary">Adjust pin</Button>
-              </div>
             </div>
 
             <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>
-              <SelectField 
-                label="Ward (Indore)" 
-                required 
-                value={form.wardId} 
-                onChange={set('wardId')} 
-                error={fieldErrors.wardId}
-              >
-                <option value="">Select your ward</option>
-                {refData.wards.map((w) => <option key={w.id} value={w.id}>{w.name}</option>)}
-              </SelectField>
               <TextField 
-                label="Address" 
+                label="Flat / Wing / Complete Address" 
                 autoComplete="street-address" 
                 required 
                 value={form.addressLine} 
                 onChange={set('addressLine')} 
                 error={fieldErrors.addressLine} 
-                hint="Society, wing, flat, street" 
+                hint="Make sure the collector can find your exact door" 
               />
               <TextField 
-                label="Landmark (optional)" 
+                label="Landmark & additional instructions (optional)" 
                 value={form.landmark} 
                 onChange={set('landmark')} 
                 error={fieldErrors.landmark} 
+                placeholder="e.g. Near the big banyan tree, call upon arrival"
               />
             </div>
             {error && !Object.keys(fieldErrors).length && <ErrorAlert error={error} />}
@@ -297,7 +318,7 @@ function Wizard({ refData, devices }) {
             variant="primary" 
             onClick={handleSubmit} 
             loading={pending}
-            disabled={!form.wardId || !form.addressLine}
+            disabled={!form.addressLine}
           >
             Confirm booking
           </Button>

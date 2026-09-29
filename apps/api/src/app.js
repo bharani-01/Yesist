@@ -30,7 +30,7 @@ export function createApp() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https://*.tile.openstreetmap.org', 'https://*.basemaps.cartocdn.com', 'https://unpkg.com'],
+        imgSrc: ["'self'", 'data:', 'https://server.arcgisonline.com', 'https://unpkg.com'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         connectSrc: ["'self'"],

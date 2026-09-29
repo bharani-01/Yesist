@@ -79,9 +79,11 @@ function Wizard({ refData, devices }) {
     }
     const timer = setTimeout(async () => {
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&addressdetails=1&countrycodes=IN&limit=5`);
+        const res = await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(searchQuery)}&limit=5`);
         const data = await res.json();
-        setSuggestions(data || []);
+        if (data && data.features) {
+          setSuggestions(data.features);
+        }
       } catch (err) {
         // ignore fetch errors
       }
@@ -90,10 +92,15 @@ function Wizard({ refData, devices }) {
   }, [searchQuery]);
 
   const selectSuggestion = (s) => {
-    setForm({ ...form, addressLine: s.display_name });
+    const { name, street, city, state, postcode } = s.properties;
+    const addressString = [name, street, city, state, postcode].filter(Boolean).join(', ');
+    setForm({ ...form, addressLine: addressString });
     setSearchQuery('');
     setSuggestions([]);
-    if (s.lat && s.lon) setCoords([parseFloat(s.lat), parseFloat(s.lon)]);
+    if (s.geometry && s.geometry.coordinates) {
+      // GeoJSON is [lon, lat]
+      setCoords([s.geometry.coordinates[1], s.geometry.coordinates[0]]);
+    }
   };
 
   if (availableDevices.length === 0) {
@@ -274,12 +281,17 @@ function Wizard({ refData, devices }) {
                 />
                 {suggestions.length > 0 && (
                   <div className="address-suggestions">
-                    {suggestions.map((s, i) => (
-                      <div key={i} onClick={() => selectSuggestion(s)}>
-                        <strong>{s.display_name.split(',')[0]}</strong>
-                        <div>{s.display_name.split(',').slice(1).join(',')}</div>
-                      </div>
-                    ))}
+                    {suggestions.map((s, i) => {
+                      const { name, street, city, state, postcode } = s.properties;
+                      const title = name || street || city;
+                      const subtitle = [street !== title ? street : null, city !== title ? city : null, state, postcode].filter(Boolean).join(', ');
+                      return (
+                        <div key={i} onClick={() => selectSuggestion(s)}>
+                          <strong>{title}</strong>
+                          {subtitle && <div>{subtitle}</div>}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>

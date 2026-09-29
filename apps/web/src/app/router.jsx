@@ -15,6 +15,7 @@ import { OversightPage } from '../features/oversight/OversightPage.jsx';
 import { NewPickupPage } from '../features/pickups/NewPickupPage.jsx';
 import { PickupDetailPage } from '../features/pickups/PickupDetailPage.jsx';
 import { PickupsListPage } from '../features/pickups/PickupsListPage.jsx';
+import { PickupsHistoryPage } from '../features/pickups/PickupsHistoryPage.jsx';
 import { BatchDetailPage } from '../features/producer/BatchDetailPage.jsx';
 import { BatchesPage } from '../features/producer/BatchesPage.jsx';
 import { LabelsPage } from '../features/producer/LabelsPage.jsx';
@@ -53,6 +54,7 @@ export const router = createBrowserRouter([
         children: [
           { path: 'devices', element: <MyDevicesPage /> },
           { path: 'pickups', element: <PickupsListPage /> },
+          { path: 'pickups/history', element: <PickupsHistoryPage /> },
           { path: 'pickups/new', element: <NewPickupPage /> },
           { path: 'pickups/:id', element: <PickupDetailPage /> },
         ],

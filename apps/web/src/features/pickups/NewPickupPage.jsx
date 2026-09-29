@@ -64,7 +64,11 @@ export function NewPickupPage() {
       <PageHeader 
         title="Book a pickup" 
         description="Schedule a doorstep collection for your registered devices." 
-        back={{ to: '/pickups', label: 'Manage pickups' }} 
+        actions={
+          <Link to="/pickups/history" className="btn btn--secondary tap-effect" style={{ borderRadius: 'var(--radius-pill)', fontWeight: 600 }}>
+            Manage pickups
+          </Link>
+        }
       />
       <AsyncView query={reference}>
         {(ref) => (

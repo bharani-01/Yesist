@@ -52,6 +52,10 @@ function Wizard({ refData, devices }) {
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);
   const [condition, setCondition] = useState('');
   
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [coords, setCoords] = useState(null);
+  
   const [form, setForm] = useState({
     contactName: user.fullName ?? '', 
     contactPhone: user.phone ?? '',
@@ -66,6 +70,31 @@ function Wizard({ refData, devices }) {
   const [error, setError] = useState(null);
   const fieldErrors = error?.fieldErrors?.() ?? {};
   const set = (key) => (e) => setForm({ ...form, [key]: e.target.value });
+
+  // Debounced live suggestions
+  useEffect(() => {
+    if (searchQuery.length < 3) {
+      setSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&addressdetails=1&countrycodes=IN&limit=5`);
+        const data = await res.json();
+        setSuggestions(data || []);
+      } catch (err) {
+        // ignore fetch errors
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const selectSuggestion = (s) => {
+    setForm({ ...form, addressLine: s.display_name });
+    setSearchQuery('');
+    setSuggestions([]);
+    if (s.lat && s.lon) setCoords([parseFloat(s.lat), parseFloat(s.lon)]);
+  };
 
   if (availableDevices.length === 0) {
     return (
@@ -239,40 +268,45 @@ function Wizard({ refData, devices }) {
                   type="text" 
                   className="input" 
                   placeholder="Start typing your address..." 
-                  value={form.addressLine} 
-                  onChange={set('addressLine')} 
+                  value={searchQuery} 
+                  onChange={(e) => setSearchQuery(e.target.value)} 
                   autoComplete="off"
                 />
-                {form.addressLine.length > 2 && !form.addressLine.includes(' ') && (
+                {suggestions.length > 0 && (
                   <div className="address-suggestions">
-                    <div onClick={() => setForm({...form, addressLine: form.addressLine + ' Society, Scheme 140'})}>
-                      <strong>{form.addressLine} Society</strong>, Scheme 140, Indore
-                    </div>
-                    <div onClick={() => setForm({...form, addressLine: form.addressLine + ' Enclave, Vijay Nagar'})}>
-                      <strong>{form.addressLine} Enclave</strong>, Vijay Nagar, Indore
-                    </div>
-                    <div onClick={() => setForm({...form, addressLine: form.addressLine + ' Apartments, Palasia'})}>
-                      <strong>{form.addressLine} Apartments</strong>, Palasia, Indore
-                    </div>
+                    {suggestions.map((s, i) => (
+                      <div key={i} onClick={() => selectSuggestion(s)}>
+                        <strong>{s.display_name.split(',')[0]}</strong>
+                        <div>{s.display_name.split(',').slice(1).join(',')}</div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
             </div>
 
             <div className="map-visual" style={{ height: 220, padding: 0 }}>
-              <iframe 
-                title="Map view"
-                width="100%" 
-                height="100%" 
-                style={{ border: 0, pointerEvents: 'none', filter: 'grayscale(0.2) contrast(1.1)' }} 
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=75.75,22.65,75.95,22.85&layer=mapnik&marker=22.7196,75.8577`}
-              />
-              <div className="map-visual__pin" style={{ zIndex: 10 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--color-brand)" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3" fill="#fff"></circle>
-                </svg>
-              </div>
+              {coords ? (
+                <>
+                  <iframe 
+                    title="Map view"
+                    width="100%" 
+                    height="100%" 
+                    style={{ border: 0, pointerEvents: 'none' }} 
+                    src={`https://maps.google.com/maps?q=${coords[0]},${coords[1]}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
+                  />
+                  <div className="map-visual__pin" style={{ zIndex: 10 }}>
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--color-brand)" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3" fill="#fff"></circle>
+                    </svg>
+                  </div>
+                </>
+              ) : (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--color-ink-muted)', fontSize: 'var(--text-sm)', textAlign: 'center', padding: 'var(--space-4)' }}>
+                  Search for your address above to see it on the map
+                </div>
+              )}
             </div>
 
             <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>

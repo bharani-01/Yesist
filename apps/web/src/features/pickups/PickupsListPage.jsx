@@ -279,9 +279,7 @@ export function PickupsListPage() {
                 width="100%" 
                 height="100%" 
                 style={{ border: 0, pointerEvents: 'none' }}
-                src="https://maps.google.com/maps?q=Indore,Madhya+Pradesh&t=&z=13&ie=UTF8&iwloc=&output=embed" 
-                title="Nearest Drop-off Hub"
-                loading="lazy"
+                src="https://maps.google.com/maps?width=100%25&height=100%25&hl=en&q=Indore+(EcoSure%20TechPark%20Hub)&t=&z=14&ie=UTF8&iwloc=B&output=embed"
               ></iframe>
               <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'var(--color-surface)', padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: '0.75rem', fontWeight: 600, boxShadow: 'var(--shadow-card)', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-brand)' }} />

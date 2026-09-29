@@ -36,7 +36,7 @@ export function HubMap() {
     >
       <TileLayer
         attribution='Tiles &copy; <a href="https://www.esri.com/">Esri</a>'
-        url="https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+        url="/tiles/{z}/{y}/{x}"
       />
       {hubs.map(hub => (
         <Marker key={hub.id} position={hub.position}>

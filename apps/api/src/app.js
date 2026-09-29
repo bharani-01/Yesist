@@ -30,7 +30,7 @@ export function createApp() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        imgSrc: ["'self'", 'data:', 'https://server.arcgisonline.com', 'https://unpkg.com'],
+        imgSrc: ["'self'", 'data:', 'https://unpkg.com'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         connectSrc: ["'self'"],
@@ -41,6 +41,19 @@ export function createApp() {
   const json = express.json({ limit: '100kb' });
   app.use((req, res, next) => (OWN_BODY_PARSER.test(req.path) ? next() : json(req, res, next)));
   app.use(cookieParser());
+
+  // Tile proxy: serves map tiles from 'self' origin, bypassing CSP restrictions.
+  app.get('/tiles/:z/:y/:x', async (req, res) => {
+    const { z, y, x } = req.params;
+    const url = `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/${z}/${y}/${x}`;
+    try {
+      const upstream = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!upstream.ok) return res.status(upstream.status).end();
+      res.set('Content-Type', upstream.headers.get('Content-Type') || 'image/png');
+      res.set('Cache-Control', 'public, max-age=86400');
+      upstream.body.pipeTo(new WritableStream({ write(chunk) { res.write(chunk); }, close() { res.end(); } }));
+    } catch { res.status(502).end(); }
+  });
 
   app.use(API_PREFIX, apiLimiter, originGuard, authenticate, buildApiRouter());
   app.use(API_PREFIX, notFoundHandler);

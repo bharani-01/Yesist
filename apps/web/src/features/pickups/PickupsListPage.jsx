@@ -90,14 +90,14 @@ export function PickupsListPage() {
         {/* Left Column: Financial Card, Active Manifest, History */}
         <div className="stack">
           {/* Hero Financial & Impact Card */}
-          <section className="hero-impact-card" aria-label="Available Payout and Impact">
+          <section className="hero-impact-card" aria-label="Total Paid Amount and Impact">
             <div className="hero-impact-card__header">
-              <span className="hero-impact-card__eyebrow">Available Payout</span>
+              <span className="hero-impact-card__eyebrow">Total Paid Amount</span>
               <div className="hero-impact-card__amount">
                 <span className="hero-impact-card__symbol">₹</span>
                 <span>{totalPayout.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
               </div>
-              <Link to="/pickups" className="hero-impact-card__link tap-effect">
+              <Link to="/pickups/payouts" className="hero-impact-card__link tap-effect">
                 <span>View payout history</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12h14" />
@@ -226,7 +226,7 @@ export function PickupsListPage() {
                               </span>
                             </div>
                           </div>
-                          <StatusBadge map={UNIT_STATE} value={d.state} />
+                          {d.state !== 'claimed' && <StatusBadge map={UNIT_STATE} value={d.state} />}
                         </Link>
                       </li>
                     );

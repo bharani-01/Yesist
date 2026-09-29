@@ -42,17 +42,23 @@ export function createApp() {
   app.use((req, res, next) => (OWN_BODY_PARSER.test(req.path) ? next() : json(req, res, next)));
   app.use(cookieParser());
 
-  // Tile proxy: serves map tiles from 'self' origin, bypassing CSP restrictions.
-  app.get('/tiles/:z/:y/:x', async (req, res) => {
-    const { z, y, x } = req.params;
-    const url = `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/${z}/${y}/${x}`;
+  // Tile proxy: fetches OSM tiles server-side so the browser never hits an external CSP-blocked domain.
+  app.get('/tiles/:z/:x/:y', async (req, res) => {
+    const { z, x, y } = req.params;
+    const url = `https://tile.openstreetmap.org/${z}/${x}/${y}.png`;
     try {
-      const upstream = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      const upstream = await fetch(url, {
+        signal: AbortSignal.timeout(8000),
+        headers: { 'User-Agent': 'EcoSure/1.0 (+https://ecosure.trackifyapp.co.in)' },
+      });
       if (!upstream.ok) return res.status(upstream.status).end();
+      const buf = Buffer.from(await upstream.arrayBuffer());
       res.set('Content-Type', upstream.headers.get('Content-Type') || 'image/png');
       res.set('Cache-Control', 'public, max-age=86400');
-      upstream.body.pipeTo(new WritableStream({ write(chunk) { res.write(chunk); }, close() { res.end(); } }));
-    } catch { res.status(502).end(); }
+      res.send(buf);
+    } catch {
+      res.status(502).end();
+    }
   });
 
   app.use(API_PREFIX, apiLimiter, originGuard, authenticate, buildApiRouter());

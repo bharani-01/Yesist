@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { AsyncView, EmptyState } from '../../components/feedback/AsyncView.jsx';
 import { StatusBadge } from '../../components/ui/Badge.jsx';
 import { PageHeader } from '../../components/ui/PageHeader.jsx';
+import { HubMap } from '../../components/ui/HubMap.jsx';
 import { Panel } from '../../components/ui/Panel.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
 import { productsApi } from '../products/products.api.js';
@@ -274,18 +275,7 @@ export function PickupsListPage() {
               <h3 className="dropoff-card__title" style={{ marginBottom: 0 }}>Nearest Drop-off</h3>
               <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--color-ink-subtle)' }}>0.8 km</span>
             </div>
-            <div className="dropoff-map tap-effect" style={{ padding: 0, position: 'relative', border: '1px solid var(--color-border)', overflow: 'hidden' }}>
-              <iframe 
-                width="100%" 
-                height="100%" 
-                style={{ border: 0, pointerEvents: 'none' }}
-                src="https://maps.google.com/maps?width=100%25&height=100%25&hl=en&q=Indore+(EcoSure%20TechPark%20Hub)&t=&z=14&ie=UTF8&iwloc=B&output=embed"
-              ></iframe>
-              <div style={{ position: 'absolute', bottom: '12px', right: '12px', background: 'var(--color-surface)', padding: '6px 14px', borderRadius: 'var(--radius-pill)', fontSize: '0.75rem', fontWeight: 600, boxShadow: 'var(--shadow-card)', color: 'var(--color-ink)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-brand)' }} />
-                TechPark Hub
-              </div>
-            </div>
+            <HubMap />
           </section>
         </div>
       </div>

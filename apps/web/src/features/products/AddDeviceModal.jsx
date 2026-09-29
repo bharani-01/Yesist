@@ -1,8 +1,8 @@
 import QrScannerLib from 'qr-scanner';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button.jsx';
-import { QrScanner, parseQrId } from '../../components/qr/QrScanner.jsx';
+import { parseQrId } from '../../components/qr/QrScanner.jsx';
 import { productsApi } from './products.api.js';
 
 // ─── constants ────────────────────────────────────────────────────────────────

@@ -23,7 +23,12 @@ end $$;
 create schema if not exists app;
 grant usage on schema app to ecosure_app;
 grant usage on schema public to ecosure_app;
-grant usage on schema extensions to ecosure_app;
+do $$
+begin
+  if exists (select 1 from pg_namespace where nspname = 'extensions') then
+    grant usage on schema extensions to ecosure_app;
+  end if;
+end $$;
 
 -- -----------------------------------------------------------------------------
 -- Reference data

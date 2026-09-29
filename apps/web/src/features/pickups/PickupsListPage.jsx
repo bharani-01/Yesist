@@ -54,7 +54,8 @@ export function PickupsListPage() {
   const devices = devicesQuery.data ?? [];
 
   // Metrics computation strictly from real backend pickups
-  const completedPickups = pickups.filter((p) => p.status === 'collected');
+  const COLLECTED_STATUSES = new Set(['collected', 'in_lot', 'received', 'closed']);
+  const completedPickups = pickups.filter((p) => COLLECTED_STATUSES.has(p.status));
   const activePickup = pickups.find((p) => p.status === 'requested' || p.status === 'scheduled');
 
   const totalPayout = completedPickups.reduce((acc, p) => acc + (Number(p.materialPaidAmount) || 0), 0);
@@ -201,11 +202,20 @@ export function PickupsListPage() {
                           <DeviceIcon categoryCode={d.categoryCode} />
                         </div>
                         <div className="product-item__content">
+                          <span className="product-item__category">
+                            {d.categoryCode === 'mobile_phone'
+                              ? 'Phone'
+                              : d.categoryCode === 'laptop'
+                              ? 'Laptop'
+                              : d.categoryCode === 'tablet'
+                              ? 'Tablet'
+                              : d.categoryName ?? 'Device'}
+                          </span>
                           <span className="product-item__title">
                             {d.brand ? `${d.brand} ${d.modelName}` : d.categoryName}
                           </span>
                           <span className="product-item__sub">
-                            {d.typicalUnitKg ? `${d.typicalUnitKg} kg` : d.categoryName} • {srn}
+                            {d.typicalUnitKg ? `${d.typicalUnitKg} kg` : ''} • {srn}
                           </span>
                         </div>
                         <StatusBadge map={UNIT_STATE} value={d.state} />

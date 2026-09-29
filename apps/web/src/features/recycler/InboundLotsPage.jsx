@@ -1,19 +1,56 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { AsyncView, EmptyState } from '../../components/feedback/AsyncView.jsx';
 import { Badge, StatusBadge } from '../../components/ui/Badge.jsx';
+import { Metric } from '../../components/ui/Metric.jsx';
 import { PageHeader } from '../../components/ui/PageHeader.jsx';
 import { Panel } from '../../components/ui/Panel.jsx';
 import { useAsync } from '../../hooks/useAsync.js';
-import { formatDateTime, formatKg } from '../../lib/format.js';
+import { formatDateTime, formatInt, formatKg } from '../../lib/format.js';
 import { LOT_STATUS } from '../../lib/status.js';
 import { recyclerApi } from './recycler.api.js';
 
 export function InboundLotsPage() {
   const navigate = useNavigate();
   const query = useAsync((s) => recyclerApi.lots(s).then((r) => r.lots), []);
+
+  const lots = query.data ?? [];
+  const receivedLots = lots.filter((l) => l.status === 'received' || l.status === 'processed' || l.status === 'attested');
+  const totalAcceptedKg = receivedLots.reduce((acc, l) => acc + (Number(l.acceptedNetKg) || 0), 0);
+  const issuedAttestations = lots.filter((l) => l.attestation?.status === 'issued').length;
+  const readyToReceive = lots.filter((l) => l.receivable && l.status !== 'received' && l.status !== 'processed' && l.status !== 'attested').length;
+
   return (
     <div className="page">
-      <PageHeader title="Inbound lots" />
+      <PageHeader
+        title="Inbound Lots"
+        eyebrow="PRO RECYCLER DASHBOARD"
+        description="Verify incoming lot weight, inspect material custody, and issue recovery attestations."
+      />
+
+      {/* Real Backend Metrics */}
+      <div className="metrics metrics--4">
+        <Metric
+          label="Total lots handled"
+          value={formatInt(lots.length)}
+          hint="All routed lots"
+        />
+        <Metric
+          label="Ready to receive"
+          value={formatInt(readyToReceive)}
+          hint="Arrived and awaiting receipt weigh-in"
+        />
+        <Metric
+          label="Total accepted weight"
+          value={formatKg(totalAcceptedKg)}
+          hint="Verified scale weight received"
+        />
+        <Metric
+          label="Certificates issued"
+          value={formatInt(issuedAttestations)}
+          hint="Official recovery attestations"
+        />
+      </div>
+
       <Panel flush>
         <AsyncView query={query} isEmpty={(d) => !d.length} empty={<EmptyState title="No lots dispatched to you yet" text="Lots appear here as soon as an agent dispatches them." />}>
           {(lots) => (

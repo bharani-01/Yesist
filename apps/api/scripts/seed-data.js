@@ -148,6 +148,14 @@ async function main() {
     console.log(`✓ Batch ${batch1.batchRef} approved & placed on market by checker`);
 
     const qrPhone = registeredUnits[0]?.qrPublicId;
+    if (registeredUnits[1]?.qrPublicId) {
+      await citizen.post('/devices/claim', { qr: registeredUnits[1].qrPublicId });
+      console.log(`✓ Citizen claimed device: ${registeredUnits[1].qrPublicId}`);
+    }
+    if (registeredUnits[2]?.qrPublicId) {
+      await citizen.post('/devices/claim', { qr: registeredUnits[2].qrPublicId });
+      console.log(`✓ Citizen claimed device: ${registeredUnits[2].qrPublicId}`);
+    }
 
     console.log('\n--- 2. Seeding Citizen Pickups in Diverse Lifecycle Stages ---');
     // Pickup A: Requested (Open, waiting for agent to accept)

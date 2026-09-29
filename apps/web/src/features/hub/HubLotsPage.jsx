@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AsyncView, EmptyState } from '../../components/feedback/AsyncView.jsx';
 import { StatusBadge } from '../../components/ui/Badge.jsx';
+import { Metric } from '../../components/ui/Metric.jsx';
 import { Segmented } from '../../components/ui/Field.jsx';
 import { PageHeader } from '../../components/ui/PageHeader.jsx';
 import { Panel } from '../../components/ui/Panel.jsx';

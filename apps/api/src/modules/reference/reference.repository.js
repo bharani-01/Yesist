@@ -13,7 +13,7 @@ export const listWards = (tx) =>
 export const getAgentIdentity = async (tx, userId) => {
   const result = await queryMany(
     tx,
-    `select u.full_name as "fullName", o.name as "orgName", o.id_card_number as "idCardNumber"
+    `select u.full_name as "fullName", o.name as "orgName"
      from users u
      join organization_members m on m.user_id = u.id
      join organizations o on o.id = m.org_id

@@ -42,7 +42,7 @@ export function VerifyAgentPage() {
   }
 
   return (
-    <div className="page" style={{ maxWidth: '400px', margin: '0 auto' }}>
+    <div className="page" style={{ maxWidth: '400px', margin: '0 auto', padding: '1rem', display: 'flex', flexDirection: 'column', minHeight: '100vh', justifyContent: 'center' }}>
       <div style={{ textAlign: 'center', margin: '2rem 0' }}>
         <div style={{ 
           display: 'inline-flex', 
@@ -57,16 +57,15 @@ export function VerifyAgentPage() {
         }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
         </div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a' }}>Verified Collection Agent</h1>
-        <p style={{ color: '#64748b', marginTop: '0.5rem' }}>This person is authorized to collect e-waste on behalf of EcoSure.</p>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a', margin: '0' }}>Verified Collector</h1>
+        <p style={{ color: '#64748b', marginTop: '0.5rem', fontSize: '0.875rem' }}>This person is authorized to collect e-waste on behalf of EcoSure.</p>
       </div>
 
       <Panel>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', padding: '0.5rem' }}>
           <div>
             <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>Organization / Shop</div>
             <div style={{ fontSize: '1.125rem', fontWeight: 600, color: '#0f172a', marginTop: '0.25rem' }}>{agent.orgName}</div>
-            {agent.idCardNumber && <div style={{ fontSize: '0.875rem', color: '#64748b', marginTop: '0.25rem' }}>ID: {agent.idCardNumber}</div>}
           </div>
 
           <div>
@@ -76,8 +75,8 @@ export function VerifyAgentPage() {
         </div>
       </Panel>
 
-      <div style={{ marginTop: '2rem', textAlign: 'center' }}>
-        <Link to="/" className="btn btn--secondary">Go to EcoSure Home</Link>
+      <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+        <Link to="/" className="btn btn--secondary" style={{ width: '100%' }}>Go to EcoSure Home</Link>
       </div>
     </div>
   );

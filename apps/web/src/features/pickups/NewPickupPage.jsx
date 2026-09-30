@@ -483,7 +483,18 @@ function Wizard({ refData, devices, pickups = [] }) {
               <span style={{ fontSize: 'var(--text-md)', color: 'var(--color-ink)', fontWeight: 500 }}>I acknowledge the handover instructions</span>
             </label>
             
-            {error && <ErrorAlert error={error} />}
+            {error && (
+              <div style={{ marginTop: 'var(--space-4)' }}>
+                <ErrorAlert error={error} />
+                {error.details?.length > 0 && (
+                  <ul style={{ margin: '8px 0 0 0', padding: '0 0 0 16px', fontSize: '0.78rem', color: 'var(--color-danger, #c0392b)' }}>
+                    {error.details.map((d, i) => (
+                      <li key={i}><strong>{d.path}</strong>: {d.message}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>

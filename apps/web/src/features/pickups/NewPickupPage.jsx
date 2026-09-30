@@ -56,11 +56,12 @@ function DeviceIcon({ categoryCode }) {
       </svg>
     );
   }
+  // Fallback: generic box/package icon
   return (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.044-1.771l1.97-3.474a1.812 1.812 0 0 1 1.57-.874H10" />
-      <path d="M11 19h6.185a1.83 1.83 0 0 0 1.57-.881 1.785 1.785 0 0 0 .044-1.771l-1.97-3.474a1.812 1.812 0 0 0-1.57-.874H13" />
-      <path d="M15.5 8 13.53 4.526a1.812 1.812 0 0 0-1.57-.874H8.04a1.83 1.83 0 0 0-1.57.881 1.785 1.785 0 0 0-.044 1.771L8.5 10" />
+      <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+      <path d="m3.3 7 8.7 5 8.7-5" />
+      <path d="M12 22V12" />
     </svg>
   );
 }
@@ -191,7 +192,8 @@ function Wizard({ refData, devices, pickups = [] }) {
   const handleNext = () => {
     if (step === 1 && !selectedDeviceId) return;
     if (step === 2 && !condition) return;
-    if (step === 3 && (!form.contactName || !form.contactPhone || !form.preferredDate || !form.preferredWindow)) return;
+    if (step === 3 && (!form.contactName || !form.contactPhone || form.contactPhone.length < 10 || !form.preferredDate || !form.preferredWindow)) return;
+    if (step === 4 && (!form.addressLine || form.addressLine.trim().length < 5)) return;
     setStep(step + 1);
   };
 
@@ -351,15 +353,30 @@ function Wizard({ refData, devices, pickups = [] }) {
                   value={form.contactName} 
                   onChange={set('contactName')} 
                 />
-                <TextField 
-                  label="Contact mobile" 
-                  type="tel" 
-                  inputMode="numeric" 
-                  maxLength={10} 
-                  required 
-                  value={form.contactPhone} 
-                  onChange={set('contactPhone')} 
-                />
+                {/* Phone field with +91 prefix */}
+                <div className="field">
+                  <label className="field__label">Contact mobile</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                    <span style={{
+                      padding: '0 12px', height: 44, display: 'flex', alignItems: 'center',
+                      background: 'var(--color-surface-raised, #f5f5f7)', border: '1px solid var(--color-border)',
+                      borderRight: 'none', borderRadius: 'var(--radius-md) 0 0 var(--radius-md)',
+                      fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-ink-subtle)',
+                      userSelect: 'none', whiteSpace: 'nowrap',
+                    }}>+91</span>
+                    <input
+                      className="input"
+                      type="tel"
+                      inputMode="numeric"
+                      maxLength={10}
+                      placeholder="10-digit mobile"
+                      required
+                      value={form.contactPhone}
+                      onChange={(e) => setForm({ ...form, contactPhone: e.target.value.replace(/\D/g, '').slice(0, 10) })}
+                      style={{ borderRadius: '0 var(--radius-md) var(--radius-md) 0', flex: 1 }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -481,7 +498,7 @@ function Wizard({ refData, devices, pickups = [] }) {
             type="button" 
             variant="primary" 
             onClick={handleNext}
-            disabled={(step === 1 && !selectedDeviceId) || (step === 2 && !condition) || (step === 3 && (!form.contactName || !form.contactPhone)) || (step === 4 && !form.addressLine)}
+          disabled={(step === 1 && !selectedDeviceId) || (step === 2 && !condition) || (step === 3 && (!form.contactName || form.contactPhone.length < 10)) || (step === 4 && (!form.addressLine || form.addressLine.trim().length < 5))}
           >
             Continue
           </Button>

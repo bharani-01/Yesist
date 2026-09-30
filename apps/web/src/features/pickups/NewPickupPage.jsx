@@ -1,5 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { AsyncView, EmptyState } from '../../components/feedback/AsyncView.jsx';
 import { ErrorAlert } from '../../components/ui/Alert.jsx';
 import { Button } from '../../components/ui/Button.jsx';
@@ -11,6 +14,21 @@ import { useReference } from '../reference/useReference.js';
 import { pickupsApi } from './pickups.api.js';
 import { productsApi } from '../products/products.api.js';
 import { useAsync } from '../../hooks/useAsync.js';
+
+// Fix Leaflet default marker icons broken by bundlers
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+});
+
+// Helper: re-center map when coords change
+function MapRecenter({ coords }) {
+  const map = useMap();
+  useEffect(() => { map.setView(coords, 16); }, [coords, map]);
+  return null;
+}
 
 function DeviceIcon({ categoryCode }) {
   if (categoryCode === 'laptop' || categoryCode === 'desktop_cpu') {
@@ -185,20 +203,22 @@ function Wizard({ refData, devices, pickups = [] }) {
     setPending(true);
     setError(null);
     try {
-      const sanitizedPhone = form.contactPhone.replace(/\D/g, '').slice(-10);
+      // Strip everything non-numeric, remove leading 91 country code if present, take last 10 digits
+      const digits = form.contactPhone.replace(/\D/g, '');
+      const sanitizedPhone = digits.startsWith('91') && digits.length === 12 ? digits.slice(2) : digits.slice(-10);
       const { pickup } = await pickupsApi.create({
-        wardId: refData.wards[0]?.id || 1,
-        addressLine: form.addressLine,
+        wardId: refData.wards[0]?.id ?? 1,
+        addressLine: form.addressLine || 'Address not specified',
         landmark: form.landmark || undefined,
         contactName: form.contactName,
         contactPhone: sanitizedPhone,
         preferredDate: form.preferredDate,
         preferredWindow: form.preferredWindow,
-        // Send the category code of the selected device with quantity 1
         items: [{ categoryCode: selectedDevice.categoryCode, quantity: 1 }],
       });
       navigate(`/pickups/${pickup.id}`, { replace: true });
     } catch (err) {
+      console.error('[Pickup] booking error:', err);
       setError(err);
       setPending(false);
     }
@@ -379,20 +399,21 @@ function Wizard({ refData, devices, pickups = [] }) {
               </div>
             </div>
 
-            <div className="map-visual" style={{ height: 220, padding: 0 }}>
-              <iframe 
-                title="Map view"
-                width="100%" 
-                height="100%" 
-                style={{ border: 0, pointerEvents: 'none' }} 
-                src={`https://maps.google.com/maps?q=${coords[0]},${coords[1]}&t=&z=16&ie=UTF8&iwloc=&output=embed`}
-              />
-              <div className="map-visual__pin" style={{ zIndex: 10 }}>
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="var(--color-brand)" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                  <circle cx="12" cy="10" r="3" fill="#fff"></circle>
-                </svg>
-              </div>
+            <div className="map-visual" style={{ height: 220, padding: 0, borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+              <MapContainer
+                center={coords}
+                zoom={16}
+                style={{ width: '100%', height: '100%' }}
+                zoomControl={false}
+                dragging={false}
+                scrollWheelZoom={false}
+                doubleClickZoom={false}
+                attributionControl={false}
+              >
+                <TileLayer url="/tiles/{z}/{x}/{y}" />
+                <Marker position={coords} />
+                <MapRecenter coords={coords} />
+              </MapContainer>
             </div>
 
             <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>
@@ -445,7 +466,7 @@ function Wizard({ refData, devices, pickups = [] }) {
               <span style={{ fontSize: 'var(--text-md)', color: 'var(--color-ink)', fontWeight: 500 }}>I acknowledge the handover instructions</span>
             </label>
             
-            {error && !Object.keys(fieldErrors).length && <ErrorAlert error={error} />}
+            {error && <ErrorAlert error={error} />}
           </div>
         )}
       </div>

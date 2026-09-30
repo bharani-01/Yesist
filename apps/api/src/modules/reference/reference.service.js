@@ -6,3 +6,6 @@ export const getReferenceData = () =>
     categories: await repo.listCategories(tx),
     wards: await repo.listWards(tx),
   }));
+
+export const getAgentIdentity = (userId) =>
+  withTx(null, (tx) => repo.getAgentIdentity(tx, userId));

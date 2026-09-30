@@ -37,6 +37,7 @@ export function AgentHomePage() {
       <PageHeader
         title="Jobs and lots"
         eyebrow="COLLECTION AGENT DASHBOARD"
+        actions={<Link to="/agent/id-card" className="btn btn--primary">Show ID Card</Link>}
       />
 
       {/* Real Backend Metrics Grid */}

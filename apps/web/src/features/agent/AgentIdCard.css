@@ -1,0 +1,167 @@
+.id-card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 2rem;
+  padding: 0 1rem;
+}
+
+.id-card {
+  width: 100%;
+  max-width: 400px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.id-card__header {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%);
+  color: white;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.id-card__logo-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.id-card__status {
+  background: rgba(255, 255, 255, 0.2);
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.id-card__body {
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.id-card__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.id-card__org-section {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.id-card__org-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.id-card__org-id {
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 0.25rem;
+}
+
+.id-card__agent-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.id-card__profile-pic {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 2px solid #0d9488;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0d9488;
+}
+
+.id-card__agent-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.125rem;
+}
+
+.id-card__agent-role {
+  font-size: 0.875rem;
+  color: #0d9488;
+  font-weight: 500;
+}
+
+.id-card__footer {
+  background: #f8fafc;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  text-align: center;
+}
+
+.id-card__footer-text {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.id-card__qr-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 0.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.id-card__qr-code {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  padding: 4px;
+  background: white;
+}
+
+.id-card__qr-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+.id-card__qr-hint {
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}

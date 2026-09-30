@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { EmptyState, LoadingState } from '../components/feedback/AsyncView.jsx';
 import { AppShell } from '../components/layout/AppShell.jsx';
 import { AgentHomePage } from '../features/agent/AgentHomePage.jsx';
+import { AgentIdCardPage } from '../features/agent/AgentIdCardPage.jsx';
 import { JobDetailPage } from '../features/agent/JobDetailPage.jsx';
 import { HOME_BY_WORKSPACE, useAuth } from '../features/auth/AuthProvider.jsx';
 import { HubLotDetailPage } from '../features/hub/HubLotDetailPage.jsx';
@@ -29,6 +30,7 @@ import { CertificatePage } from '../features/products/CertificatePage.jsx';
 import { InboundLotsPage } from '../features/recycler/InboundLotsPage.jsx';
 import { LotDetailPage } from '../features/recycler/LotDetailPage.jsx';
 import { VerifyPage } from '../features/verify/VerifyPage.jsx';
+import { VerifyAgentPage } from '../features/verify/VerifyAgentPage.jsx';
 
 function HomeRedirect() {
   const auth = useAuth();
@@ -50,6 +52,7 @@ export const router = createBrowserRouter([
       { index: true, element: <HomeRedirect /> },
       { path: 'verify', element: <VerifyPage /> },
       { path: 'verify/:number', element: <VerifyPage /> },
+      { path: 'verify/agent/:id', element: <VerifyAgentPage /> },
       { path: 'p/:qr', element: <ProductPage /> },
       {
         element: <RequireWorkspace workspace="citizen" />,
@@ -68,6 +71,7 @@ export const router = createBrowserRouter([
         children: [
           { path: 'agent', element: <AgentHomePage /> },
           { path: 'agent/jobs/:id', element: <JobDetailPage /> },
+          { path: 'agent/id-card', element: <AgentIdCardPage /> },
         ],
       },
       {

@@ -387,7 +387,8 @@ function Wizard({ refData, devices, pickups = [] }) {
             <h2 className="wizard-title">Location</h2>
             <p className="wizard-desc">Where should we pick this up?</p>
             
-            <div className="form-grid" style={{ marginBottom: 'var(--space-4)' }}>
+            {/* Address fields FIRST, map preview BELOW */}
+            <div className="form-grid" style={{ marginBottom: 'var(--space-3)' }}>
               <div className="field" style={{ position: 'relative' }}>
                 <label className="field__label">Search address</label>
                 <input 
@@ -414,26 +415,6 @@ function Wizard({ refData, devices, pickups = [] }) {
                   </div>
                 )}
               </div>
-            </div>
-
-            <div className="map-visual" style={{ height: 220, padding: 0, borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
-              <MapContainer
-                center={coords}
-                zoom={16}
-                style={{ width: '100%', height: '100%' }}
-                zoomControl={false}
-                dragging={false}
-                scrollWheelZoom={false}
-                doubleClickZoom={false}
-                attributionControl={false}
-              >
-                <TileLayer url="/tiles/{z}/{x}/{y}" />
-                <Marker position={coords} />
-                <MapRecenter coords={coords} />
-              </MapContainer>
-            </div>
-
-            <div className="form-grid" style={{ marginTop: 'var(--space-4)' }}>
               <TextField 
                 label="Flat / Wing / Complete Address" 
                 autoComplete="street-address" 
@@ -451,7 +432,26 @@ function Wizard({ refData, devices, pickups = [] }) {
                 placeholder="e.g. Near the big banyan tree, call upon arrival"
               />
             </div>
-            {error && !Object.keys(fieldErrors).length && <ErrorAlert error={error} />}
+
+            {/* Map preview below the fields */}
+            <div className="map-visual" style={{ height: 200, padding: 0, borderRadius: 'var(--radius-lg)', overflow: 'hidden', border: '1px solid var(--color-border)' }}>
+              <MapContainer
+                center={coords}
+                zoom={16}
+                style={{ width: '100%', height: '100%' }}
+                zoomControl={false}
+                dragging={false}
+                scrollWheelZoom={false}
+                doubleClickZoom={false}
+                attributionControl={false}
+              >
+                <TileLayer url="/tiles/{z}/{x}/{y}" />
+                <Marker position={coords} />
+                <MapRecenter coords={coords} />
+              </MapContainer>
+            </div>
+
+            {error && !Object.keys(fieldErrors).length && <ErrorAlert error={error} style={{ marginTop: 'var(--space-3)' }} />}
           </div>
         )}
 

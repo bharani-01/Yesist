@@ -4,7 +4,7 @@ import { queryMany, queryOne } from '../../core/db.js';
 export const listClaimed = (tx, userId) =>
   queryMany(
     tx,
-    `select u.qr_public_id as "qrPublicId", u.state, u.updated_at as "updatedAt", c.claimed_at as "claimedAt",
+    `select u.qr_public_id as "qrPublicId", u.state, u.category_code as "categoryCode", u.updated_at as "updatedAt", c.claimed_at as "claimedAt",
             m.brand, m.model_name as "modelName", wc.name as "categoryName"
        from unit_claims c
        join product_units u on u.id = c.unit_id

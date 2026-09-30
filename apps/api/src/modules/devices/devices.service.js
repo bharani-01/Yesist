@@ -20,3 +20,14 @@ export async function claimDevice({ qr }, ctx) {
   if (CLAIM_ERRORS[result]) throw CLAIM_ERRORS[result]();
   return { status: result };
 }
+
+export async function getDeviceCertificate(qr, ctx) {
+  const cert = await withTx(ctx.userId, (tx) => repo.findCertificate(tx, qr, ctx.userId));
+  if (!cert) throw Errors.notFound('Certificate');
+  if (!cert.issuedAt) throw Errors.conflict('not_yet_certified', 'This device has not been recycled and certified yet.');
+  return cert;
+}
+
+export async function addManualDevice(input, ctx) {
+  return withTx(ctx.userId, (tx) => repo.insertManualDevice(tx, ctx.userId, input));
+}

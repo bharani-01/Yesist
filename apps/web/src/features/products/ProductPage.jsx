@@ -72,8 +72,10 @@ function Journey({ product, onChange }) {
             </div>
           </Panel>
           {product.attestationNumber && (
-            <Alert tone="success" title="Recycling attested">
-              Covered by custody attestation <Link to={`/verify/${product.attestationNumber}`} className="mono">{product.attestationNumber}</Link>.
+            <Alert tone="success" title="Responsibly Recycled ✓">
+              Your device has been recycled by an authorised recycler.
+              {' '}
+              <Link to={`/devices/${product.qrPublicId}/certificate`} style={{ fontWeight: 600 }}>View your Recycling Certificate →</Link>
             </Alert>
           )}
         </div>

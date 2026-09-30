@@ -125,6 +125,14 @@ function ScanningView({ onScanResult, onBack, scanError }) {
         preferredCamera: 'environment',
         highlightScanRegion: true,
         maxScansPerSecond: 6,
+        calculateScanRegion: (video) => {
+          const s = Math.round((2 / 3) * Math.min(video.videoWidth, video.videoHeight));
+          return {
+            x: Math.round((video.videoWidth - s) / 2),
+            y: Math.round((video.videoHeight - s) / 2),
+            width: s, height: s, downScaledWidth: 400, downScaledHeight: 400,
+          };
+        },
       },
     );
     scannerRef.current = scanner;

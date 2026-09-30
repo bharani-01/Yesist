@@ -198,14 +198,6 @@ export function AppShell() {
               <span>{l.label}</span>
             </NavLink>
           ))}
-          <NavLink
-            to="/verify"
-            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-            onClick={() => setMobileOpen(false)}
-          >
-            <Icon name="verify" />
-            <span>Verify Certificate</span>
-          </NavLink>
         </nav>
 
         <div className="sidebar__footer">

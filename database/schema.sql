@@ -390,6 +390,29 @@ create table if not exists unit_claims (
 );
 create index if not exists unit_claims_user_idx on unit_claims (user_id, claimed_at desc);
 
+-- Self-registered devices (no EcoSure QR label). Citizens track these alongside claimed units.
+create table if not exists manual_devices (
+  id              uuid primary key default gen_random_uuid(),
+  user_id         uuid not null references users(id),
+  category        text not null check (length(category) between 1 and 80),
+  brand           text check (brand is null or length(brand) <= 80),
+  model           text check (model is null or length(model) <= 120),
+  serial_number   text check (serial_number is null or length(serial_number) <= 80),
+  year_of_purchase int check (year_of_purchase is null or year_of_purchase between 1990 and 2100),
+  condition       text not null default 'working'
+                  check (condition in ('working','partially_working','not_working')),
+  notes           text check (notes is null or length(notes) <= 500),
+  photo_url       text,
+  created_at      timestamptz not null default now(),
+  updated_at      timestamptz not null default now()
+);
+create index if not exists manual_devices_user_idx on manual_devices (user_id, created_at desc);
+alter table manual_devices enable row level security;
+drop policy if exists manual_devices_owner on manual_devices;
+create policy manual_devices_owner on manual_devices
+  for all to ecosure_app using (user_id = app.uid()) with check (user_id = app.uid());
+grant all on manual_devices to ecosure_app;
+
 create table if not exists handover_codes (
   pickup_id   uuid primary key references pickup_requests(id) on delete cascade,
   code_hash   text not null,
@@ -446,6 +469,68 @@ create table if not exists attestations (
   check (checker_id is null or checker_id <> maker_id),
   check (status = 'draft' or (checker_id is not null and public_number is not null and sha256 is not null and issued_at is not null))
 );
+
+-- -----------------------------------------------------------------------------
+-- Per-device citizen recycling certificates (citizen-facing, ECS-CERT-YYYY-NNNNNN)
+-- One row per product_unit, auto-created when the lot's attestation is issued.
+-- The attestation's public_number (ECS-ATT-...) is NEVER exposed here.
+-- -----------------------------------------------------------------------------
+
+create sequence if not exists certificate_number_seq;
+
+create table if not exists recycling_certificates (
+  id              uuid primary key default gen_random_uuid(),
+  unit_id         uuid not null unique references product_units(id),
+  attestation_id  uuid not null references attestations(id),
+  cert_number     text not null unique,           -- ECS-CERT-YYYY-NNNNNN
+  issued_at       timestamptz not null,
+  created_at      timestamptz not null default now()
+);
+create index if not exists recycling_certificates_attestation_idx on recycling_certificates (attestation_id);
+
+-- Auto-generate one certificate per unit when attestation transitions draft → issued.
+create or replace function app.generate_unit_certificates()
+returns trigger language plpgsql security definer as $$
+declare
+  _year text := extract(year from new.issued_at)::text;
+  _unit record;
+begin
+  if new.status = 'issued' and old.status = 'draft' then
+    for _unit in
+      select pu.id as unit_id
+        from lots l
+        join pickup_requests pr   on pr.lot_id = l.id
+        join pickup_items    pi   on pi.pickup_id = pr.id
+        join pickup_item_units piu on piu.pickup_item_id = pi.id
+        join product_units   pu   on pu.id = piu.unit_id
+       where l.id = new.lot_id
+    loop
+      insert into recycling_certificates (unit_id, attestation_id, cert_number, issued_at)
+      values (
+        _unit.unit_id,
+        new.id,
+        'ECS-CERT-' || _year || '-' || lpad(nextval('certificate_number_seq')::text, 6, '0'),
+        new.issued_at
+      )
+      on conflict (unit_id) do nothing;
+    end loop;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists trg_generate_certificates on attestations;
+create trigger trg_generate_certificates
+  after update on attestations
+  for each row execute function app.generate_unit_certificates();
+
+-- RLS: citizens can only read their own device's certificate.
+alter table recycling_certificates enable row level security;
+drop policy if exists recycling_certificates_owner on recycling_certificates;
+create policy recycling_certificates_owner on recycling_certificates
+  for select to ecosure_app
+  using (unit_id in (select unit_id from unit_claims where user_id = app.uid()));
+grant select on recycling_certificates to ecosure_app;
 
 create table if not exists citizen_incentives (
   id               uuid primary key default gen_random_uuid(),

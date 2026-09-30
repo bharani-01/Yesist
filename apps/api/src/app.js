@@ -30,10 +30,15 @@ export function createApp() {
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
+        // blob: needed for qr-scanner Web Worker (created via URL.createObjectURL)
+        scriptSrc: ["'self'", "'wasm-unsafe-eval'", 'blob:'],
+        workerSrc: ["'self'", 'blob:'],
         imgSrc: ["'self'", 'data:', 'https://unpkg.com'],
         styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com', 'https://unpkg.com'],
         fontSrc: ["'self'", 'https://fonts.gstatic.com'],
         connectSrc: ["'self'"],
+        // Camera access for QR scanning
+        mediaSrc: ["'self'"],
         frameAncestors: ["'none'"],
       },
     },

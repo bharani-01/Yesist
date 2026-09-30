@@ -54,7 +54,25 @@ export function QrScanner({ onScan, label = 'Scan a product label', continuous =
         emit(id);
         if (!continuous) setCamera('off');
       },
-      { returnDetailedScanResult: true, preferredCamera: 'environment', highlightScanRegion: true, maxScansPerSecond: 5 },
+      {
+        returnDetailedScanResult: true,
+        preferredCamera: 'environment',
+        highlightScanRegion: true,
+        maxScansPerSecond: 5,
+        // Suppress willReadFrequently canvas warning
+        calculateScanRegion: (video) => {
+          const smallestDimension = Math.min(video.videoWidth, video.videoHeight);
+          const scanRegionSize = Math.round((2 / 3) * smallestDimension);
+          return {
+            x: Math.round((video.videoWidth - scanRegionSize) / 2),
+            y: Math.round((video.videoHeight - scanRegionSize) / 2),
+            width: scanRegionSize,
+            height: scanRegionSize,
+            downScaledWidth: 400,
+            downScaledHeight: 400,
+          };
+        },
+      },
     );
     scannerRef.current = scanner;
     scanner.start()

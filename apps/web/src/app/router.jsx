@@ -25,6 +25,7 @@ import { ProducerOverviewPage } from '../features/producer/ProducerOverviewPage.
 import { UnitsPage } from '../features/producer/UnitsPage.jsx';
 import { MyDevicesPage } from '../features/products/MyDevicesPage.jsx';
 import { ProductPage } from '../features/products/ProductPage.jsx';
+import { CertificatePage } from '../features/products/CertificatePage.jsx';
 import { InboundLotsPage } from '../features/recycler/InboundLotsPage.jsx';
 import { LotDetailPage } from '../features/recycler/LotDetailPage.jsx';
 import { VerifyPage } from '../features/verify/VerifyPage.jsx';
@@ -54,6 +55,7 @@ export const router = createBrowserRouter([
         element: <RequireWorkspace workspace="citizen" />,
         children: [
           { path: 'devices', element: <MyDevicesPage /> },
+          { path: 'devices/:qr/certificate', element: <CertificatePage /> },
           { path: 'pickups', element: <PickupsListPage /> },
           { path: 'pickups/history', element: <PickupsHistoryPage /> },
           { path: 'pickups/payouts', element: <PayoutHistoryPage /> },

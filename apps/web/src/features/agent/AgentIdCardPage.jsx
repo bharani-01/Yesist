@@ -36,16 +36,10 @@ export function AgentIdCardPage() {
   const [isFlipped, setIsFlipped] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
 
-  // Handle parsing "(local only)" out of orgName to match the design
-  const { orgNameMain, orgNameSub } = useMemo(() => {
+  const orgNameMain = useMemo(() => {
     let main = user?.orgs?.[0]?.name || 'EcoSure Partner';
-    let sub = '';
-    const match = main.match(/(.*)\((.*)\)$/);
-    if (match) {
-      main = match[1].trim();
-      sub = '(' + match[2].trim().toUpperCase() + ')';
-    }
-    return { orgNameMain: main, orgNameSub: sub };
+    // Remove "(local only)" entirely
+    return main.replace(/\(local only\)/gi, '').trim();
   }, [user]);
 
   // Generate QR code for the public verification endpoint
@@ -71,7 +65,7 @@ export function AgentIdCardPage() {
 
   return (
     <div className="id-card-page">
-      <div className="w-full max-w-sm mb-6 flex justify-between items-center px-2">
+      <div className="w-full max-w-[360px] mb-6 flex justify-between items-center px-1">
         <Link to="/agent" className="text-emerald-600 font-medium flex items-center hover:underline">
           &larr; Back to Dashboard
         </Link>
@@ -106,16 +100,10 @@ export function AgentIdCardPage() {
                 </div>
               </div>
 
-              <div className="auth-badge">
-                <ShieldCheck size={14} strokeWidth={2.5}/>
-                AUTHORIZED PARTNER
-              </div>
-
-              <div className="org-section">
+              <div className="org-section" style={{ marginTop: '16px' }}>
                 <div className="org-label">ORGANIZATION / SHOP</div>
                 <div className="org-name">
                   {orgNameMain}
-                  {orgNameSub && <div className="org-subtext">{orgNameSub}</div>}
                 </div>
               </div>
 

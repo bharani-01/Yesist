@@ -42,13 +42,18 @@
   background: #ffffff;
   border-radius: 20px;
   box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0,0,0,0.05); /* Premium shadow */
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+.id-card-front {
+  z-index: 2;
+  transform: rotateY(0deg);
+}
+
 .id-card-back {
   transform: rotateY(180deg);
+  z-index: 1;
 }
 
 /* ================= FRONT SIDE ================= */
@@ -320,6 +325,8 @@
   align-items: flex-start;
   gap: 12px;
   margin-top: auto;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .footer-icon {
@@ -344,6 +351,8 @@
   display: flex;
   justify-content: space-between;
   overflow: hidden;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
 }
 
 .back-header-bg {
@@ -492,6 +501,8 @@
 .back-footer {
   padding: 0 24px 24px;
   margin-top: auto;
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
 }
 
 .verify-box {

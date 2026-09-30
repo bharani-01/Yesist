@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import QRCode from 'qrcode';
 import { PageHeader } from '../../components/ui/PageHeader.jsx';
 import { useAuth } from '../auth/AuthProvider.jsx';
-import { env } from '../../config/env.js';
 import './AgentIdCard.css';
 
 export function AgentIdCardPage() {

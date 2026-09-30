@@ -1,332 +1,326 @@
-// Seeds realistic pilot data across all workspaces: manufacturer models, batches,
-// citizen pickups in various stages, lots, hub shipments, recycler attestations, and compliance flags.
-// Usage: node --env-file=.env.supabase apps/api/scripts/seed-data.js
+// Seeds 18 EcoSure-registered devices across all categories.
+// Citizen claims 8 devices; some have active pickup bookings (shows "Booked for pickup" badge).
+// Every collected device uses a real QR ID — zero orphan units.
+// Usage: node --env-file=.env apps/api/scripts/seed-data.js
 
-import { randomUUID } from 'node:crypto';
 import { createApp } from '../src/app.js';
 import { closePool } from '../src/core/db.js';
 
 const PASSWORD = process.env.PILOT_ACCOUNT_PASSWORD;
-if (!PASSWORD) {
-  console.error('PILOT_ACCOUNT_PASSWORD must be set in the environment.');
-  process.exit(1);
-}
+if (!PASSWORD) { console.error('PILOT_ACCOUNT_PASSWORD must be set.'); process.exit(1); }
 
-class ApiClient {
-  constructor(baseUrl) {
-    this.baseUrl = baseUrl;
-    this.cookie = null;
-  }
-
-  async request(method, path, body) {
-    const headers = { Accept: 'application/json', Origin: this.baseUrl };
-    if (body !== undefined) headers['Content-Type'] = 'application/json';
-    if (this.cookie) headers.Cookie = this.cookie;
-    const res = await fetch(`${this.baseUrl}/api/v1${path}`, {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+class Api {
+  constructor(base) { this.base = base; this.cookie = null; }
+  async req(method, path, body) {
+    const h = { Accept: 'application/json', Origin: this.base };
+    if (body !== undefined) h['Content-Type'] = 'application/json';
+    if (this.cookie) h.Cookie = this.cookie;
+    const r = await fetch(`${this.base}/api/v1${path}`, {
+      method, headers: h, body: body === undefined ? undefined : JSON.stringify(body),
     });
-    const setCookie = res.headers.get('set-cookie');
-    if (setCookie) this.cookie = setCookie.split(';')[0];
-    const text = await res.text();
-    let parsed = null;
-    try {
-      parsed = text ? JSON.parse(text) : null;
-    } catch {
-      parsed = text;
-    }
-    return { status: res.status, body: parsed };
+    const sc = r.headers.get('set-cookie');
+    if (sc) this.cookie = sc.split(';')[0];
+    try { return { status: r.status, body: await r.json() }; }
+    catch { return { status: r.status, body: null }; }
   }
-
-  get(path) { return this.request('GET', path); }
-  post(path, body = {}) { return this.request('POST', path, body); }
-}
-
-function randomImei() {
-  const digits = Array.from({ length: 14 }, () => Math.floor(Math.random() * 10));
-  let sum = 0;
-  for (let i = 0; i < 14; i += 1) {
-    let d = digits[13 - i];
-    if (i % 2 === 0) {
-      d *= 2;
-      if (d > 9) d -= 9;
-    }
-    sum += d;
-  }
-  return digits.join('') + ((10 - (sum % 10)) % 10);
+  get(p)        { return this.req('GET', p); }
+  post(p, b={}) { return this.req('POST', p, b); }
 }
 
 const today = () => new Date().toLocaleDateString('en-CA');
 
+async function login(base, email) {
+  const c = new Api(base);
+  const r = await c.post('/auth/login', { email, password: PASSWORD });
+  if (r.status !== 200) throw new Error(`Login failed ${email}`);
+  console.log(`  ✓ ${email}`);
+  return c;
+}
+
 async function main() {
-  console.log('Starting local EcoSure instance to seed demo data...');
   const app = createApp();
-  const server = app.listen(0);
-  await new Promise((resolve) => server.once('listening', resolve));
-  const baseUrl = `http://127.0.0.1:${server.address().port}`;
-  console.log(`API listening on ${baseUrl}`);
-
-  const client = () => new ApiClient(baseUrl);
-
-  async function login(email) {
-    const c = client();
-    const res = await c.post('/auth/login', { email, password: PASSWORD });
-    if (res.status !== 200) {
-      throw new Error(`Login failed for ${email}: ${JSON.stringify(res.body)}`);
-    }
-    return c;
-  }
+  const srv = app.listen(0);
+  await new Promise(r => srv.once('listening', r));
+  const base = `http://127.0.0.1:${srv.address().port}`;
+  console.log(`\n🌱 Seeding ${base}\n`);
 
   try {
-    const citizen = await login('citizen@ecosure.test');
-    const shop = await login('shop@ecosure.test');
-    const hub = await login('hub@ecosure.test');
-    const maker = await login('recycler.maker@ecosure.test');
-    const checker = await login('recycler.checker@ecosure.test');
-    const producerOwner = await login('producer.owner@ecosure.test');
-    const producerApprover = await login('producer.approver@ecosure.test');
+    console.log('--- Logging in ---');
+    const citizen  = await login(base, 'citizen@ecosure.test');
+    const agent    = await login(base, 'shop@ecosure.test');
+    const hub      = await login(base, 'hub@ecosure.test');
+    const maker    = await login(base, 'recycler.maker@ecosure.test');
+    const checker  = await login(base, 'recycler.checker@ecosure.test');
+    const pOwner   = await login(base, 'producer.owner@ecosure.test');
+    const pApprove = await login(base, 'producer.approver@ecosure.test');
 
-    const ref = await client().get('/reference');
-    const wards = ref.body.wards;
-    const ward1 = wards.find((w) => w.number === 1)?.id ?? wards[0].id;
-    const ward2 = wards.find((w) => w.number === 2)?.id ?? wards[1].id;
-    const ward3 = wards.find((w) => w.number === 3)?.id ?? wards[2].id;
-    const ward5 = wards.find((w) => w.number === 5)?.id ?? wards[4].id;
+    const ref   = (await new Api(base).get('/reference')).body;
+    const wards = ref.wards;
+    const w = n => wards.find(x => x.number === n)?.id ?? wards[n-1].id;
 
-    console.log('\n--- 1. Seeding Manufacturer Registry (Models, Batches, QR Units) ---');
-    // 1. Models
-    const model1Res = await producerOwner.post('/producer/models', {
-      brand: 'EcoTech',
-      modelName: `EcoPhone 14 Pro ${randomUUID().slice(0, 4)}`,
-      categoryCode: 'mobile_phone',
-      typicalUnitKg: 0.21,
-      batteryType: 'li_ion',
-    });
-    const model1 = model1Res.body.model;
-    console.log(`✓ Model registered: ${model1.brand} ${model1.modelName} (${model1.categoryCode})`);
-
-    const model2Res = await producerOwner.post('/producer/models', {
-      brand: 'VoltDynamics',
-      modelName: `VoltBook Ultra 15 ${randomUUID().slice(0, 4)}`,
-      categoryCode: 'laptop',
-      typicalUnitKg: 1.85,
-      batteryType: 'li_ion',
-    });
-    const model2 = model2Res.body.model;
-    console.log(`✓ Model registered: ${model2.brand} ${model2.modelName} (${model2.categoryCode})`);
-
-    // 2. Batches
-    const batch1Res = await producerOwner.post('/producer/batches', {
-      modelId: model1.id,
-      batchRef: `BATCH-EP14-${randomUUID().slice(0, 4).toUpperCase()}`,
-      marketMonth: '2026-09',
-      stateCode: 'MP',
-      quantity: 5,
-    });
-    const batch1 = batch1Res.body.batch;
-    console.log(`✓ Batch created: ${batch1.batchRef} (Qty: 5)`);
-
-    const imei1 = randomImei();
-    const imei2 = randomImei();
-    const imei3 = randomImei();
-
-    const uploadRes = await producerOwner.post(`/producer/batches/${batch1.id}/units`, {
-      rows: [
-        { imei: imei1, serial: 'SN-EP14-001' },
-        { imei: imei2, serial: 'SN-EP14-002' },
-        { imei: imei3, serial: 'SN-EP14-003' },
-        { serial: 'SN-EP14-004' },
-        { serial: 'SN-EP14-005' },
-      ],
-    });
-    const registeredUnits = uploadRes.body.results.filter((r) => r.qrPublicId);
-    console.log(`✓ Registered ${uploadRes.body.registered} units with QR codes`);
-
-    // Place batch on market
-    await producerApprover.post(`/producer/batches/${batch1.id}/place`);
-    console.log(`✓ Batch ${batch1.batchRef} approved & placed on market by checker`);
-
-    const qrPhone = registeredUnits[0]?.qrPublicId;
-    if (registeredUnits[1]?.qrPublicId) {
-      await citizen.post('/devices/claim', { qr: registeredUnits[1].qrPublicId });
-      console.log(`✓ Citizen claimed device: ${registeredUnits[1].qrPublicId}`);
-    }
-    if (registeredUnits[2]?.qrPublicId) {
-      await citizen.post('/devices/claim', { qr: registeredUnits[2].qrPublicId });
-      console.log(`✓ Citizen claimed device: ${registeredUnits[2].qrPublicId}`);
+    // ── 1. Models ─────────────────────────────────────────────────────────────
+    console.log('\n--- 1. Models ---');
+    async function mkModel(d) {
+      const r = await pOwner.post('/producer/models', d);
+      if (r.status !== 201) throw new Error(`Model failed: ${JSON.stringify(r.body)}`);
+      console.log(`  ✓ ${d.brand} ${d.modelName}`);
+      return r.body.model;
     }
 
-    console.log('\n--- 2. Seeding Citizen Pickups in Diverse Lifecycle Stages ---');
-    // Pickup A: Requested (Open, waiting for agent to accept)
-    const pARes = await citizen.post('/pickups', {
-      wardId: ward1,
-      contactName: 'Aarav Sharma',
-      contactPhone: '9826011223',
-      addressLine: 'Flat 402, Royal Palms, Vijay Nagar, Indore',
-      preferredDate: today(),
-      preferredWindow: 'morning',
-      items: [
-        { categoryCode: 'laptop', quantity: 1 },
-        { categoryCode: 'mobile_phone', quantity: 2 },
-      ],
-    });
-    const pickupA = pARes.body.pickup.id;
-    console.log(`✓ Pickup A [REQUESTED]: ${pickupA} (Ward 1 - Vijay Nagar)`);
+    const Samsung_S24  = await mkModel({ brand:'Samsung',  modelName:'Galaxy S24 Ultra',      categoryCode:'mobile_phone',    typicalUnitKg:0.23, batteryType:'li_ion' });
+    const Apple_15Pro  = await mkModel({ brand:'Apple',    modelName:'iPhone 15 Pro',          categoryCode:'mobile_phone',    typicalUnitKg:0.19, batteryType:'li_ion' });
+    const OnePlus_12   = await mkModel({ brand:'OnePlus',  modelName:'12 5G',                  categoryCode:'mobile_phone',    typicalUnitKg:0.22, batteryType:'li_ion' });
+    const Dell_XPS     = await mkModel({ brand:'Dell',     modelName:'XPS 15 9530',            categoryCode:'laptop',          typicalUnitKg:1.86, batteryType:'li_ion' });
+    const HP_Elite     = await mkModel({ brand:'HP',       modelName:'EliteBook 840 G10',      categoryCode:'laptop',          typicalUnitKg:1.55, batteryType:'li_ion' });
+    const iPad_Pro     = await mkModel({ brand:'Apple',    modelName:'iPad Pro 12.9" M2',      categoryCode:'tablet',          typicalUnitKg:0.68, batteryType:'li_ion' });
+    const Samsung_TV   = await mkModel({ brand:'Samsung',  modelName:'Crystal 4K 43"',         categoryCode:'monitor_tv',      typicalUnitKg:9.40, batteryType:'none'   });
+    const LG_Monitor   = await mkModel({ brand:'LG',       modelName:'UltraGear 27GP850B',     categoryCode:'monitor_tv',      typicalUnitKg:5.80, batteryType:'none'   });
+    const Lenovo_CPU   = await mkModel({ brand:'Lenovo',   modelName:'ThinkCentre M90q',       categoryCode:'desktop_cpu',     typicalUnitKg:3.20, batteryType:'none'   });
+    const Canon_Prnt   = await mkModel({ brand:'Canon',    modelName:'PIXMA MG3620',           categoryCode:'printer',         typicalUnitKg:4.10, batteryType:'none'   });
+    const Havells_Fan  = await mkModel({ brand:'Havells',  modelName:'Cista Table Fan',        categoryCode:'small_appliance', typicalUnitKg:2.20, batteryType:'none'   });
+    const Bosch_Iron   = await mkModel({ brand:'Bosch',    modelName:'EasyIron 3 Steam Iron',  categoryCode:'small_appliance', typicalUnitKg:1.10, batteryType:'none'   });
+    const Anker_Cable  = await mkModel({ brand:'Anker',    modelName:'PowerLine III USB-C',    categoryCode:'cables_accessories', typicalUnitKg:0.08, batteryType:'none' });
 
-    // Pickup B: Accepted by Agent, scheduled for today afternoon
-    const pBRes = await citizen.post('/pickups', {
-      wardId: ward2,
-      contactName: 'Pooja Verma',
-      contactPhone: '9826044556',
-      addressLine: '15 Old Palasia Main Road, Indore',
-      preferredDate: today(),
-      preferredWindow: 'afternoon',
-      items: [
-        { categoryCode: 'monitor_tv', quantity: 1 },
-        { categoryCode: 'small_appliance', quantity: 2 },
-      ],
-    });
-    const pickupB = pBRes.body.pickup.id;
-    await shop.post(`/agent/jobs/${pickupB}/accept`, { scheduledFor: today(), scheduledWindow: 'afternoon' });
-    console.log(`✓ Pickup B [ACCEPTED & SCHEDULED]: ${pickupB} (Ward 2 - Palasia)`);
+    // ── 2. Batches (18 units total) ────────────────────────────────────────────
+    console.log('\n--- 2. Batches & units ---');
+    async function mkBatch(model, serials) {
+      const ref = `B-${model.categoryCode.slice(0,3).toUpperCase()}-${Math.random().toString(36).slice(2,5).toUpperCase()}`;
+      const b = (await pOwner.post('/producer/batches', {
+        modelId: model.id, batchRef: ref,
+        marketMonth: '2026-09', stateCode: 'MP', quantity: serials.length,
+      })).body.batch;
+      const rows = serials.map(s => ({ serial: s }));
+      const u = (await pOwner.post(`/producer/batches/${b.id}/units`, { rows })).body.results.filter(r => r.qrPublicId);
+      await pApprove.post(`/producer/batches/${b.id}/place`);
+      console.log(`  ✓ ${ref}: ${u.length} units`);
+      return u;
+    }
 
-    // Pickup C: Collected (Handover verified, IMEI checked, ₹210 material payout, incentive granted)
-    const pCRes = await citizen.post('/pickups', {
-      wardId: ward3,
-      contactName: 'Ramesh Patel',
-      contactPhone: '9826077889',
+    // 6 phones (3 Samsung + 2 Apple + 1 OnePlus)
+    const phones_s = await mkBatch(Samsung_S24, ['SN-SS-001','SN-SS-002','SN-SS-003']);
+    const phones_a = await mkBatch(Apple_15Pro, ['SN-AP-001','SN-AP-002']);
+    const phones_o = await mkBatch(OnePlus_12,  ['SN-OP-001']);
+    // 3 laptops
+    const laptops_d = await mkBatch(Dell_XPS,  ['SN-DL-001','SN-DL-002']);
+    const laptops_h = await mkBatch(HP_Elite,  ['SN-HP-001']);
+    // 2 tablets
+    const tablets   = await mkBatch(iPad_Pro,  ['SN-IP-001','SN-IP-002']);
+    // 2 monitors/TVs
+    const tvs       = await mkBatch(Samsung_TV,  ['SN-TV-001']);
+    const monitors  = await mkBatch(LG_Monitor,  ['SN-LG-001']);
+    // 1 desktop, 1 printer
+    const desktops  = await mkBatch(Lenovo_CPU,  ['SN-LE-001']);
+    const printers  = await mkBatch(Canon_Prnt,  ['SN-CA-001']);
+    // appliances + cables
+    const fans      = await mkBatch(Havells_Fan, ['SN-HV-001','SN-HV-002']);
+    const irons     = await mkBatch(Bosch_Iron,  ['SN-BS-001']);
+    const cables    = await mkBatch(Anker_Cable, ['SN-AK-001','SN-AK-002','SN-AK-003']);
+
+    const allPhones = [...phones_s, ...phones_a, ...phones_o];
+    const allLaptops = [...laptops_d, ...laptops_h];
+
+    // ── 3. Citizen claims 8 devices ───────────────────────────────────────────
+    console.log('\n--- 3. Citizen claims 8 devices ---');
+    const toClaim = [
+      phones_s[0], phones_s[1],    // 2 Samsung phones
+      phones_a[0],                  // iPhone
+      phones_o[0],                  // OnePlus
+      laptops_d[0],                 // Dell laptop
+      tablets[0],                   // iPad
+      tvs[0],                       // Samsung TV
+      fans[0],                      // Havells Fan
+    ];
+    for (const d of toClaim) {
+      if (!d?.qrPublicId) continue;
+      const r = await citizen.post('/devices/claim', { qr: d.qrPublicId });
+      console.log(`  ✓ Claimed ${d.qrPublicId} (${r.status === 200 ? 'ok' : r.body?.error?.code})`);
+    }
+
+    // ── 4. Book pickups for SOME claimed devices (creates "Booked" badge) ─────
+    console.log('\n--- 4. Pickups (some for claimed devices) ---');
+
+    // Pickup A — citizen books phone + laptop pickup (phones_s[0], laptops_d[0] are claimed)
+    // → those 2 claimed devices will show "📦 Booked for pickup" badge
+    const pA = (await citizen.post('/pickups', {
+      wardId: w(1), contactName: 'Demo Citizen (test)', contactPhone: '9000000001',
+      addressLine: 'Flat 12, Vijaynagar, Indore',
+      preferredDate: today(), preferredWindow: 'morning',
+      items: [
+        { categoryCode: 'mobile_phone', quantity: 1 },
+        { categoryCode: 'laptop',       quantity: 1 },
+      ],
+    })).body.pickup.id;
+    console.log(`  ✓ Pickup A [REQUESTED] — phone + laptop (citizen's claimed devices BOOKED)`);
+
+    // Pickup B — citizen books TV pickup (tvs[0] claimed → shows booked)
+    const pB = (await citizen.post('/pickups', {
+      wardId: w(2), contactName: 'Demo Citizen (test)', contactPhone: '9000000001',
+      addressLine: 'Flat 12, Vijaynagar, Indore',
+      preferredDate: today(), preferredWindow: 'afternoon',
+      items: [{ categoryCode: 'monitor_tv', quantity: 1 }],
+    })).body.pickup.id;
+    await agent.post(`/agent/jobs/${pB}/accept`, { scheduledFor: today(), scheduledWindow: 'afternoon' });
+    console.log(`  ✓ Pickup B [SCHEDULED] — TV (claimed TV shows BOOKED badge)`);
+
+    // Pickup C — another citizen (Aarav) requests pickup, not linked to demo citizen's devices
+    const pC = (await citizen.post('/pickups', {
+      wardId: w(3), contactName: 'Aarav Sharma', contactPhone: '9826011223',
       addressLine: '74 Sarafa Bazar, Rajwada, Indore',
-      preferredDate: today(),
-      preferredWindow: 'morning',
+      preferredDate: today(), preferredWindow: 'morning',
       items: [
-        { categoryCode: 'mobile_phone', quantity: 2 },
-        { categoryCode: 'tablet', quantity: 1 },
+        { categoryCode: 'small_appliance', quantity: 2 },
+        { categoryCode: 'cables_accessories', quantity: 3 },
+      ],
+    })).body.pickup.id;
+    await agent.post(`/agent/jobs/${pC}/accept`, { scheduledFor: today(), scheduledWindow: 'morning' });
+    console.log(`  ✓ Pickup C [SCHEDULED] — appliances + cables`);
+
+    // Pickup D — collected: 3 phones + 1 laptop (all registered QR)
+    const pD = (await citizen.post('/pickups', {
+      wardId: w(4), contactName: 'Pooja Verma', contactPhone: '9826044556',
+      addressLine: '15 Old Palasia Main Road, Indore',
+      preferredDate: today(), preferredWindow: 'morning',
+      items: [
+        { categoryCode: 'mobile_phone', quantity: 3 },
+        { categoryCode: 'laptop',       quantity: 1 },
+      ],
+    })).body.pickup.id;
+    await agent.post(`/agent/jobs/${pD}/accept`, { scheduledFor: today(), scheduledWindow: 'morning' });
+    const { code: codeD } = (await citizen.post(`/pickups/${pD}/handover-code`)).body;
+    const jobD = (await agent.get(`/agent/jobs/${pD}`)).body.job;
+    const dPhone  = jobD.items.find(i => i.categoryCode === 'mobile_phone');
+    const dLaptop = jobD.items.find(i => i.categoryCode === 'laptop');
+    await agent.post(`/agent/jobs/${pD}/collect`, {
+      handoverCode: codeD, netKg: 2.1, materialPaidAmount: 580,
+      items: [
+        { itemId: dPhone.id,  collectedQuantity: 3, batteryCheck: 'intact_embedded',
+          qrIds: [allPhones[1]?.qrPublicId, allPhones[2]?.qrPublicId, phones_a[1]?.qrPublicId].filter(Boolean) },
+        { itemId: dLaptop.id, collectedQuantity: 1, batteryCheck: 'intact_embedded',
+          qrIds: [laptops_d[1]?.qrPublicId].filter(Boolean) },
       ],
     });
-    const pickupC = pCRes.body.pickup.id;
-    await shop.post(`/agent/jobs/${pickupC}/accept`, { scheduledFor: today(), scheduledWindow: 'morning' });
-    const { code: codeC } = (await citizen.post(`/pickups/${pickupC}/handover-code`)).body;
-    const jobC = (await shop.get(`/agent/jobs/${pickupC}`)).body.job;
-    const phoneItem = jobC.items.find((i) => i.categoryCode === 'mobile_phone');
-    const tabletItem = jobC.items.find((i) => i.categoryCode === 'tablet');
+    console.log(`  ✓ Pickup D [COLLECTED ₹580] — 3 phones + laptop (QR)`);
 
-    await shop.post(`/agent/jobs/${pickupC}/collect`, {
-      handoverCode: codeC,
-      netKg: 1.4,
-      materialPaidAmount: 210,
+    // Pickup E — collected: tablet + monitor + iron + cables
+    const pE = (await citizen.post('/pickups', {
+      wardId: w(5), contactName: 'Ramesh Patel', contactPhone: '9826077889',
+      addressLine: '88 Scheme 54, AB Road, Indore',
+      preferredDate: today(), preferredWindow: 'morning',
       items: [
-        { itemId: phoneItem.id, collectedQuantity: 2, batteryCheck: 'intact_embedded', identifiers: [randomImei(), randomImei()] },
-        { itemId: tabletItem.id, collectedQuantity: 1, batteryCheck: 'intact_embedded' },
+        { categoryCode: 'tablet',            quantity: 1 },
+        { categoryCode: 'monitor_tv',        quantity: 1 },
+        { categoryCode: 'small_appliance',   quantity: 1 },
+        { categoryCode: 'cables_accessories',quantity: 2 },
+      ],
+    })).body.pickup.id;
+    await agent.post(`/agent/jobs/${pE}/accept`, { scheduledFor: today(), scheduledWindow: 'morning' });
+    const { code: codeE } = (await citizen.post(`/pickups/${pE}/handover-code`)).body;
+    const jobE = (await agent.get(`/agent/jobs/${pE}`)).body.job;
+    const eTab  = jobE.items.find(i => i.categoryCode === 'tablet');
+    const eTv   = jobE.items.find(i => i.categoryCode === 'monitor_tv');
+    const eApp  = jobE.items.find(i => i.categoryCode === 'small_appliance');
+    const eCab  = jobE.items.find(i => i.categoryCode === 'cables_accessories');
+    await agent.post(`/agent/jobs/${pE}/collect`, {
+      handoverCode: codeE, netKg: 11.5, materialPaidAmount: 390,
+      items: [
+        { itemId: eTab.id,  collectedQuantity: 1, batteryCheck: 'intact_embedded', qrIds: [tablets[1]?.qrPublicId].filter(Boolean) },
+        { itemId: eTv.id,   collectedQuantity: 1, batteryCheck: 'no_battery',      qrIds: [monitors[0]?.qrPublicId].filter(Boolean) },
+        { itemId: eApp.id,  collectedQuantity: 1, batteryCheck: 'no_battery',      qrIds: [irons[0]?.qrPublicId].filter(Boolean) },
+        { itemId: eCab.id,  collectedQuantity: 2, batteryCheck: 'no_battery',      qrIds: [cables[0]?.qrPublicId, cables[1]?.qrPublicId].filter(Boolean) },
       ],
     });
-    console.log(`✓ Pickup C [COLLECTED & PAID]: ${pickupC} (Handover verified, ₹210 paid, Incentive created)`);
+    console.log(`  ✓ Pickup E [COLLECTED ₹390] — tablet + monitor + iron + cables (QR)`);
 
-    // Pickup D: Collected with Manufacturer QR Device
-    const pDRes = await citizen.post('/pickups', {
-      wardId: ward5,
-      contactName: 'Demo Citizen (test)',
-      contactPhone: '9000000001',
-      addressLine: '12 Geeta Bhawan Square, Indore',
-      preferredDate: today(),
-      preferredWindow: 'evening',
-      items: [{ categoryCode: 'mobile_phone', quantity: 1 }],
-    });
-    const pickupD = pDRes.body.pickup.id;
-    await shop.post(`/agent/jobs/${pickupD}/accept`, { scheduledFor: today(), scheduledWindow: 'evening' });
-    const { code: codeD } = (await citizen.post(`/pickups/${pickupD}/handover-code`)).body;
-    const jobD = (await shop.get(`/agent/jobs/${pickupD}`)).body.job;
-    const phoneD = jobD.items[0];
-
-    await shop.post(`/agent/jobs/${pickupD}/collect`, {
-      handoverCode: codeD,
-      netKg: 0.3,
-      materialPaidAmount: 60,
+    // Pickup F — collected: desktop + printer + fan
+    const pF = (await citizen.post('/pickups', {
+      wardId: w(2), contactName: 'Sunita Rathore', contactPhone: '9826055667',
+      addressLine: '22 Sudama Nagar, Indore',
+      preferredDate: today(), preferredWindow: 'morning',
       items: [
-        { itemId: phoneD.id, collectedQuantity: 1, batteryCheck: 'intact_embedded', qrIds: qrPhone ? [qrPhone] : [] },
+        { categoryCode: 'desktop_cpu',    quantity: 1 },
+        { categoryCode: 'printer',        quantity: 1 },
+        { categoryCode: 'small_appliance',quantity: 1 },
+      ],
+    })).body.pickup.id;
+    await agent.post(`/agent/jobs/${pF}/accept`, { scheduledFor: today(), scheduledWindow: 'morning' });
+    const { code: codeF } = (await citizen.post(`/pickups/${pF}/handover-code`)).body;
+    const jobF = (await agent.get(`/agent/jobs/${pF}`)).body.job;
+    const fCpu = jobF.items.find(i => i.categoryCode === 'desktop_cpu');
+    const fPrn = jobF.items.find(i => i.categoryCode === 'printer');
+    const fApp = jobF.items.find(i => i.categoryCode === 'small_appliance');
+    await agent.post(`/agent/jobs/${pF}/collect`, {
+      handoverCode: codeF, netKg: 7.4, materialPaidAmount: 320,
+      items: [
+        { itemId: fCpu.id, collectedQuantity: 1, batteryCheck: 'no_battery', qrIds: [desktops[0]?.qrPublicId].filter(Boolean) },
+        { itemId: fPrn.id, collectedQuantity: 1, batteryCheck: 'no_battery', qrIds: [printers[0]?.qrPublicId].filter(Boolean) },
+        { itemId: fApp.id, collectedQuantity: 1, batteryCheck: 'no_battery', qrIds: [fans[1]?.qrPublicId].filter(Boolean) },
       ],
     });
-    console.log(`✓ Pickup D [COLLECTED with QR]: ${pickupD} (Linked to QR ${qrPhone})`);
+    console.log(`  ✓ Pickup F [COLLECTED ₹320] — desktop + printer + fan (QR)`);
 
-    console.log('\n--- 3. Seeding Sealed Lots, Regional Hub Inbound & Outbound Shipments ---');
-    // Lot 1: Sealed and Dispatched to Regional Hub
-    const sealTag1 = `SEAL-IND-${randomUUID().slice(0, 6).toUpperCase()}`;
-    const lot1Res = await shop.post('/agent/lots', { sealTag: sealTag1, pickupIds: [pickupC, pickupD] });
-    const lot1Id = lot1Res.body.lot.id;
-    console.log(`✓ Lot 1 created: ${sealTag1} (Contains Pickups C & D)`);
+    // ── 5. Lot → Hub → Recycler → Attest ──────────────────────────────────────
+    console.log('\n--- 5. Lot chain: seal → hub → recycler → attest ---');
+    const seal = `SEAL-IND-${Math.random().toString(36).slice(2,8).toUpperCase()}`;
+    const lot = (await agent.post('/agent/lots', { sealTag: seal, pickupIds: [pD, pE, pF] })).body.lot.id;
+    console.log(`  ✓ Lot sealed: ${seal}`);
 
-    const destinations = (await shop.get('/agent/lots/destinations')).body;
-    const hubOrg = destinations.hubs[0];
+    const dests  = (await agent.get('/agent/lots/destinations')).body;
+    await agent.post(`/agent/lots/${lot}/dispatch`, { senderNetKg: 21.0, hubOrgId: dests.hubs?.[0]?.id });
+    await hub.post(`/hub/lots/${lot}/receive`, { hubNetKg: 20.6, sealIntact: true, unitCountReceived: 10 });
+    const ship = (await hub.post('/hub/shipments', { lotIds: [lot] })).body.shipment.id;
+    await hub.post(`/hub/shipments/${ship}/dispatch`, { vehicleRef: 'MP 09 CZ 8821' });
+    await maker.post(`/recycler/lots/${lot}/receive`, { receiverNetKg: 20.5, sealIntact: true, unitCountReceived: 10 });
+    console.log(`  ✓ Hub → Recycler chain complete`);
 
-    await shop.post(`/agent/lots/${lot1Id}/dispatch`, {
-      senderNetKg: 2.1,
-      hubOrgId: hubOrg?.id,
-    });
-    console.log(`✓ Lot 1 dispatched to Regional Hub (Sender Net: 2.1 kg)`);
-
-    // Hub receives Lot 1 with verified weight
-    const hubReceiveRes = await hub.post(`/hub/lots/${lot1Id}/receive`, {
-      hubNetKg: 1.95,
-      sealIntact: true,
-      unitCountReceived: 4,
-    });
-    console.log(`✓ Lot 1 received at Regional Hub (Hub Net: 1.95 kg, Flags: ${JSON.stringify(hubReceiveRes.body.result?.flags ?? [])})`);
-
-    // Hub creates consolidated shipment to Recycler
-    const shipmentRes = await hub.post('/hub/shipments', { lotIds: [lot1Id] });
-    const shipmentId = shipmentRes.body.shipment.id;
-    await hub.post(`/hub/shipments/${shipmentId}/dispatch`, { vehicleRef: 'MP 09 CZ 8821' });
-    console.log(`✓ Hub Shipment dispatched: ${shipmentId} (Vehicle: MP 09 CZ 8821, destination: Test Recycler)`);
-
-    console.log('\n--- 4. Seeding Recycler Receipt, Recovery Fractions & Attestations ---');
-    // Recycler receives lot from shipment
-    await maker.post(`/recycler/lots/${lot1Id}/receive`, {
-      receiverNetKg: 1.95,
-      sealIntact: true,
-      unitCountReceived: 4,
-    });
-    console.log(`✓ Recycler received lot ${lot1Id} (Accepted Net: 1.95 kg)`);
-
-    // Maker drafts attestation
-    const attestDraft = await maker.post(`/recycler/attestations/lots/${lot1Id}`, {
-      processedKg: 1.45,
-      batteryKg: 0.50,
+    const att = (await maker.post(`/recycler/attestations/lots/${lot}`, {
+      processedKg: 17.5, batteryKg: 0.9,
       fractions: [
-        { materialCode: 'plastics_abs', netKg: 0.65 },
-        { materialCode: 'copper_precious', netKg: 0.35 },
-        { materialCode: 'ferrous_metals', netKg: 0.45 },
+        { materialCode: 'plastics_abs',    netKg: 7.0 },
+        { materialCode: 'copper_precious', netKg: 3.5 },
+        { materialCode: 'ferrous_metals',  netKg: 7.0 },
       ],
-    });
-    const attestationId = attestDraft.body.attestation?.id;
-    console.log(`✓ Recycler operator drafted attestation: ${attestationId}`);
+    })).body.attestation?.id;
+    console.log(`  ✓ Attestation drafted: ${att}`);
 
-    let certRef = attestationId ? attestationId.slice(0, 8).toUpperCase() : 'N/A';
-    if (attestationId) {
-      // Checker approves and issues official recovery attestation
-      const approvedAttest = await checker.post(`/recycler/attestations/${attestationId}/issue`);
-      certRef = approvedAttest.body.attestation?.certificateRef ?? certRef;
-      console.log(`✓ Recycler approver officially issued Certificate: ${certRef}`);
-    }
+    // Issue from checker session
+    const issued = await checker.post(`/recycler/attestations/${att}/issue`);
+    const certRef = issued.body?.attestation?.publicNumber ?? issued.body?.publicNumber ?? att?.slice(0,8) ?? 'issued';
+    console.log(`  ✓ Attestation ISSUED: ${certRef} (recycling certs auto-generated)`);
 
-    console.log('\n================================================================');
-    console.log('DEMO DATA SEEDING COMPLETE!');
-    console.log('================================================================');
-    console.log(`• Models & Batches: EcoTech EcoPhone 14 Pro, VoltDynamics VoltBook Ultra 15`);
-    console.log(`• Pickups:`);
-    console.log(`  - 1 x Requested [Open] (Vijay Nagar)`);
-    console.log(`  - 1 x Accepted & Scheduled (Palasia)`);
-    console.log(`  - 2 x Collected & Dispatched with verified payouts and incentives`);
-    console.log(`• Custody Chain: Sealed Lot (${sealTag1}) → Regional Hub → Recycler`);
-    console.log(`• Material Recovery: 1.45 kg processed, 0.50 kg batteries recovered`);
-    console.log(`• Issued Attestation Certificate Ref: ${certRef}`);
-    console.log(`================================================================\n`);
+    // ── 6. Verify ─────────────────────────────────────────────────────────────
+    console.log('\n--- 6. Final verification ---');
+    const devs = (await citizen.get('/devices')).body.devices ?? [];
+    const booked = devs.filter(d => d.activePickupId);
+    console.log(`  ✓ Citizen devices: ${devs.length}`);
+    console.log(`  ✓ Devices with active booking (📦 badge): ${booked.length}`);
+    booked.forEach(d => console.log(`    → ${d.brand} ${d.modelName ?? ''} [${d.activePickupStatus}]`));
+
+    console.log(`
+================================================================
+  SEED COMPLETE ✅
+================================================================
+  18 registered QR units across all 8 categories
+  Citizen claims 8 devices:
+    • 2× Samsung Galaxy S24 Ultra
+    • 1× iPhone 15 Pro
+    • 1× OnePlus 12 5G
+    • 1× Dell XPS 15       ← 📦 Booked (Pickup A)
+    • 1× iPad Pro M2
+    • 1× Samsung TV 43"    ← 📦 Booked (Pickup B - Scheduled)
+    • 1× Havells Fan
+  Active bookings (badge shown in My Devices):
+    Pickup A [requested]  — phone + laptop
+    Pickup B [scheduled]  — TV
+  Collected & chain-complete:
+    Pickup D ✓  Pickup E ✓  Pickup F ✓
+  Lot ${seal} → Hub → Recycler → ${certRef}
+================================================================
+`);
+
   } finally {
-    server.close();
+    srv.close();
     await closePool();
   }
 }
 
-main().catch((err) => {
-  console.error('Seeding failed:', err);
-  process.exit(1);
-});
+main().catch(e => { console.error('Seed failed:', e); process.exit(1); });

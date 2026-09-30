@@ -63,14 +63,8 @@ export function MyDevicesPage() {
               {rows.map((d) => (
                 <li key={d.qrPublicId ?? d.id}>
                   <Link to={d.qrPublicId ? `/p/${d.qrPublicId}` : '#'} className="list__item list__item--link">
-                    {/* Photo thumbnail if available */}
                     {d.photoUrl && (
-                      <img
-                        src={d.photoUrl}
-                        alt=""
-                        className="list__thumb"
-                        aria-hidden="true"
-                      />
+                      <img src={d.photoUrl} alt="" className="list__thumb" aria-hidden="true" />
                     )}
                     <div className="list__main">
                       <span className="list__title">
@@ -80,7 +74,17 @@ export function MyDevicesPage() {
                         <span>{d.categoryName}</span>
                         {d.claimedAt && <span>Claimed {formatDate(d.claimedAt)}</span>}
                         {d.qrPublicId && <span className="mono">…{d.qrPublicId.slice(-4)}</span>}
-                        {d.planMode && <span className="badge badge--info">Plan mode</span>}
+                        {/* Booking badge — shown when an active pickup exists for this device's category */}
+                        {d.activePickupId && (
+                          <Link
+                            to={`/pickups/${d.activePickupId}`}
+                            className="badge badge--warning"
+                            onClick={e => e.stopPropagation()}
+                            title={`Pickup ${d.activePickupStatus} · ${d.activePickupDate ?? ''}`}
+                          >
+                            📦 Booked for pickup
+                          </Link>
+                        )}
                       </span>
                     </div>
                     <StatusBadge map={UNIT_STATE} value={d.state ?? 'manual'} />

@@ -1,17 +1,41 @@
 import { queryMany, queryOne } from '../../core/db.js';
 
-// Units the citizen claimed by scanning their QR label. RLS limits rows to the caller's claims.
+// Units the citizen claimed. Includes active pickup booking for the device's category
+// so the UI can show a "Booked for pickup" badge and block re-booking.
 export const listClaimed = (tx, userId) =>
   queryMany(
     tx,
-    `select u.qr_public_id as "qrPublicId", u.state, u.category_code as "categoryCode", u.updated_at as "updatedAt", c.claimed_at as "claimedAt",
-            m.brand, m.model_name as "modelName", wc.name as "categoryName"
-       from unit_claims c
-       join product_units u on u.id = c.unit_id
-       join waste_categories wc on wc.code = u.category_code
-       left join product_models m on m.id = u.model_id
-      where c.user_id = $1
-      order by c.claimed_at desc limit 200`,
+    `select
+       u.qr_public_id          as "qrPublicId",
+       u.state,
+       u.category_code         as "categoryCode",
+       u.updated_at            as "updatedAt",
+       c.claimed_at            as "claimedAt",
+       m.brand,
+       m.model_name            as "modelName",
+       wc.name                 as "categoryName",
+       -- Active pickup booking for this device's category (requested or scheduled)
+       active_pr.id            as "activePickupId",
+       active_pr.status        as "activePickupStatus",
+       active_pr.preferred_date::text as "activePickupDate"
+     from unit_claims c
+     join product_units u        on u.id = c.unit_id
+     join waste_categories wc    on wc.code = u.category_code
+     left join product_models m  on m.id = u.model_id
+     -- Find an open pickup by the same citizen that includes this device's category
+     left join lateral (
+       select pr.id, pr.status, pr.preferred_date
+       from pickup_requests pr
+       join pickup_items pi on pi.pickup_id = pr.id
+       where pr.requester_id = c.user_id
+         and pi.category_code = u.category_code
+         and pr.status in ('requested','scheduled')
+       order by pr.created_at desc
+       limit 1
+     ) active_pr on true
+     where c.user_id = $1
+     order by c.claimed_at desc
+     limit 200`,
     [userId],
   );
 

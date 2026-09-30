@@ -81,15 +81,15 @@
 
 .id-card-front {
   background-image: url('/id-card-bg.png');
-  background-size: 250% 112%;
-  background-position: 8% center;
+  background-size: 245% 110%;
+  background-position: 14% center;
   background-repeat: no-repeat;
 }
 
 .id-card-back {
   background-image: url('/id-card-bg.png');
-  background-size: 250% 112%;
-  background-position: 92% center;
+  background-size: 245% 110%;
+  background-position: 86% center;
   background-repeat: no-repeat;
 }
 

@@ -54,10 +54,6 @@ export function AgentIdCardPage() {
         {/* ================= FRONT ================= */}
         <div className="id-card-face id-card-front">
           <div className="front-content">
-              <div className="hole-punch-container">
-                <div className="hole-punch"></div>
-              </div>
-
               <div className="front-header">
                 <div className="logo-group">
                   <LeafLogoSvg className="logo-icon" />
@@ -138,9 +134,6 @@ export function AgentIdCardPage() {
         {/* ================= BACK ================= */}
         <div className="id-card-face id-card-back">
           <div className="back-header">
-              
-              <div className="back-hole-punch"></div>
-              
               <div className="logo-group">
                 <LeafLogoSvg className="logo-icon" />
                 <div className="logo-text">

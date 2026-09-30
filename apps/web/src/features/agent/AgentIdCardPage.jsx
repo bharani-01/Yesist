@@ -17,9 +17,7 @@ const WaveSvg = () => (
 );
 
 const LeafLogoSvg = ({ className }) => (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
-    <path d="M17.5 2C13.91 2 10.5 4 8 6.5C4 10.5 2 16.5 2 20.5C2 21.33 2.67 22 3.5 22C4.33 22 5 21.33 5 20.5C5 18 6.5 15.5 8 13.5C8.83 12.39 10.02 11.45 11.23 10.67C11.64 12.63 12.56 14.47 14 16C17 19 22 20 22 20C22 20 22 14.5 19 11.5C18.17 10.67 17.15 10 16 9.5C15.82 8.5 15.65 7.5 15.6 6.5C15.42 3 16 2 17.5 2ZM6.42 20.53C6.67 21 6.84 21.5 7.21 21.84C7.57 22.18 8.04 22 8.54 22L7.38 19.38C7.15 19 6.88 18.66 6.59 18.35L6.42 20.53Z" />
-  </svg>
+  <Leaf className={className} fill="currentColor" strokeWidth={1} />
 );
 
 // Elegant background watermark SVG for the front card
@@ -65,11 +63,11 @@ export function AgentIdCardPage() {
 
   return (
     <div className="id-card-page">
-      <div className="w-full max-w-[360px] mb-6 flex justify-between items-center px-1">
-        <Link to="/agent" className="text-emerald-600 font-medium flex items-center hover:underline">
+      <div className="w-full max-w-[360px] mb-8 flex flex-col items-center justify-center gap-2">
+        <Link to="/agent" className="text-emerald-700 font-semibold flex items-center hover:bg-emerald-50 px-5 py-2.5 rounded-full transition-colors border border-emerald-100 bg-white shadow-sm text-sm">
           &larr; Back to Dashboard
         </Link>
-        <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Tap card to flip</span>
+        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Tap card to flip</span>
       </div>
 
       <div 

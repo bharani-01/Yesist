@@ -5,33 +5,13 @@ import { useAuth } from '../auth/AuthProvider.jsx';
 import './AgentIdCard.css';
 import { Leaf, ShieldCheck, MapPin, Recycle, FileText, Ban, Calendar, ExternalLink } from 'lucide-react';
 
-// Generates the smooth SVG wave for the back header
-const WaveSvg = () => (
-  <svg className="back-header-wave" viewBox="0 0 1440 120" preserveAspectRatio="none">
-    <path
-      fill="#ffffff"
-      fillOpacity="1"
-      d="M0,32L60,42.7C120,53,240,75,360,74.7C480,75,600,53,720,48C840,42.7,960,53,1080,53.3C1200,53,1320,43,1380,37.3L1440,32L1440,120L1380,120C1320,120,1200,120,1080,120C960,120,840,120,720,120C600,120,480,120,360,120C240,120,120,120,60,120L0,120Z"
-    />
-  </svg>
-);
-
 const LeafLogoSvg = ({ className }) => (
   <Leaf className={className} fill="currentColor" strokeWidth={1} />
-);
-
-// Elegant background watermark SVG for the front card
-const FrontBgWatermark = () => (
-  <svg className="front-bg-svg" viewBox="0 0 400 600" preserveAspectRatio="xMidYMid slice" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M410 -20C320 50 400 200 480 250C560 300 450 450 350 500C250 550 400 650 450 700" stroke="#f0fdf4" strokeWidth="80" strokeLinecap="round" opacity="0.6"/>
-    <path d="M-50 450C50 350 -50 200 -100 150" stroke="#f0fdf4" strokeWidth="60" strokeLinecap="round" opacity="0.6"/>
-  </svg>
 );
 
 
 export function AgentIdCardPage() {
   const { user } = useAuth();
-  const [isFlipped, setIsFlipped] = useState(false);
   const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
 
   const orgNameMain = useMemo(() => {
@@ -63,24 +43,17 @@ export function AgentIdCardPage() {
 
   return (
     <div className="id-card-page">
-      <div className="w-full max-w-[360px] mb-8 flex flex-col items-center justify-center gap-2">
-        <Link to="/agent" className="text-emerald-700 font-semibold flex items-center hover:bg-emerald-50 px-5 py-2.5 rounded-full transition-colors border border-emerald-100 bg-white shadow-sm text-sm">
+      <div className="top-nav-bar">
+        <Link to="/agent" className="back-btn">
           &larr; Back to Dashboard
         </Link>
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Tap card to flip</span>
       </div>
 
-      <div 
-        className={`id-card-scene ${isFlipped ? 'is-flipped' : ''}`}
-        onClick={() => setIsFlipped(!isFlipped)}
-      >
-        <div className="id-card-inner">
-          
-          {/* ================= FRONT ================= */}
-          <div className="id-card-front">
-            <FrontBgWatermark />
-            
-            <div className="front-content">
+      <div className="cards-container">
+        
+        {/* ================= FRONT ================= */}
+        <div className="id-card-face id-card-front">
+          <div className="front-content">
               <div className="hole-punch-container">
                 <div className="hole-punch"></div>
               </div>
@@ -160,16 +133,15 @@ export function AgentIdCardPage() {
                 </div>
               </div>
             </div>
-          </div>
+        </div>
 
-          {/* ================= BACK ================= */}
-          <div className="id-card-back">
-            <div className="back-header">
-              <div className="back-header-bg"></div>
+        {/* ================= BACK ================= */}
+        <div className="id-card-face id-card-back">
+          <div className="back-header">
               
               <div className="back-hole-punch"></div>
               
-              <div className="logo-group back-logo-text">
+              <div className="logo-group">
                 <LeafLogoSvg className="logo-icon" />
                 <div className="logo-text">
                   <span className="logo-title">EcoSure</span>
@@ -179,8 +151,6 @@ export function AgentIdCardPage() {
               <div className="back-header-badge">
                 DIGITAL<br/>ID CARD<br/>BACK
               </div>
-              
-              <WaveSvg />
             </div>
 
             <div className="back-guidelines">
@@ -236,6 +206,5 @@ export function AgentIdCardPage() {
 
         </div>
       </div>
-    </div>
   );
 }

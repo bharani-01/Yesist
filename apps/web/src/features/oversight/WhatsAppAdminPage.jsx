@@ -4,7 +4,7 @@ import { Panel } from '../../components/ui/Panel.jsx';
 import { TextField, SelectField } from '../../components/ui/Field.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { Alert } from '../../components/ui/Alert.jsx';
-import { api } from '../../lib/api.js';
+import { http } from '../../lib/http.js';
 
 export function WhatsAppAdminPage() {
   const [settings, setSettings] = useState(null);
@@ -25,7 +25,7 @@ export function WhatsAppAdminPage() {
   async function loadSettings() {
     try {
       setLoading(true);
-      const data = await api.get('/whatsapp/settings');
+      const data = await http.get('/whatsapp/settings');
       setSettings(data);
       setTestMode(data.test_mode);
       setTestNumbers(data.test_numbers.join(', '));
@@ -40,7 +40,7 @@ export function WhatsAppAdminPage() {
     e.preventDefault();
     try {
       const numbersArray = testNumbers.split(',').map(n => n.trim()).filter(Boolean);
-      await api.put('/whatsapp/settings', { testMode, testNumbers: numbersArray });
+      await http.put('/whatsapp/settings', { testMode, testNumbers: numbersArray });
       alert('Settings saved successfully');
       loadSettings();
     } catch (err) {
@@ -54,7 +54,7 @@ export function WhatsAppAdminPage() {
     
     try {
       setMsgLoading(true);
-      const data = await api.get(`/whatsapp/messages?phone=${encodeURIComponent(lookupPhone)}`);
+      const data = await http.get(`/whatsapp/messages?phone=${encodeURIComponent(lookupPhone)}`);
       setMessages(data);
     } catch (err) {
       alert('Error fetching messages: ' + err.message);

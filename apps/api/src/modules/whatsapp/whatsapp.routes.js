@@ -7,9 +7,11 @@ const router = express.Router();
 // Public webhook
 router.post('/webhook', handleWebhook);
 
-// Admin routes (only programme_operator can access)
-router.get('/settings', requireRole(['programme_operator']), getSettings);
-router.put('/settings', requireRole(['programme_operator']), updateSettings);
-router.get('/messages', requireRole(['programme_operator']), getMessages);
+// Admin routes
+const OVERSIGHT_ROLES = ['programme_operator', 'spcb_officer', 'cpcb_officer', 'ulb_officer'];
+
+router.get('/settings', requireRole(OVERSIGHT_ROLES), getSettings);
+router.put('/settings', requireRole(OVERSIGHT_ROLES), updateSettings);
+router.get('/messages', requireRole(OVERSIGHT_ROLES), getMessages);
 
 export default router;

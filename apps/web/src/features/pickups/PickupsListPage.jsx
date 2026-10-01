@@ -242,10 +242,10 @@ export function PickupsListPage() {
               {(deviceItems) => (
                 <ul className="products-list">
                   {deviceItems.map((d) => {
-                    const srn = `SRN: ${d.qrPublicId.slice(-4).toUpperCase()}`;
+                    const srn = d.qrPublicId ? `SRN: ${d.qrPublicId.slice(-4).toUpperCase()}` : 'Manual Entry';
                     return (
-                      <li key={d.qrPublicId}>
-                        <Link to={`/p/${d.qrPublicId}`} className="product-item product-item--link tap-effect">
+                      <li key={d.qrPublicId ?? d.id}>
+                        <Link to={d.qrPublicId ? `/p/${d.qrPublicId}` : '#'} className="product-item product-item--link tap-effect">
                           <div className="product-item__left">
                             <div className="product-item__icon">
                               <DeviceIcon categoryCode={d.categoryCode} />
@@ -259,7 +259,6 @@ export function PickupsListPage() {
                               </span>
                             </div>
                           </div>
-                          {d.state !== 'claimed' && <StatusBadge map={UNIT_STATE} value={d.state} />}
                         </Link>
                       </li>
                     );

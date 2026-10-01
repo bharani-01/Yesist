@@ -52,9 +52,11 @@ export function ErrorState({ error, onRetry, action }) {
  * Renders the right state for a useAsync result.
  * `isEmpty(data)` decides when to show the empty state.
  */
-export function AsyncView({ query, isEmpty, empty, loadingRows, children }) {
+export function AsyncView({ query, isEmpty, empty, loadingRows, render, children }) {
   if (query.status === 'loading' && !query.data) return <LoadingState rows={loadingRows} />;
   if (query.status === 'error' && !query.data) return <ErrorState error={query.error} onRetry={query.reload} />;
   if (isEmpty?.(query.data)) return empty ?? <EmptyState title="Nothing here yet" />;
-  return children(query.data);
+  const renderFn = typeof children === 'function' ? children : (typeof render === 'function' ? render : null);
+  if (renderFn) return renderFn(query.data);
+  return children ?? null;
 }

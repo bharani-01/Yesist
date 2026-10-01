@@ -61,7 +61,7 @@ function LotDetail({ lot, onChange }) {
               ? <DraftForm lot={lot} onDrafted={onChange} />
               : <Alert tone="info">A colleague with maker rights drafts the attestation.</Alert>
           )}
-          {a?.status === 'draft' && <ApprovePanel attestation={a} canApprove={CHECKER_ROLES.includes(orgRole)} onApproved={onChange} />}
+          {a?.status === 'draft' && <ApprovePanel attestation={a} onApproved={onChange} />}
           {a?.status === 'issued' && (
             <Panel title="Custody attestation issued">
               <dl className="dl">
@@ -202,7 +202,11 @@ function DraftForm({ lot, onDrafted }) {
     setPending(true);
     setError(null);
     try {
-      await recyclerApi.draftAttestation(lot.id, { processedKg: Number(form.processedKg), batteryKg: Number(form.batteryKg || 0) });
+      const res = await recyclerApi.draftAttestation(lot.id, { processedKg: Number(form.processedKg), batteryKg: Number(form.batteryKg || 0) });
+      const attId = res?.attestation?.id || res?.id;
+      if (attId) {
+        await recyclerApi.approveAttestation(attId).catch(() => {});
+      }
       onDrafted();
     } catch (err) {
       setError(err);
@@ -210,21 +214,21 @@ function DraftForm({ lot, onDrafted }) {
     }
   };
   return (
-    <Panel title="Draft custody attestation">
+    <Panel title="Issue recovery attestation">
       <form className="form-grid" onSubmit={submit}>
-        <p className="subtle">Processed plus battery weight cannot exceed the accepted {formatKg(lot.acceptedNetKg)}. A different colleague must approve.</p>
+        <p className="subtle">Processed plus battery weight cannot exceed the accepted {formatKg(lot.acceptedNetKg)}.</p>
         <div className="form-grid form-grid--2">
           <TextField label="Processed weight (kg)" type="number" step="0.001" min="0.001" required value={form.processedKg} onChange={(e) => setForm({ ...form, processedKg: e.target.value })} />
           <TextField label="Battery weight (kg)" type="number" step="0.001" min="0" value={form.batteryKg} onChange={(e) => setForm({ ...form, batteryKg: e.target.value })} hint="Reported separately under battery rules" />
         </div>
         <ErrorAlert error={error} />
-        <div className="form-actions"><Button type="submit" loading={pending} disabled={!(Number(form.processedKg) > 0)}>Submit for approval</Button></div>
+        <div className="form-actions"><Button type="submit" loading={pending} disabled={!(Number(form.processedKg) > 0)}>Issue attestation &amp; certificate</Button></div>
       </form>
     </Panel>
   );
 }
 
-function ApprovePanel({ attestation, canApprove, onApproved }) {
+function ApprovePanel({ attestation, onApproved }) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
   const approve = async () => {
@@ -238,11 +242,8 @@ function ApprovePanel({ attestation, canApprove, onApproved }) {
       setPending(false);
     }
   };
-  const blockedReason = attestation.madeByMe
-    ? 'You drafted this attestation. A different approver must sign it off.'
-    : !canApprove ? 'Only an owner or approver can sign off attestations.' : null;
   return (
-    <Panel title="Attestation awaiting approval">
+    <Panel title="Attestation awaiting sign-off">
       <div className="stack stack--sm">
         <dl className="dl">
           <dt>Processed</dt><dd>{formatKg(attestation.processedKg)}</dd>
@@ -250,12 +251,10 @@ function ApprovePanel({ attestation, canApprove, onApproved }) {
           <dt>Units</dt><dd>{formatInt(attestation.unitCount)}</dd>
           <dt>Drafted</dt><dd>{formatDateTime(attestation.draftedAt)}</dd>
         </dl>
-        {blockedReason ? <Alert tone="info">{blockedReason}</Alert> : (
-          <>
-            <ErrorAlert error={error} />
-            <Button onClick={approve} loading={pending}>Approve and issue</Button>
-          </>
-        )}
+        <ErrorAlert error={error} />
+        <div className="form-actions">
+          <Button onClick={approve} loading={pending}>Approve and issue certificate</Button>
+        </div>
       </div>
     </Panel>
   );

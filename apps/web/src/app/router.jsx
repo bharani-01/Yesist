@@ -31,6 +31,10 @@ import { UnitsPage } from '../features/producer/UnitsPage.jsx';
 import { MyDevicesPage } from '../features/products/MyDevicesPage.jsx';
 import { ProductPage } from '../features/products/ProductPage.jsx';
 import { CertificatePage } from '../features/products/CertificatePage.jsx';
+import { RewardsPage } from '../features/rewards/RewardsPage.jsx';
+import { LedgerPage } from '../features/rewards/LedgerPage.jsx';
+import { CataloguePage } from '../features/rewards/CataloguePage.jsx';
+import { ReferralPage } from '../features/rewards/ReferralPage.jsx';
 import { InboundLotsPage } from '../features/recycler/InboundLotsPage.jsx';
 import { LotDetailPage } from '../features/recycler/LotDetailPage.jsx';
 import { VerifyPage } from '../features/verify/VerifyPage.jsx';
@@ -62,12 +66,18 @@ export const router = createBrowserRouter([
         element: <RequireWorkspace workspace="citizen" />,
         children: [
           { path: 'devices', element: <MyDevicesPage /> },
+          { path: 'devices/:qr', element: <ProductPage /> },
           { path: 'devices/:qr/certificate', element: <CertificatePage /> },
           { path: 'pickups', element: <PickupsListPage /> },
           { path: 'pickups/history', element: <PickupsHistoryPage /> },
           { path: 'pickups/payouts', element: <PayoutHistoryPage /> },
           { path: 'pickups/new', element: <NewPickupPage /> },
           { path: 'pickups/:id', element: <PickupDetailPage /> },
+          { path: 'rewards', element: <RewardsPage /> },
+          { path: 'rewards/ledger', element: <LedgerPage /> },
+          { path: 'rewards/catalogue', element: <CataloguePage /> },
+          { path: 'referral', element: <ReferralPage /> },
+          { path: 'referrals', element: <ReferralPage /> },
         ],
       },
       {

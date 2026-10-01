@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { ErrorAlert } from '../../components/ui/Alert.jsx';
 import { Button } from '../../components/ui/Button.jsx';
 import { TextField } from '../../components/ui/Field.jsx';
@@ -9,7 +9,9 @@ import { HOME_BY_WORKSPACE, useAuth } from './AuthProvider.jsx';
 export function RegisterPage() {
   const auth = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ fullName: '', email: '', phone: '', password: '' });
+  const [searchParams] = useSearchParams();
+  const initialRef = (searchParams.get('ref') || '').toUpperCase();
+  const [form, setForm] = useState({ fullName: '', email: '', phone: '', password: '', referralCode: initialRef });
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
   const fieldErrors = error?.fieldErrors?.() ?? {};
@@ -43,6 +45,13 @@ export function RegisterPage() {
         <TextField label="Email" type="email" autoComplete="email" required value={form.email} onChange={set('email')} error={fieldErrors.email} />
         <TextField label="Mobile number" type="tel" inputMode="numeric" autoComplete="tel-national" maxLength={10} required value={form.phone} onChange={set('phone')} error={fieldErrors.phone} hint="10 digits, used for pickup coordination" />
         <TextField label="Password" type="password" autoComplete="new-password" required minLength={10} value={form.password} onChange={set('password')} error={fieldErrors.password} hint="At least 10 characters" />
+        <TextField
+          label="Referral code (optional)"
+          value={form.referralCode}
+          onChange={(e) => setForm({ ...form, referralCode: e.target.value.toUpperCase() })}
+          placeholder="ECO-XXXXX"
+          hint={form.referralCode ? 'Bonus points will be unlocked on your first completed pickup!' : 'Have a friend’s invite code? Enter it here to earn bonus points.'}
+        />
         <Button type="submit" block loading={pending}>Create account</Button>
         <p className="subtle">We never ask for Aadhaar. Your address is shared only with the collector who accepts your pickup.</p>
       </form>

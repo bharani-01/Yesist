@@ -121,14 +121,16 @@ export function CertificatePage() {
                 alignItems: 'center',
                 gap: 'var(--space-2)',
               }}>
-                <span style={{ color: '#34a853', fontSize: 18, fontWeight: 700 }}>✓</span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34a853" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
                 <span style={{ fontSize: 'var(--text-sm)', color: '#1a7f4b', fontWeight: 500 }}>
                   Verified responsible recycling — your device will not end up in a landfill.
                 </span>
               </div>
 
               <div style={{ marginTop: 'var(--space-5)', display: 'flex', gap: 'var(--space-3)' }}>
-                <Link to="/products" className="btn btn--secondary tap-effect" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}>
+                <Link to="/devices" className="btn btn--secondary tap-effect" style={{ flex: 1, textAlign: 'center', textDecoration: 'none' }}>
                   ← My Devices
                 </Link>
                 <button

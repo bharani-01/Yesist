@@ -17,10 +17,10 @@ export const HUB_ORG_TYPES = Object.freeze(['regional_hub']);
 //   manage  the team page (invite, change roles, remove staff)
 export const ORG_ROLES = Object.freeze(['owner', 'operator', 'approver', 'finance', 'viewer']);
 export const STAFF = Object.freeze({
-  work: Object.freeze(['owner', 'operator']),
+  work: Object.freeze(['owner', 'operator', 'approver']),
   draft: Object.freeze(['owner', 'operator', 'approver']),
-  approve: Object.freeze(['owner', 'approver']),
-  money: Object.freeze(['owner', 'finance']),
+  approve: Object.freeze(['owner', 'operator', 'approver']),
+  money: Object.freeze(['owner', 'finance', 'operator']),
   manage: Object.freeze(['owner']),
   read: ORG_ROLES,
 });

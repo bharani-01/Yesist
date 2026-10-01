@@ -1,6 +1,7 @@
 import { withTx } from '../../core/db.js';
 import { Errors } from '../../core/errors.js';
 import { writeAudit } from '../../shared/audit.js';
+import { creditDeviceAddedBonus } from '../rewards/rewards.service.js';
 import * as repo from './devices.repository.js';
 
 const CLAIM_ERRORS = {
@@ -37,5 +38,32 @@ export async function getDeviceCertificate(qr, ctx) {
 }
 
 export async function addManualDevice(input, ctx) {
-  return withTx(ctx.userId, (tx) => repo.insertManualDevice(tx, ctx.userId, input));
+  return withTx(ctx.userId, async (tx) => {
+    const device = await repo.insertManualDevice(tx, ctx.userId, input);
+    await creditDeviceAddedBonus(tx, ctx.userId, device.id, `${input.brand || ''} ${input.model || ''}`.trim());
+    return device;
+  });
+}
+
+export async function updateDeviceStatus(idOrQr, status, ctx) {
+  return withTx(ctx.userId, async (tx) => {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(idOrQr);
+    let updated = null;
+    if (isUuid) {
+      updated = await repo.updateManualDeviceStatus(tx, ctx.userId, idOrQr, status);
+    } else {
+      updated = await repo.updateClaimedUnitStatus(tx, ctx.userId, idOrQr, status);
+    }
+    if (!updated) throw Errors.notFound('Device');
+
+    await writeAudit(tx, {
+      actor: ctx,
+      action: status === 'recycled' ? 'device.recycle' : 'device.activate',
+      entity: 'device',
+      entityId: idOrQr,
+      detail: { status },
+    });
+
+    return updated;
+  });
 }

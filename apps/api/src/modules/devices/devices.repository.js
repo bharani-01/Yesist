@@ -8,6 +8,15 @@ export const listClaimed = (tx, userId) =>
     `select
        u.qr_public_id          as "qrPublicId",
        u.state,
+       case
+         when u.state in ('processed', 'materials_recovered') or rc.id is not null then 'recycled'
+         when u.state in ('collected', 'in_lot', 'at_hub', 'received_at_recycler') then 'in_transit'
+         when active_pr.id is not null then 'booked'
+         else 'active'
+       end                     as status,
+       (u.state in ('processed', 'materials_recovered') or rc.id is not null) as "isRecycled",
+       case when (u.state in ('processed', 'materials_recovered') or rc.id is not null) then coalesce(rc.issued_at, u.updated_at) else null end as "recycledAt",
+       rc.cert_number          as "certNumber",
        u.category_code         as "categoryCode",
        u.updated_at            as "updatedAt",
        c.claimed_at            as "claimedAt",
@@ -22,6 +31,7 @@ export const listClaimed = (tx, userId) =>
      join product_units u        on u.id = c.unit_id
      join waste_categories wc    on wc.code = u.category_code
      left join product_models m  on m.id = u.model_id
+     left join recycling_certificates rc on rc.unit_id = u.id
      -- Find an open pickup by the same citizen that includes this device's category
      left join lateral (
        select pr.id, pr.status, pr.preferred_date
@@ -44,7 +54,10 @@ export const listManual = (tx, userId) =>
     tx,
     `select
        m.id,
-       'registered' as state,
+       m.status,
+       (m.status = 'recycled') as "isRecycled",
+       m.recycled_at as "recycledAt",
+       m.status as state,
        case lower(trim(m.category))
          when 'smartphone' then 'mobile_phone'
          when 'mobile' then 'mobile_phone'
@@ -72,6 +85,7 @@ export const listManual = (tx, userId) =>
        m.model      as "modelName",
        m.category   as "categoryName",
        m.photo_url  as "photoUrl",
+       null         as "certNumber",
        null         as "activePickupId",
        null         as "activePickupStatus",
        null         as "activePickupDate"
@@ -118,8 +132,32 @@ export const insertManualDevice = (tx, userId, d) =>
   queryOne(
     tx,
     `insert into manual_devices
-       (user_id, category, brand, model, serial_number, year_of_purchase, condition, notes, photo_url)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-     returning id, category, brand, model, created_at as "createdAt"`,
+       (user_id, category, brand, model, serial_number, year_of_purchase, condition, notes, photo_url, status)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,'active')
+     returning id, category, brand, model, status, created_at as "createdAt"`,
     [userId, d.category, d.brand, d.model, d.serialNumber, d.yearOfPurchase, d.condition, d.notes, d.photoUrl],
+  );
+
+export const updateManualDeviceStatus = (tx, userId, id, status) =>
+  queryOne(
+    tx,
+    `update manual_devices
+     set status = $1,
+         recycled_at = case when $1 = 'recycled' then now() else null end,
+         updated_at = now()
+     where id = $2 and user_id = $3
+     returning id, status, recycled_at as "recycledAt"`,
+    [status, id, userId],
+  );
+
+export const updateClaimedUnitStatus = (tx, userId, qr, status) =>
+  queryOne(
+    tx,
+    `update product_units
+     set state = case when $1 = 'recycled' then 'processed' else 'claimed' end,
+         updated_at = now()
+     where qr_public_id = $2
+       and id in (select unit_id from unit_claims where user_id = $3)
+     returning id, qr_public_id as "qrPublicId", state`,
+    [status, qr, userId],
   );

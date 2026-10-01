@@ -13,3 +13,7 @@ export const manualDeviceBody = z.object({
   notes:        z.string().trim().max(500).optional().transform(v => v || null),
   photoUrl:     z.string().url().optional().nullable(),
 });
+
+export const updateStatusBody = z.object({
+  status: z.enum(['active', 'recycled']),
+});

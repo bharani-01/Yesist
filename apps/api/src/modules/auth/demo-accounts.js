@@ -21,14 +21,18 @@ const OFFICER_DESCRIPTIONS = {
   ulb_officer: 'Programme overview, read-only flags',
 };
 
-const staff = (workspace, members) => members
-  .filter((m) => m.orgRole !== 'finance' && m.orgRole !== 'viewer')
-  .map((m) => ({
+const staff = (workspace, members) => {
+  const active = members.filter((m) => m.orgRole !== 'finance' && m.orgRole !== 'viewer');
+  const target = ['recycler', 'agent', 'hub', 'producer'].includes(workspace)
+    ? active.slice(0, 1)
+    : active;
+  return target.map((m) => ({
     email: m.email,
     workspace,
-    label: `${WORKSPACE_LABELS[workspace]} · ${ROLE_LABELS[m.orgRole]}`,
+    label: WORKSPACE_LABELS[workspace],
     description: STAFF_DESCRIPTIONS[workspace][m.orgRole] ?? READ_ONLY,
   }));
+};
 
 function load() {
   const config = JSON.parse(readFileSync(onboardingFile, 'utf8'));
@@ -38,12 +42,14 @@ function load() {
     ...staff('recycler', config.recycler.members),
     ...(config.hubs ?? []).flatMap((h) => staff('hub', h.members)),
     ...(config.producers ?? []).flatMap((p) => staff('producer', p.members)),
-    ...config.officers.map((o) => ({
-      email: o.email,
-      workspace: 'oversight',
-      label: o.role === 'ulb_officer' ? 'City officer' : 'Pollution control board officer',
-      description: OFFICER_DESCRIPTIONS[o.role],
-    })),
+    ...config.officers
+      .filter((o) => o.role !== 'ulb_officer')
+      .map((o) => ({
+        email: o.email,
+        workspace: 'oversight',
+        label: 'Pollution control board officer',
+        description: OFFICER_DESCRIPTIONS[o.role] ?? 'Programme overview and flag triage',
+      })),
   ];
 }
 

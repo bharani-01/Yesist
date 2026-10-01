@@ -111,7 +111,9 @@ function Wizard({ refData, devices, pickups = [] }) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const availableDevices = devices.filter((d) => ['placed_on_market', 'claimed', 'registered'].includes(d.state));
+  const availableDevices = devices.filter(
+    (d) => !d.isRecycled && d.status !== 'recycled' && ['placed_on_market', 'claimed', 'registered', 'active'].includes(d.state),
+  );
 
   const [step, setStep] = useState(1);
   const [selectedDeviceId, setSelectedDeviceId] = useState(null);

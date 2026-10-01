@@ -9,6 +9,8 @@ export const productsApi = {
   /** Upload a product photo; returns the public URL string. */
   uploadPhoto: (formData) =>
     http.upload('/devices/photo', formData).then((r) => r.url),
+  /** Mark device status (active or recycled) */
+  updateStatus: (id, status) => http.patch(`/devices/${encodeURIComponent(id)}/status`, { status }),
 };
 
 /** Stages a labelled product moves through, in order. */

@@ -107,8 +107,8 @@ export function WhatsAppAdminPage() {
                 value={botEnabled.toString()} 
                 onChange={(e) => setBotEnabled(e.target.value === 'true')}
               >
-                <option value="true">🟢 Enabled (Bot automatically replies to WhatsApp messages)</option>
-                <option value="false">🔴 Disabled (Bot is paused / No auto-replies)</option>
+                <option value="true">Enabled (Bot automatically replies to WhatsApp messages)</option>
+                <option value="false">Disabled (Bot is paused / No auto-replies)</option>
               </SelectField>
 
               <SelectField 

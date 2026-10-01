@@ -9,4 +9,4 @@ export const recyclerApi = {
 };
 
 export const MAKER_ROLES = ['owner', 'operator', 'approver'];
-export const CHECKER_ROLES = ['owner', 'approver'];
+export const CHECKER_ROLES = ['owner', 'operator', 'approver'];

@@ -6,6 +6,7 @@ export const registerBody = z.object({
   email: z.email().trim().toLowerCase().max(254),
   phone: indianMobile,
   password: z.string().min(10, 'Use at least 10 characters').max(128),
+  referralCode: z.string().trim().regex(/^ECO-[A-Z0-9]{5}$/).optional().or(z.literal('')),
 });
 
 export const loginBody = z.object({

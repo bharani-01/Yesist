@@ -99,6 +99,7 @@
 .panel__header + .panel__body { padding-top: 0; }
 .panel__body--flush, .panel__header + .panel__body--flush { padding: 0; }
 .panel--flush { padding: var(--space-8); }
+.device-item-row:hover { background: var(--color-surface-hover) !important; }
 
 /* ---------- Hero Financial & Impact Card (SOTA) ---------- */
 .hero-impact-card {

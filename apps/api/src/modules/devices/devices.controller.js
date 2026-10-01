@@ -21,3 +21,7 @@ export async function addManual(req, res) {
 export async function uploadPhoto(req, res) {
   res.json({ url: null });
 }
+
+export async function updateStatus(req, res) {
+  res.json({ device: await service.updateDeviceStatus(req.params.id, req.valid.body.status, contextOf(req)) });
+}

@@ -1,0 +1,436 @@
+/* ==========================================================================
+   Referral Hub Page Styles (SOTA Apple / Fintech Light Theme)
+   ========================================================================== */
+
+.referral-page {
+  padding-bottom: var(--space-12);
+}
+
+.referral-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+/* --------------------------------------------------------------------------
+   Top KPI Stat Cards (4-Column Light Grid)
+   -------------------------------------------------------------------------- */
+.referral-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.referral-stat-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: var(--space-3);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.referral-stat-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-card);
+}
+
+.referral-stat-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.referral-stat-card__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  background: var(--color-surface-muted);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border-subtle);
+  flex-shrink: 0;
+}
+
+.referral-stat-card__icon-wrap--brand {
+  background: var(--color-brand-weak);
+  color: #047857;
+  border-color: rgba(0, 209, 94, 0.2);
+}
+
+.referral-stat-card__pill {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-muted);
+  color: var(--color-ink-muted);
+  border: 1px solid var(--color-border-subtle);
+}
+
+.referral-stat-card__pill--brand {
+  background: var(--color-brand-weak);
+  color: #047857;
+  border-color: rgba(0, 209, 94, 0.2);
+}
+
+.referral-stat-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.referral-stat-card__value {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.referral-stat-card__value--brand {
+  color: #047857;
+}
+
+.referral-stat-card__unit {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-ink-muted);
+}
+
+.referral-stat-card__label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-ink-muted);
+  margin-top: 4px;
+}
+
+.referral-stat-card__sub {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-subtle);
+  line-height: 1.4;
+}
+
+/* --------------------------------------------------------------------------
+   Main Referral Card (Light Theme Showcase)
+   -------------------------------------------------------------------------- */
+.referral-card-main {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: clamp(var(--space-6), 4vw, var(--space-8));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  position: relative;
+  overflow: hidden;
+}
+
+.referral-card-main__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.referral-card-main__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-brand-weak);
+  border: 1px solid rgba(0, 209, 94, 0.25);
+  color: #047857;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  width: fit-content;
+  letter-spacing: 0.02em;
+}
+
+.referral-card-main__title {
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 700;
+  color: var(--color-ink);
+  letter-spacing: -0.025em;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.referral-card-main__description {
+  font-size: var(--text-sm);
+  color: var(--color-ink-muted);
+  max-width: 680px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Interactive Grid (Share Console + QR Code Station)
+   -------------------------------------------------------------------------- */
+.referral-interactive-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: var(--space-6);
+  align-items: stretch;
+}
+
+.referral-console {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  justify-content: center;
+}
+
+.referral-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.referral-field-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-ink-muted);
+}
+
+/* Unique Referral Code Banner */
+.referral-code-banner {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  transition: border-color 0.15s ease;
+}
+
+.referral-code-banner:hover {
+  border-color: var(--color-border-strong);
+}
+
+.referral-code-display {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.referral-code-text {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--color-ink);
+  line-height: 1.2;
+}
+
+.referral-code-sub {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+  font-weight: 500;
+}
+
+/* Direct Invite Link Input Row */
+.referral-input-action {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.referral-text-input {
+  flex: 1;
+  min-width: 0;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-ink);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  padding: 10px 14px;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.referral-text-input:focus {
+  border-color: var(--color-brand);
+  box-shadow: var(--focus-ring);
+}
+
+/* Action Buttons Row */
+.referral-buttons-row {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn--whatsapp {
+  background: #25D366;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(37, 211, 102, 0.2);
+  transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn--whatsapp:hover {
+  background: #20BD5A;
+  color: #FFFFFF !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.btn--success {
+  background: var(--color-brand-weak);
+  color: #047857 !important;
+  border: 1px solid rgba(0, 209, 94, 0.35);
+  font-weight: 600;
+  border-radius: var(--radius-pill);
+}
+
+/* --------------------------------------------------------------------------
+   QR Code Station
+   -------------------------------------------------------------------------- */
+.referral-qr-station {
+  background: var(--color-surface-muted);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.referral-qr-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-ink-muted);
+}
+
+.referral-qr-box {
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  box-shadow: var(--shadow-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.referral-qr-hint {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  max-width: 220px;
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* --------------------------------------------------------------------------
+   Bottom Reassurance Footer
+   -------------------------------------------------------------------------- */
+.referral-card-main__footer {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-5);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+
+.referral-footer-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-brand-weak);
+  color: #047857;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.referral-footer-text {
+  font-size: var(--text-xs);
+  color: var(--color-ink-muted);
+  line-height: 1.55;
+}
+
+.referral-footer-text strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Adaptations
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .referral-stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .referral-interactive-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .referral-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .referral-input-action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .referral-buttons-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .referral-buttons-row .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

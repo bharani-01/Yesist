@@ -48,7 +48,15 @@ export async function register(input, ctx) {
   const passwordHash = await hashPassword(input.password);
   const userId = await withTx(null, async (tx) => {
     const id = await repo.registerCitizen(tx, { ...input, passwordHash });
-    if (id) await writeAudit(tx, { actor: null, action: 'user.register', entity: 'user', entityId: id, ip: ctx.ip });
+    if (id) {
+      await writeAudit(tx, { actor: null, action: 'user.register', entity: 'user', entityId: id, ip: ctx.ip });
+      // Credit signup milestone points
+      await repo.creditSignupGreenPoints(tx, id);
+      // Link referral code if provided
+      if (input.referralCode) {
+        await repo.linkReferral(tx, input.referralCode.trim().toUpperCase(), id);
+      }
+    }
     return id;
   });
   if (!userId) throw Errors.conflict('account_exists', 'An account with this email or phone already exists.');

@@ -25,3 +25,18 @@ export const findMemberships = (tx, userId) =>
       where m.user_id = $1 and o.status = 'active' order by o.name`,
     [userId],
   );
+
+export const linkReferral = (tx, code, refereeId) =>
+  tx.query(
+    `update referral_links
+     set referee_id = $1, used_at = now()
+     where code = $2 and referee_id is null and referrer_id <> $1`,
+    [refereeId, code],
+  );
+
+export const creditSignupGreenPoints = (tx, userId) =>
+  tx.query(
+    `select app.credit_green_points($1, 20, 'profile_complete', null, null, null, 'Welcome to EcoSure! Profile complete bonus')`,
+    [userId],
+  );
+

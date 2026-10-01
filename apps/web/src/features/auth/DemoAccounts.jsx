@@ -68,14 +68,11 @@ const DEFAULT_DEMO = {
   password: 'Password123!',
   accounts: [
     { email: 'citizen@ecosure.test', workspace: 'citizen', label: 'Citizen' },
-    { email: 'shop@ecosure.test', workspace: 'agent', label: 'Collection agent · Owner (Full Access)' },
-    { email: 'recycler.maker@ecosure.test', workspace: 'recycler', label: 'Recycler · Operator' },
-    { email: 'recycler.checker@ecosure.test', workspace: 'recycler', label: 'Recycler · Approver' },
-    { email: 'hub@ecosure.test', workspace: 'hub', label: 'Regional hub · Owner' },
-    { email: 'producer.owner@ecosure.test', workspace: 'producer', label: 'Manufacturer · Owner' },
-    { email: 'producer.approver@ecosure.test', workspace: 'producer', label: 'Manufacturer · Approver' },
+    { email: 'shop@ecosure.test', workspace: 'agent', label: 'Collection agent' },
+    { email: 'recycler.maker@ecosure.test', workspace: 'recycler', label: 'Recycler' },
+    { email: 'hub@ecosure.test', workspace: 'hub', label: 'Regional hub' },
+    { email: 'producer.owner@ecosure.test', workspace: 'producer', label: 'Manufacturer' },
     { email: 'spcb@ecosure.test', workspace: 'oversight', label: 'Pollution control board officer' },
-    { email: 'imc@ecosure.test', workspace: 'oversight', label: 'City officer' },
   ],
 };
 

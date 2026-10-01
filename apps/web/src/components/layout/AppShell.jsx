@@ -102,11 +102,29 @@ function Icon({ name }) {
       </svg>
     );
   }
+  if (name === 'rewards') {
+    return (
+      <svg className="nav-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="8" r="6" />
+        <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
+      </svg>
+    );
+  }
   if (name === 'verify') {
     return (
       <svg className="nav-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
         <path d="m9 12 2 2 4-4" />
+      </svg>
+    );
+  }
+  if (name === 'referral' || name === 'gift' || name === 'users') {
+    return (
+      <svg className="nav-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
       </svg>
     );
   }
@@ -117,6 +135,8 @@ const NAV = {
   citizen: [
     { to: '/pickups', label: 'Dashboard', icon: 'dashboard', end: true },
     { to: '/devices', label: 'My Products', icon: 'devices' },
+    { to: '/rewards', label: 'Green Points', icon: 'rewards' },
+    { to: '/referral', label: 'Referral Hub', icon: 'referral', badge: '+100 pts' },
     { to: '/pickups/new', label: 'Book a Pickup', icon: 'plus' },
   ],
   agent: [
@@ -211,18 +231,27 @@ export function AppShell() {
         <Link to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} className="brand">
           <Logo />
         </Link>
-        <button
-          type="button"
-          className="btn btn--secondary btn--sm"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle navigation"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {user?.workspace === 'citizen' && (
+            <Link to="/referral" className="mobile-referral-chip">
+              <Icon name="referral" />
+              <span>Refer</span>
+              <span className="chip-badge">+100</span>
+            </Link>
+          )}
+          <button
+            type="button"
+            className="btn btn--secondary btn--sm"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle navigation"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="3" y1="12" x2="21" y2="12" />
+              <line x1="3" y1="6" x2="21" y2="6" />
+              <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {mobileOpen && (
@@ -275,10 +304,28 @@ export function AppShell() {
             >
               <Icon name={l.icon} />
               <span className="nav-link__text">{l.label}</span>
+              {l.badge && !collapsed && (
+                <span className="nav-link__badge">{l.badge}</span>
+              )}
               {collapsed && <span className="nav-link__tooltip">{l.label}</span>}
             </NavLink>
           ))}
         </nav>
+
+        {user?.workspace === 'citizen' && !collapsed && (
+          <div className="sidebar__referral-box">
+            <div className="sidebar__referral-head">
+              <span className="sidebar__referral-tag">Referral Bonus</span>
+              <span className="sidebar__referral-pts">+100 pts</span>
+            </div>
+            <p className="sidebar__referral-text">
+              Invite friends to recycle electronics. Earn 100 pts per completed pickup.
+            </p>
+            <Link to="/referral" className="sidebar__referral-link" onClick={() => setMobileOpen(false)}>
+              Invite Friends →
+            </Link>
+          </div>
+        )}
 
         <div className="sidebar__footer">
           {user ? (

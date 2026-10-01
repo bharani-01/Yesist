@@ -43,7 +43,7 @@ function PickupDetail({ pickup, onChange }) {
           )}
           {pickup.status === 'cancelled' && <Alert tone="warning" title="Cancelled">{pickup.cancelReason}</Alert>}
           {pickup.attestation && (
-            <Alert tone="success" title="Responsibly Recycled ✓">
+            <Alert tone="success" title="Responsibly Recycled">
               Your device has been recycled on {formatDate(pickup.attestation.issuedAt)}.
               {' '}
               <Link to={`/devices/${pickup.items?.[0]?.qrPublicId ?? ''}/certificate`} style={{ fontWeight: 600 }}>View Recycling Certificate →</Link>

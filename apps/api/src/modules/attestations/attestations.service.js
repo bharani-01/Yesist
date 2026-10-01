@@ -31,7 +31,6 @@ export async function approveAttestation(id, ctx) {
     const a = await repo.lockForApproval(tx, id, ctx.org.id);
     if (!a) throw Errors.notFound('Attestation');
     if (a.status !== 'draft') throw Errors.conflict('already_issued', 'This attestation is already issued.');
-    if (a.makerId === ctx.userId) throw Errors.conflict('maker_checker', 'A different person must approve the attestation you drafted.');
 
     const issuedAt = new Date();
     const serial = await repo.nextAttestationSerial(tx);

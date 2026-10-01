@@ -12,6 +12,7 @@ import { oversightRoutes } from '../modules/oversight/oversight.routes.js';
 import { pickupsRoutes } from '../modules/pickups/pickups.routes.js';
 import { producerRoutes } from '../modules/producer/producer.routes.js';
 import { referenceRoutes } from '../modules/reference/reference.routes.js';
+import { rewardsRoutes } from '../modules/rewards/rewards.routes.js';
 import { verificationRoutes } from '../modules/verification/verification.routes.js';
 import whatsappRoutes from '../modules/whatsapp/whatsapp.routes.js';
 
@@ -29,6 +30,7 @@ export function buildApiRouter() {
   api.use('/auth', noStore, authRoutes);
   api.use('/pickups', noStore, pickupsRoutes);
   api.use('/devices', noStore, devicesRoutes);
+  api.use('/rewards', noStore, rewardsRoutes);
   api.use('/agent/jobs', noStore, collectionRoutes);
   api.use('/agent/lots', noStore, lotsRoutes);
   api.use('/recycler/lots', noStore, intakeRoutes);

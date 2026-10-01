@@ -10,6 +10,8 @@ import { useAsync } from '../../hooks/useAsync.js';
 import { formatDate, formatInr, formatKg, WINDOW_LABELS } from '../../lib/format.js';
 import { PICKUP_STATUS, UNIT_STATE } from '../../lib/status.js';
 import { pickupsApi } from './pickups.api.js';
+import { rewardsApi } from '../rewards/rewards.api.js';
+import { BalanceWidget } from '../rewards/components/BalanceWidget.jsx';
 
 function DeviceIcon({ categoryCode }) {
   if (categoryCode === 'laptop' || categoryCode === 'desktop_cpu') {
@@ -50,9 +52,12 @@ export function PickupsListPage() {
   const { user } = useAuth();
   const query = useAsync((signal) => pickupsApi.list(signal).then((r) => r.pickups), []);
   const devicesQuery = useAsync((signal) => productsApi.myDevices(signal), []);
+  const rewardsQuery = useAsync((signal) => rewardsApi.balance(signal), []);
 
   const pickups = query.data ?? [];
   const devices = devicesQuery.data ?? [];
+  const points = rewardsQuery.data?.balance ?? 0;
+  const rank = rewardsQuery.data?.rank ?? 1;
 
   // Metrics computation strictly from real backend pickups
   const COLLECTED_STATUSES = new Set(['collected', 'in_lot', 'received', 'closed']);
@@ -75,6 +80,13 @@ export function PickupsListPage() {
       </svg>
       Schedule Pickup
     </Link>
+  );
+
+  const headerActions = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+      <BalanceWidget balance={points} rank={rank} />
+      {bookButton}
+    </div>
   );
 
   // Calculate live stepper stage
@@ -102,7 +114,7 @@ export function PickupsListPage() {
       <PageHeader
         title={user?.fullName ?? 'Citizen'}
         eyebrow={greeting}
-        actions={bookButton}
+        actions={headerActions}
       />
 
       {/* Main Dashboard Grid */}
@@ -135,19 +147,27 @@ export function PickupsListPage() {
                 <div className="live-stepper__bar-fill" style={{ width: activeStepFill }} />
 
                 <div className={`live-stepper__node ${activeStep >= 1 ? (activeStep === 1 ? 'is-active' : 'is-done') : ''}`}>
-                  <div className="live-stepper__circle">{activeStep > 1 ? '✓' : '1'}</div>
+                  <div className="live-stepper__circle">{activeStep > 1 ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : '1'}</div>
                   <span className="live-stepper__label">Booked</span>
                 </div>
                 <div className={`live-stepper__node ${activeStep >= 2 ? (activeStep === 2 ? 'is-active' : 'is-done') : ''}`}>
-                  <div className="live-stepper__circle">{activeStep > 2 ? '✓' : '2'}</div>
+                  <div className="live-stepper__circle">{activeStep > 2 ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : '2'}</div>
                   <span className="live-stepper__label">Agent Assigned</span>
                 </div>
                 <div className={`live-stepper__node ${activeStep >= 3 ? (activeStep === 3 ? 'is-active' : 'is-done') : ''}`}>
-                  <div className="live-stepper__circle">{activeStep > 3 ? '✓' : '3'}</div>
+                  <div className="live-stepper__circle">{activeStep > 3 ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : '3'}</div>
                   <span className="live-stepper__label">Doorstep Visit</span>
                 </div>
                 <div className={`live-stepper__node ${activeStep >= 4 ? (activeStep === 4 ? 'is-active' : 'is-done') : ''}`}>
-                  <div className="live-stepper__circle">{activeStep >= 4 ? '✓' : '4'}</div>
+                  <div className="live-stepper__circle">{activeStep >= 4 ? (
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  ) : '4'}</div>
                   <span className="live-stepper__label">Paid & Recycled</span>
                 </div>
               </div>
@@ -193,6 +213,19 @@ export function PickupsListPage() {
 
           {/* Quick Action Tiles */}
           <div className="action-cards">
+            <Link to="/rewards" className="action-card action-card--dark tap-effect">
+              <div>
+                <h4 className="action-card__title">Green Points & Rewards</h4>
+                <p className="action-card__sub">{points.toLocaleString('en-IN')} pts · Redeem perks &rarr;</p>
+              </div>
+              <div className="action-card__icon">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z" />
+                  <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
+                </svg>
+              </div>
+            </Link>
+
             <Link to="/devices" className="action-card action-card--dark tap-effect">
               <div>
                 <h4 className="action-card__title">Add Product</h4>

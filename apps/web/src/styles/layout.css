@@ -127,6 +127,97 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
+.nav-link__badge {
+  margin-left: auto;
+  padding: 1px 7px;
+  background: rgba(26, 127, 75, 0.12);
+  color: #1a7f4b;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  border: 1px solid rgba(26, 127, 75, 0.22);
+}
+
+.mobile-referral-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(26, 127, 75, 0.08);
+  border: 1px solid rgba(26, 127, 75, 0.22);
+  border-radius: var(--radius-pill);
+  color: #1a7f4b;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 120ms ease;
+}
+.mobile-referral-chip .nav-link__icon {
+  width: 14px;
+  height: 14px;
+}
+.mobile-referral-chip .chip-badge {
+  background: #1a7f4b;
+  color: #ffffff;
+  padding: 1px 5px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+}
+.mobile-referral-chip:hover {
+  background: rgba(26, 127, 75, 0.15);
+  text-decoration: none;
+}
+
+.sidebar__referral-box {
+  margin: var(--space-3) var(--space-3) var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: linear-gradient(135deg, rgba(26, 127, 75, 0.08) 0%, rgba(52, 168, 83, 0.03) 100%);
+  border: 1px solid rgba(26, 127, 75, 0.2);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.sidebar__referral-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sidebar__referral-tag {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #1a7f4b;
+}
+.sidebar__referral-pts {
+  font-size: 11px;
+  font-weight: 700;
+  color: #1a7f4b;
+  background: rgba(26, 127, 75, 0.15);
+  padding: 1px 6px;
+  border-radius: var(--radius-pill);
+}
+.sidebar__referral-text {
+  font-size: 11px;
+  color: var(--color-ink-muted);
+  line-height: 1.35;
+  margin: 0;
+}
+.sidebar__referral-link {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a7f4b;
+  text-decoration: none;
+  margin-top: 2px;
+  display: inline-flex;
+  align-items: center;
+}
+.sidebar__referral-link:hover {
+  text-decoration: underline;
+}
 
 .sidebar__footer {
   padding: var(--space-4) var(--space-4);

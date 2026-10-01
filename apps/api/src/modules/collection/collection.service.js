@@ -5,6 +5,7 @@ import { hashHandoverCode, hashIdentifier } from '../../core/security/hashing.js
 import { writeAudit } from '../../shared/audit.js';
 import { loadSchemeSettings, raiseFlag, recordCustodyEvent } from '../../shared/custody.js';
 import { isValidImei } from '../../shared/schemas.js';
+import { creditPickupCollectedPoints } from '../rewards/rewards.service.js';
 import * as repo from './collection.repository.js';
 
 const HANDOVER_ERRORS = {
@@ -153,6 +154,15 @@ export async function collectJob(id, input, ctx) {
     await recordCustodyEvent(tx, {
       pickupId: id, type: 'collected', actorId: ctx.userId, orgId: ctx.org.id,
       detail: { netKg: input.netKg, materialPaidAmount: input.materialPaidAmount, duplicates },
+    });
+
+    // Credit Green Points to citizen
+    const totalCollected = input.items.reduce((sum, line) => sum + (line.collectedQuantity || 0), 0);
+    await creditPickupCollectedPoints(tx, {
+      requesterId: pickup.requesterId,
+      pickupId: id,
+      totalCollected,
+      eligibleDataBearing: eligibleUnits,
     });
 
     let incentive = null;

@@ -10,8 +10,8 @@ router.post('/webhook', handleWebhook);
 // Admin routes
 const OVERSIGHT_ROLES = ['programme_operator', 'spcb_officer', 'cpcb_officer', 'ulb_officer'];
 
-router.get('/settings', requireRole(OVERSIGHT_ROLES), getSettings);
-router.put('/settings', requireRole(OVERSIGHT_ROLES), updateSettings);
-router.get('/messages', requireRole(OVERSIGHT_ROLES), getMessages);
+router.get('/settings', requireRole(...OVERSIGHT_ROLES), getSettings);
+router.put('/settings', requireRole(...OVERSIGHT_ROLES), updateSettings);
+router.get('/messages', requireRole(...OVERSIGHT_ROLES), getMessages);
 
 export default router;

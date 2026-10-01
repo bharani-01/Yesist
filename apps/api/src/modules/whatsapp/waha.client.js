@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-const WAHA_URL = process.env.WAHA_API_URL || 'http://16.113.27.11:3000';
-const SESSION = process.env.WAHA_SESSION_NAME || 'default';
+const WAHA_URL = process.env.WAHA_API_URL || 'https://waha.ecosure.trackifyapp.co.in';
+const SESSION = process.env.WAHA_SESSION_NAME || 'Bharani';
 // Fallback to unauthenticated if WAHA_API_KEY is not set
-const API_KEY = process.env.WAHA_API_KEY || '';
+const API_KEY = process.env.WAHA_API_KEY || 'waha_secret_key_2026';
 
 export const sendWhatsAppMessage = async (phone, text) => {
   try {

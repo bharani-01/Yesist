@@ -2,7 +2,7 @@ const http = require('http');
 
 const payload = JSON.stringify({
   event: 'message',
-  session: 'default',
+  session: 'Bharani',
   payload: {
     from: '916382288170@c.us',
     to: '911234567890@c.us',

@@ -41,3 +41,31 @@ export const schedulePickup = async (tx, { userId, preferredDate, preferredWindo
   ]);
   return result?.reference;
 };
+
+// WhatsApp Config and Memory
+export const getWhatsAppSettings = (tx) =>
+  queryOne(tx, 'select test_mode, test_numbers from whatsapp_settings where id = 1');
+
+export const updateWhatsAppSettings = (tx, { testMode, testNumbers }) =>
+  queryOne(tx, 'update whatsapp_settings set test_mode = $1, test_numbers = $2 where id = 1 returning *', [testMode, testNumbers]);
+
+export const getChatHistory = (tx, phone) =>
+  queryMany(tx, 'select role, content, name, tool_call_id from whatsapp_messages where phone = $1 order by created_at asc', [phone]);
+
+export const saveChatMessage = (tx, phone, message) => {
+  return queryOne(tx, `
+    insert into whatsapp_messages (phone, role, content, name, tool_call_id)
+    values ($1, $2, $3, $4, $5)
+    returning id
+  `, [
+    phone,
+    message.role,
+    message.content || '',
+    message.name || null,
+    message.tool_call_id || message.tool_calls?.[0]?.id || null, // Simplified for single tool call
+  ]);
+};
+
+export const clearChatHistory = (tx, phone) =>
+  queryOne(tx, 'delete from whatsapp_messages where phone = $1', [phone]);
+

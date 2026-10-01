@@ -1,0 +1,11 @@
+{
+    "InstanceIds": ["i-0215c17fe3d81985d"],
+    "DocumentName": "AWS-RunShellScript",
+    "Parameters": {
+        "commands": [
+            "cat /root/docker-compose.yml 2>/dev/null",
+            "cat /home/ubuntu/docker-compose.yml 2>/dev/null",
+            "find / -name docker-compose.yml -maxdepth 3 2>/dev/null"
+        ]
+    }
+}

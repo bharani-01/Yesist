@@ -13,6 +13,7 @@ import { LoginPage } from '../features/auth/LoginPage.jsx';
 import { RegisterPage } from '../features/auth/RegisterPage.jsx';
 import { RequireWorkspace } from '../features/auth/RequireWorkspace.jsx';
 import { OversightPage } from '../features/oversight/OversightPage.jsx';
+import { WhatsAppAdminPage } from '../features/oversight/WhatsAppAdminPage.jsx';
 import { NewPickupPage } from '../features/pickups/NewPickupPage.jsx';
 import { PickupDetailPage } from '../features/pickups/PickupDetailPage.jsx';
 import { PickupsListPage } from '../features/pickups/PickupsListPage.jsx';
@@ -103,7 +104,10 @@ export const router = createBrowserRouter([
       },
       {
         element: <RequireWorkspace workspace="oversight" />,
-        children: [{ path: 'oversight', element: <OversightPage /> }],
+        children: [
+          { path: 'oversight', element: <OversightPage /> },
+          { path: 'oversight/whatsapp', element: <WhatsAppAdminPage /> }
+        ],
       },
       { path: '*', element: <NotFoundPage /> },
     ],

@@ -1,10 +1,10 @@
 import { Groq } from 'groq-sdk';
 import { db } from '../../core/db.js';
-import { findUserByPhone, createCitizenUser, findUserDevices, addDevice, schedulePickup } from './whatsapp.repository.js';
+import { 
+  findUserByPhone, createCitizenUser, findUserDevices, addDevice, schedulePickup, 
+  getWhatsAppSettings, getChatHistory, saveChatMessage 
+} from './whatsapp.repository.js';
 import { sendWhatsAppMessage } from './waha.client.js';
-
-// In-memory conversation history (for testing; in production use Redis or DB)
-const conversations = new Map();
 
 // Initialize Groq
 const groq = new Groq({
@@ -57,10 +57,10 @@ const tools = [
 export const processIncomingMessage = async (phone, text) => {
   if (!text) return; // Ignore non-text messages for now
 
-  // Check test mode
-  if (process.env.WHATSAPP_TEST_MODE === 'true') {
-    const allowed = (process.env.WHATSAPP_TEST_NUMBERS || '').split(',');
-    if (!allowed.includes(phone)) {
+  // Check test mode from DB
+  const settings = await getWhatsAppSettings(db);
+  if (settings?.test_mode) {
+    if (!settings.test_numbers.includes(phone)) {
       console.log(`[WAHA] Ignored message from ${phone} (not in TEST_NUMBERS)`);
       return;
     }
@@ -68,29 +68,46 @@ export const processIncomingMessage = async (phone, text) => {
 
   let user = await findUserByPhone(db, phone);
 
-  // Initialize conversation
-  if (!conversations.has(phone)) {
-    conversations.set(phone, [
-      { 
-        role: 'system', 
-        content: `You are the EcoSure WhatsApp Assistant. You help citizens manage their e-waste by adding devices and scheduling pickups. 
-        Always be polite, concise, and helpful. Use the provided tools when necessary.` 
-      }
-    ]);
+  // Fetch chat history from DB
+  let history = await getChatHistory(db, phone);
+
+  // Re-format history to match Groq API structure
+  history = history.map(msg => {
+    let m = { role: msg.role, content: msg.content };
+    if (msg.name) m.name = msg.name;
+    if (msg.tool_call_id && msg.role === 'tool') m.tool_call_id = msg.tool_call_id;
+    if (msg.tool_call_id && msg.role === 'assistant') {
+      m.tool_calls = [{
+        id: msg.tool_call_id,
+        type: 'function',
+        function: { name: msg.name || 'unknown', arguments: "{}" }
+      }];
+    }
+    return m;
+  });
+
+  if (history.length === 0) {
+    const sysMsg = { 
+      role: 'system', 
+      content: `You are the EcoSure WhatsApp Assistant. You help citizens manage their e-waste by adding devices and scheduling pickups. 
+      Always be polite, concise, and helpful. Use the provided tools when necessary.` 
+    };
+    history.push(sysMsg);
+    await saveChatMessage(db, phone, sysMsg);
   }
 
-  const history = conversations.get(phone);
-
-  // Handle Registration manually before handing off to AI to ensure DB integrity
+  // Handle Registration manually before handing off to AI
   if (!user) {
-    // If the last message from us was asking for name, assume this is the name
     const lastMsg = history[history.length - 1];
     if (lastMsg.role === 'assistant' && lastMsg.content.includes('reply with your Full Name')) {
       try {
         await createCitizenUser(db, { phone, fullName: text });
         user = await findUserByPhone(db, phone);
         const welcomeText = `Thanks ${text}! Your EcoSure account is ready.\n\nHow can I help you today? You can:\n- Add a device\n- View your devices\n- Schedule a pickup`;
-        history.push({ role: 'user', content: text }, { role: 'assistant', content: welcomeText });
+        
+        await saveChatMessage(db, phone, { role: 'user', content: text });
+        await saveChatMessage(db, phone, { role: 'assistant', content: welcomeText });
+        
         await sendWhatsAppMessage(phone, welcomeText);
         return;
       } catch (err) {
@@ -99,20 +116,21 @@ export const processIncomingMessage = async (phone, text) => {
         return;
       }
     } else {
-      // First time seeing this number
       const prompt = `Welcome to EcoSure! We don't recognize this number. To register an account, please reply with your Full Name.`;
-      history.push({ role: 'assistant', content: prompt });
+      await saveChatMessage(db, phone, { role: 'assistant', content: prompt });
       await sendWhatsAppMessage(phone, prompt);
       return;
     }
   }
 
-  // --- Process with AI ---
-  history.push({ role: 'user', content: text });
+  // Process with AI
+  const userMsg = { role: 'user', content: text };
+  history.push(userMsg);
+  await saveChatMessage(db, phone, userMsg);
 
   try {
     const response = await groq.chat.completions.create({
-      model: 'llama-3.1-70b-versatile',
+      model: process.env.GROQ_MODEL || 'llama3-70b-8192',
       messages: history,
       tools: tools,
       tool_choice: 'auto',
@@ -122,7 +140,15 @@ export const processIncomingMessage = async (phone, text) => {
     
     // Handle Tool Calls
     if (responseMessage.tool_calls) {
-      history.push(responseMessage); // Append assistant's tool call request
+      history.push(responseMessage);
+      
+      // Save assistant's tool call to DB
+      await saveChatMessage(db, phone, {
+        role: 'assistant',
+        content: responseMessage.content || '',
+        name: responseMessage.tool_calls[0].function.name,
+        tool_call_id: responseMessage.tool_calls[0].id
+      });
 
       for (const toolCall of responseMessage.tool_calls) {
         const functionName = toolCall.function.name;
@@ -146,28 +172,33 @@ export const processIncomingMessage = async (phone, text) => {
           functionResult = `Error executing action: ${dbErr.message}`;
         }
 
-        history.push({
+        const toolResultMsg = {
           tool_call_id: toolCall.id,
           role: 'tool',
           name: functionName,
           content: functionResult,
-        });
+        };
+
+        history.push(toolResultMsg);
+        await saveChatMessage(db, phone, toolResultMsg);
       }
 
-      // Send the results back to Groq to generate a final text response for the user
+      // Send the results back to Groq to generate a final text response
       const finalResponse = await groq.chat.completions.create({
-        model: 'llama-3.1-70b-versatile',
+        model: process.env.GROQ_MODEL || 'llama3-70b-8192',
         messages: history,
       });
 
       const finalText = finalResponse.choices[0].message.content;
       history.push({ role: 'assistant', content: finalText });
+      await saveChatMessage(db, phone, { role: 'assistant', content: finalText });
       await sendWhatsAppMessage(phone, finalText);
 
     } else {
-      // No tool calls, just a standard text response
+      // Standard text response
       const replyText = responseMessage.content;
       history.push({ role: 'assistant', content: replyText });
+      await saveChatMessage(db, phone, { role: 'assistant', content: replyText });
       await sendWhatsAppMessage(phone, replyText);
     }
   } catch (error) {

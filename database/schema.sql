@@ -1625,3 +1625,41 @@ insert into scheme_settings (key, value_num, description) values
   ('unit_leakage_min_pct',              97,  'Minimum received/sent unit ratio before a leakage flag, PRD v3 §18.3'),
   ('storage_flag_pct',                  75,  'Share of storage period after which an undelivered lot is flagged')
 on conflict (key) do update set value_num = excluded.value_num, description = excluded.description;
+
+-- -----------------------------------------------------------------------------
+-- WhatsApp Integration
+-- -----------------------------------------------------------------------------
+
+create table if not exists whatsapp_settings (
+  id          int primary key default 1 check (id = 1),
+  test_mode   boolean not null default true,
+  test_numbers text[] not null default '{}'
+);
+
+-- Insert default row
+insert into whatsapp_settings (id, test_mode, test_numbers) 
+values (1, true, array['919876543210']) 
+on conflict (id) do nothing;
+
+create table if not exists whatsapp_messages (
+  id          serial primary key,
+  phone       text not null,
+  role        text not null check (role in ('system', 'user', 'assistant', 'tool')),
+  content     text not null,
+  tool_call_id text,
+  name        text,
+  created_at  timestamptz not null default now()
+);
+create index if not exists whatsapp_messages_phone_idx on whatsapp_messages(phone);
+
+-- RLS Policies
+alter table whatsapp_settings enable row level security;
+alter table whatsapp_messages enable row level security;
+
+create policy whatsapp_settings_read on whatsapp_settings for select using (true);
+create policy whatsapp_settings_update on whatsapp_settings for update using (app.user_role() = 'programme_operator');
+
+create policy whatsapp_messages_read on whatsapp_messages for select using (app.user_role() = 'programme_operator');
+-- Allow insertion without role check to let the webhook insert messages
+create policy whatsapp_messages_insert on whatsapp_messages for insert with check (true);
+

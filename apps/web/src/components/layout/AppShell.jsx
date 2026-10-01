@@ -120,6 +120,7 @@ const NAV = {
   ],
   oversight: [
     { to: '/oversight', label: 'Overview & Flags', icon: 'oversight', end: true },
+    { to: '/oversight/whatsapp', label: 'WhatsApp Bot', icon: 'activity' },
   ],
 };
 

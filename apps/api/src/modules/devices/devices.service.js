@@ -9,7 +9,15 @@ const CLAIM_ERRORS = {
   not_claimable: () => Errors.conflict('not_claimable', 'Only devices on sale or in use can be claimed. This one is already on its way to recycling.'),
 };
 
-export const listDevices = (ctx) => withTx(ctx.userId, (tx) => repo.listClaimed(tx, ctx.userId));
+export const listDevices = (ctx) => withTx(ctx.userId, async (tx) => {
+  const [claimed, manual] = await Promise.all([
+    repo.listClaimed(tx, ctx.userId),
+    repo.listManual(tx, ctx.userId),
+  ]);
+  const combined = [...claimed, ...manual];
+  combined.sort((a, b) => new Date(b.claimedAt || b.updatedAt) - new Date(a.claimedAt || a.updatedAt));
+  return combined;
+});
 
 export async function claimDevice({ qr }, ctx) {
   const result = await withTx(ctx.userId, async (tx) => {

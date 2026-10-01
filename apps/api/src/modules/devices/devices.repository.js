@@ -39,6 +39,29 @@ export const listClaimed = (tx, userId) =>
     [userId],
   );
 
+export const listManual = (tx, userId) =>
+  queryMany(
+    tx,
+    `select
+       m.id,
+       'registered' as state,
+       m.category   as "categoryCode",
+       m.updated_at as "updatedAt",
+       m.created_at as "claimedAt",
+       m.brand,
+       m.model      as "modelName",
+       m.category   as "categoryName",
+       m.photo_url  as "photoUrl",
+       null         as "activePickupId",
+       null         as "activePickupStatus",
+       null         as "activePickupDate"
+     from manual_devices m
+     where m.user_id = $1
+     order by m.created_at desc
+     limit 200`,
+    [userId],
+  );
+
 /**
  * Returns recycling certificate data for a citizen-owned device.
  * Reads from the recycling_certificates table (populated by the

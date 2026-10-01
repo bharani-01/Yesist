@@ -1656,10 +1656,14 @@ create index if not exists whatsapp_messages_phone_idx on whatsapp_messages(phon
 alter table whatsapp_settings enable row level security;
 alter table whatsapp_messages enable row level security;
 
+drop policy if exists whatsapp_settings_read on whatsapp_settings;
 create policy whatsapp_settings_read on whatsapp_settings for select using (true);
+drop policy if exists whatsapp_settings_update on whatsapp_settings;
 create policy whatsapp_settings_update on whatsapp_settings for update using (app.user_role() = 'programme_operator');
 
+drop policy if exists whatsapp_messages_read on whatsapp_messages;
 create policy whatsapp_messages_read on whatsapp_messages for select using (app.user_role() = 'programme_operator');
 -- Allow insertion without role check to let the webhook insert messages
+drop policy if exists whatsapp_messages_insert on whatsapp_messages;
 create policy whatsapp_messages_insert on whatsapp_messages for insert with check (true);
 

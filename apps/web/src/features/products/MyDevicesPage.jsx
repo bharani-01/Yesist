@@ -74,20 +74,8 @@ export function MyDevicesPage() {
                         <span>{d.categoryName}</span>
                         {d.claimedAt && <span>Claimed {formatDate(d.claimedAt)}</span>}
                         {d.qrPublicId && <span className="mono">…{d.qrPublicId.slice(-4)}</span>}
-                        {/* Booking badge — shown when an active pickup exists for this device's category */}
-                        {d.activePickupId && (
-                          <Link
-                            to={`/pickups/${d.activePickupId}`}
-                            className="badge badge--warning"
-                            onClick={e => e.stopPropagation()}
-                            title={`Pickup ${d.activePickupStatus} · ${d.activePickupDate ?? ''}`}
-                          >
-                            📦 Booked for pickup
-                          </Link>
-                        )}
                       </span>
                     </div>
-                    <StatusBadge map={UNIT_STATE} value={d.state ?? 'manual'} />
                   </Link>
                 </li>
               ))}

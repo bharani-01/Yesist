@@ -280,6 +280,7 @@ export function AddDeviceModal({ onClose, onSuccess }) {
   const [scanError,  setScanError]  = useState(null);
   const [busy,       setBusy]       = useState(false);
   const [error,      setError]      = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   /* ── form state ── */
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -325,6 +326,7 @@ export function AddDeviceModal({ onClose, onSuccess }) {
     e.preventDefault();
     if (!form.category) { setError('Please select a category.'); return; }
     setError(null);
+    setFieldErrors({});
     setBusy(true);
     try {
       let photoUrl = null;
@@ -333,10 +335,21 @@ export function AddDeviceModal({ onClose, onSuccess }) {
         fd.append('file', photoFile);
         photoUrl = await productsApi.uploadPhoto(fd);
       }
-      await productsApi.addManual({ ...form, photoUrl });
+      
+      const payload = { ...form, photoUrl };
+      payload.model = payload.modelName;
+      delete payload.modelName;
+      if (payload.yearOfPurchase) {
+        payload.yearOfPurchase = parseInt(payload.yearOfPurchase, 10);
+      } else {
+        payload.yearOfPurchase = null;
+      }
+
+      await productsApi.addManual(payload);
       onSuccess?.();
       onClose();
     } catch (e) {
+      if (e.fieldErrors) setFieldErrors(e.fieldErrors());
       setError(e?.message ?? 'Could not save the product. Please try again.');
       setBusy(false);
     }
@@ -473,18 +486,23 @@ export function AddDeviceModal({ onClose, onSuccess }) {
                     <div className="form-grid form-grid--2">
                       <div className="field">
                         <label className="field__label" htmlFor="f-brand">Brand</label>
-                        <input id="f-brand" className="input" placeholder="e.g. Samsung" value={form.brand} onChange={set('brand')} />
+                        <input id="f-brand" className="input" placeholder="e.g. Samsung" value={form.brand} onChange={set('brand')} aria-invalid={!!fieldErrors.brand} />
+                        {fieldErrors.brand && <p className="field__error">{fieldErrors.brand}</p>}
                       </div>
                       <div className="field">
                         <label className="field__label" htmlFor="f-model">Model</label>
-                        <input id="f-model" className="input" placeholder="e.g. Galaxy S23" value={form.modelName} onChange={set('modelName')} />
+                        <input id="f-model" className="input" placeholder="e.g. Galaxy S23" value={form.modelName} onChange={set('modelName')} aria-invalid={!!fieldErrors.model} />
+                        {fieldErrors.model && <p className="field__error">{fieldErrors.model}</p>}
                       </div>
                     </div>
 
                     <div className="form-grid form-grid--2">
                       <div className="field">
-                        <label className="field__label" htmlFor="f-serial">Serial / IMEI</label>
-                        <input id="f-serial" className="input" placeholder="Optional" value={form.serialNumber} onChange={set('serialNumber')} autoComplete="off" />
+                        <label className="field__label" htmlFor="f-serial">
+                          {['Smartphone', 'Tablet'].includes(form.category) ? 'IMEI' : 'Serial Number'}
+                        </label>
+                        <input id="f-serial" className="input" placeholder="Optional" value={form.serialNumber} onChange={set('serialNumber')} autoComplete="off" aria-invalid={!!fieldErrors.serialNumber} />
+                        {fieldErrors.serialNumber && <p className="field__error">{fieldErrors.serialNumber}</p>}
                       </div>
                       <div className="field">
                         <label className="field__label" htmlFor="f-year">Year of purchase</label>
@@ -492,7 +510,9 @@ export function AddDeviceModal({ onClose, onSuccess }) {
                           placeholder={String(new Date().getFullYear())}
                           min="1990" max={new Date().getFullYear()}
                           value={form.yearOfPurchase} onChange={set('yearOfPurchase')}
+                          aria-invalid={!!fieldErrors.yearOfPurchase}
                         />
+                        {fieldErrors.yearOfPurchase && <p className="field__error">{fieldErrors.yearOfPurchase}</p>}
                       </div>
                     </div>
 

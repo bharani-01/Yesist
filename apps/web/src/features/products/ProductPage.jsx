@@ -44,7 +44,6 @@ function Journey({ product, onChange }) {
       <PageHeader
         title={title}
         description={`${product.categoryName} · label ${product.qrPublicId}`}
-        actions={<StatusBadge map={UNIT_STATE} value={product.state} />}
       />
       {product.state === 'disputed' && (
         <Alert tone="error" title="Missing from its lot">

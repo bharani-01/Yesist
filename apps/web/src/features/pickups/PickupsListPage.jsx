@@ -127,6 +127,38 @@ export function PickupsListPage() {
             </div>
           </section>
 
+          {/* Quick Action Tiles */}
+          <div className="action-cards">
+            <Link to="/devices" className="action-card action-card--dark tap-effect">
+              <div>
+                <h4 className="action-card__title">Add Product</h4>
+                <p className="action-card__sub">Register a new device</p>
+              </div>
+              <div className="action-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </div>
+            </Link>
+
+            <Link to="/pickups/new" className="action-card action-card--light tap-effect">
+              <div>
+                <h4 className="action-card__title">Home Pickup</h4>
+                <p className="action-card__sub">Schedule collection</p>
+              </div>
+              <div className="action-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
+                  <path d="M15 18H9" />
+                  <path d="M19 18h2a1 1 0 0 0 1-1v-5.5a1.5 1.5 0 0 0-.44-1.06L18.5 7.38A1.5 1.5 0 0 0 17.44 7H14" />
+                  <circle cx="7" cy="18" r="2" />
+                  <circle cx="17" cy="18" r="2" />
+                </svg>
+              </div>
+            </Link>
+          </div>
+
           {/* Active Pickups / Live Tracking Widget */}
           <section className="manifest-card" aria-label="Active Pickups Status">
             <div className="manifest-card__header">
@@ -236,38 +268,6 @@ export function PickupsListPage() {
               )}
             </AsyncView>
           </aside>
-
-          {/* Quick Action Tiles */}
-          <div className="action-cards">
-            <Link to="/devices" className="action-card action-card--dark tap-effect">
-              <div>
-                <h4 className="action-card__title">Add Product</h4>
-                <p className="action-card__sub">Register a new device</p>
-              </div>
-              <div className="action-card__icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </div>
-            </Link>
-
-            <Link to="/pickups/new" className="action-card action-card--light tap-effect">
-              <div>
-                <h4 className="action-card__title">Home Pickup</h4>
-                <p className="action-card__sub">Schedule collection</p>
-              </div>
-              <div className="action-card__icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2" />
-                  <path d="M15 18H9" />
-                  <path d="M19 18h2a1 1 0 0 0 1-1v-5.5a1.5 1.5 0 0 0-.44-1.06L18.5 7.38A1.5 1.5 0 0 0 17.44 7H14" />
-                  <circle cx="7" cy="18" r="2" />
-                  <circle cx="17" cy="18" r="2" />
-                </svg>
-              </div>
-            </Link>
-          </div>
 
           {/* Nearest Drop-off / Regional Hub Widget */}
           <section className="dropoff-card">

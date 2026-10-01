@@ -12,12 +12,12 @@ export const sendWhatsAppMessage = async (phone, text) => {
 
     // WAHA expects phone number with country code, no + (e.g. 919876543210)
     // The internal system uses 10 digits, so prepend 91 for Indian numbers if needed
-    const wahaPhone = phone.length === 10 ? \`91\${phone}\` : phone;
+    const wahaPhone = phone.length === 10 ? `91${phone}` : phone;
 
     await axios.post(
-      \`\${WAHA_URL}/api/sendText\`,
+      `${WAHA_URL}/api/sendText`,
       {
-        chatId: \`\${wahaPhone}@c.us\`,
+        chatId: `${wahaPhone}@c.us`,
         text: text,
         session: SESSION,
       },

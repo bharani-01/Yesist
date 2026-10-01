@@ -90,6 +90,35 @@ export function WhatsAppAdminPage() {
           )}
         </Panel>
 
+        <Panel title="Send Test Message" style={{ marginTop: 'var(--space-4)' }}>
+          <form onSubmit={async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const phone = form.phone.value;
+            const message = form.message.value;
+            if (!phone) return;
+            try {
+              await http.post('/whatsapp/test-send', { phone, message });
+              alert('Test message sent to WAHA!');
+            } catch (err) {
+              alert('Failed to send test message: ' + err.message);
+            }
+          }} className="stack">
+            <TextField 
+              name="phone"
+              label="Recipient Phone Number" 
+              placeholder="e.g. 6382288170" 
+              required
+            />
+            <TextField 
+              name="message"
+              label="Message content (optional)" 
+              placeholder="Leave blank for default test message"
+            />
+            <Button type="submit">Send Message</Button>
+          </form>
+        </Panel>
+
         <Panel title="Conversation Viewer">
           <form onSubmit={handleLookup} style={{ display: 'flex', gap: 'var(--space-4)', marginBottom: 'var(--space-4)' }}>
             <div style={{ flex: 1 }}>

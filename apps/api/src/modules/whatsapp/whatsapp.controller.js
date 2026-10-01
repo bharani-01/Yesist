@@ -96,3 +96,23 @@ export const getMessages = async (req, res, next) => {
     next(err);
   }
 };
+
+export const testSend = async (req, res, next) => {
+  try {
+    const { phone, message } = req.body;
+    if (!phone) throw Errors.badRequest('Phone number is required');
+    
+    let normalizedPhone = String(phone).replace(/\D/g, '');
+    if (normalizedPhone.startsWith('91') && normalizedPhone.length === 12) {
+      normalizedPhone = normalizedPhone.substring(2);
+    }
+    
+    // Import here to avoid circular dependency if any, or just import at top.
+    const { sendWhatsAppMessage } = await import('./waha.client.js');
+    await sendWhatsAppMessage(normalizedPhone, message || 'Hello! This is a test message from EcoSure WhatsApp integration.');
+    
+    res.json({ success: true, message: 'Test message sent' });
+  } catch (err) {
+    next(err);
+  }
+};

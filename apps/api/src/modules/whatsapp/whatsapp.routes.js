@@ -1,5 +1,5 @@
 import express from 'express';
-import { handleWebhook, getSettings, updateSettings, getMessages } from './whatsapp.controller.js';
+import { handleWebhook, getSettings, updateSettings, getMessages, testSend } from './whatsapp.controller.js';
 import { requireRole } from '../../middleware/authorize.js';
 
 const router = express.Router();
@@ -13,5 +13,6 @@ const OVERSIGHT_ROLES = ['programme_operator', 'spcb_officer', 'cpcb_officer', '
 router.get('/settings', requireRole(...OVERSIGHT_ROLES), getSettings);
 router.put('/settings', requireRole(...OVERSIGHT_ROLES), updateSettings);
 router.get('/messages', requireRole(...OVERSIGHT_ROLES), getMessages);
+router.post('/test-send', requireRole(...OVERSIGHT_ROLES), testSend);
 
 export default router;

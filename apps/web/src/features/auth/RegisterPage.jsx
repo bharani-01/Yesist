@@ -34,7 +34,8 @@ export function RegisterPage() {
   return (
     <AuthLayout
       title="Create your account"
-      footer={<p>Already registered? <Link to="/login">Sign in</Link></p>}
+      subtitle="Join Indore's digital e-waste recycling and circular rewards program."
+      footer={<p>Already registered? <Link to="/login">Sign in &rarr;</Link></p>}
     >
       <form className="form-grid" onSubmit={onSubmit} noValidate>
         {error && !Object.keys(fieldErrors).length && <ErrorAlert error={error} />}

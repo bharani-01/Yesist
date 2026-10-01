@@ -30,7 +30,7 @@ function JobDetail({ job, onChange }) {
   return (
     <>
       <PageHeader
-        back={{ to: job.isMine ? '/agent?tab=mine' : '/agent', label: 'Jobs' }}
+        back={{ to: job.isMine ? '/agent/pickups' : '/agent/requests', label: job.isMine ? 'My Pickups' : 'Open Requests' }}
         title={`Pickup ${job.reference}`}
         description={`${job.wardName} · requested for ${formatDate(job.preferredDate)}, ${WINDOW_LABELS[job.preferredWindow]}`}
         actions={<StatusBadge map={PICKUP_STATUS} value={job.status} />}

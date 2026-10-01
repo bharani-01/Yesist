@@ -11,6 +11,7 @@ export function WhatsAppAdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
+  const [botEnabled, setBotEnabled] = useState(true);
   const [testMode, setTestMode] = useState(false);
   const [testNumbers, setTestNumbers] = useState('');
   
@@ -27,8 +28,9 @@ export function WhatsAppAdminPage() {
       setLoading(true);
       const data = await http.get('/whatsapp/settings');
       setSettings(data);
-      setTestMode(data.test_mode);
-      setTestNumbers(data.test_numbers.join(', '));
+      setBotEnabled(data.bot_enabled ?? true);
+      setTestMode(data.test_mode ?? false);
+      setTestNumbers((data.test_numbers || []).join(', '));
     } catch (err) {
       setError(err.message);
     } finally {
@@ -40,7 +42,7 @@ export function WhatsAppAdminPage() {
     e.preventDefault();
     try {
       const numbersArray = testNumbers.split(',').map(n => n.trim()).filter(Boolean);
-      await http.put('/whatsapp/settings', { testMode, testNumbers: numbersArray });
+      await http.put('/whatsapp/settings', { botEnabled, testMode, testNumbers: numbersArray });
       alert('Settings saved successfully');
       loadSettings();
     } catch (err) {
@@ -65,7 +67,31 @@ export function WhatsAppAdminPage() {
 
   return (
     <div className="page">
-      <PageHeader title="WhatsApp Bot Configuration" />
+      <PageHeader 
+        title="WhatsApp Bot Configuration" 
+        action={
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 12px',
+            borderRadius: '999px',
+            fontSize: '13px',
+            fontWeight: 600,
+            background: botEnabled ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+            color: botEnabled ? '#16a34a' : '#dc2626',
+            border: `1px solid ${botEnabled ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+          }}>
+            <span style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              backgroundColor: botEnabled ? '#16a34a' : '#dc2626'
+            }}></span>
+            {botEnabled ? 'Automation Active' : 'Automation Paused'}
+          </span>
+        }
+      />
       
       {error && <Alert type="error">{error}</Alert>}
       
@@ -75,13 +101,29 @@ export function WhatsAppAdminPage() {
             <p>Loading...</p>
           ) : (
             <form onSubmit={handleSaveSettings} className="stack">
-              <SelectField label="Test Mode" value={testMode.toString()} onChange={(e) => setTestMode(e.target.value === 'true')}>
-                <option value="true">Enabled (Only respond to test numbers)</option>
-                <option value="false">Disabled (Live to public)</option>
+              <SelectField 
+                label="Master Automation Switch" 
+                hint="Turn the entire WhatsApp bot ON or OFF globally"
+                value={botEnabled.toString()} 
+                onChange={(e) => setBotEnabled(e.target.value === 'true')}
+              >
+                <option value="true">🟢 Enabled (Bot automatically replies to WhatsApp messages)</option>
+                <option value="false">🔴 Disabled (Bot is paused / No auto-replies)</option>
               </SelectField>
+
+              <SelectField 
+                label="Audience Scope / Test Mode" 
+                hint="Restrict bot to specific test numbers or open to all citizens"
+                value={testMode.toString()} 
+                onChange={(e) => setTestMode(e.target.value === 'true')}
+              >
+                <option value="false">Live to public (Responds to all incoming numbers)</option>
+                <option value="true">Restricted Test Mode (Only responds to numbers below)</option>
+              </SelectField>
+
               <TextField 
                 label="Test Numbers (comma separated)" 
-                hint="Include country code without +, e.g., 919876543210"
+                hint="Include country code or 10-digit number, e.g., 9843554591, 9482577885"
                 value={testNumbers} 
                 onChange={(e) => setTestNumbers(e.target.value)} 
               />

@@ -57,22 +57,32 @@ export const getSettings = async (req, res, next) => {
 
 export const updateSettings = async (req, res, next) => {
   try {
-    const { testMode, testNumbers } = req.body;
-    if (typeof testMode !== 'boolean' || !Array.isArray(testNumbers)) {
-      throw Errors.badRequest('Invalid payload');
+    const { botEnabled, testMode, testNumbers } = req.body;
+    if (botEnabled !== undefined && typeof botEnabled !== 'boolean') {
+      throw Errors.badRequest('Invalid botEnabled value');
+    }
+    if (testMode !== undefined && typeof testMode !== 'boolean') {
+      throw Errors.badRequest('Invalid testMode value');
+    }
+    if (testNumbers !== undefined && !Array.isArray(testNumbers)) {
+      throw Errors.badRequest('Invalid testNumbers payload');
     }
     
-    // Normalize test numbers to match the 10-digit database format
-    const normalizedNumbers = testNumbers.map(n => {
+    // Normalize test numbers to match the 10-digit database format and deduplicate
+    const normalizedNumbers = testNumbers ? [...new Set(testNumbers.map(n => {
       let num = String(n).replace(/\D/g, ''); // Remove all non-digits (like +)
       if (num.startsWith('91') && num.length === 12) {
         num = num.substring(2);
       }
       return num;
-    }).filter(n => n.length === 10);
+    }).filter(n => n.length === 10))] : undefined;
 
     const ctx = contextOf(req);
-    const updated = await withTx(ctx.userId, tx => updateWhatsAppSettings(tx, { testMode, testNumbers: normalizedNumbers }));
+    const updated = await withTx(ctx.userId, tx => updateWhatsAppSettings(tx, { 
+      botEnabled,
+      testMode, 
+      testNumbers: normalizedNumbers 
+    }));
     res.json(updated);
   } catch (err) {
     next(err);

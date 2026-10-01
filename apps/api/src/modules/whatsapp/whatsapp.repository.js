@@ -44,10 +44,16 @@ export const schedulePickup = async (tx, { userId, preferredDate, preferredWindo
 
 // WhatsApp Config and Memory
 export const getWhatsAppSettings = (tx) =>
-  queryOne(tx, 'select test_mode, test_numbers from whatsapp_settings where id = 1');
+  queryOne(tx, 'select bot_enabled, test_mode, test_numbers from whatsapp_settings where id = 1');
 
-export const updateWhatsAppSettings = (tx, { testMode, testNumbers }) =>
-  queryOne(tx, 'update whatsapp_settings set test_mode = $1, test_numbers = $2 where id = 1 returning *', [testMode, testNumbers]);
+export const updateWhatsAppSettings = (tx, { botEnabled, testMode, testNumbers }) =>
+  queryOne(tx, `
+    update whatsapp_settings 
+    set bot_enabled = coalesce($1, bot_enabled),
+        test_mode = coalesce($2, test_mode), 
+        test_numbers = coalesce($3, test_numbers) 
+    where id = 1 returning *
+  `, [botEnabled, testMode, testNumbers]);
 
 export const getChatHistory = (tx, phone) =>
   queryMany(tx, 'select role, content, name, tool_call_id from whatsapp_messages where phone = $1 order by created_at asc', [phone]);

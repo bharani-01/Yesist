@@ -21,12 +21,14 @@ const OFFICER_DESCRIPTIONS = {
   ulb_officer: 'Programme overview, read-only flags',
 };
 
-const staff = (workspace, members) => members.map((m) => ({
-  email: m.email,
-  workspace,
-  label: `${WORKSPACE_LABELS[workspace]} · ${ROLE_LABELS[m.orgRole]}`,
-  description: STAFF_DESCRIPTIONS[workspace][m.orgRole] ?? READ_ONLY,
-}));
+const staff = (workspace, members) => members
+  .filter((m) => m.orgRole !== 'finance' && m.orgRole !== 'viewer')
+  .map((m) => ({
+    email: m.email,
+    workspace,
+    label: `${WORKSPACE_LABELS[workspace]} · ${ROLE_LABELS[m.orgRole]}`,
+    description: STAFF_DESCRIPTIONS[workspace][m.orgRole] ?? READ_ONLY,
+  }));
 
 function load() {
   const config = JSON.parse(readFileSync(onboardingFile, 'utf8'));

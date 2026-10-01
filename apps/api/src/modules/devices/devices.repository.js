@@ -45,7 +45,27 @@ export const listManual = (tx, userId) =>
     `select
        m.id,
        'registered' as state,
-       m.category   as "categoryCode",
+       case lower(trim(m.category))
+         when 'smartphone' then 'mobile_phone'
+         when 'mobile' then 'mobile_phone'
+         when 'phone' then 'mobile_phone'
+         when 'mobile_phone' then 'mobile_phone'
+         when 'laptop' then 'laptop'
+         when 'tablet' then 'tablet'
+         when 'television' then 'monitor_tv'
+         when 'tv' then 'monitor_tv'
+         when 'monitor' then 'monitor_tv'
+         when 'monitor_tv' then 'monitor_tv'
+         when 'desktop' then 'desktop_cpu'
+         when 'desktop_cpu' then 'desktop_cpu'
+         when 'printer' then 'printer'
+         when 'refrigerator' then 'small_appliance'
+         when 'washing machine' then 'small_appliance'
+         when 'air conditioner' then 'small_appliance'
+         when 'microwave' then 'small_appliance'
+         when 'small_appliance' then 'small_appliance'
+         else coalesce((select code from waste_categories where code = lower(trim(m.category))), 'cables_accessories')
+       end as "categoryCode",
        m.updated_at as "updatedAt",
        m.created_at as "claimedAt",
        m.brand,

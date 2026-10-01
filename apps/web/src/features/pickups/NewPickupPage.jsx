@@ -201,6 +201,41 @@ function Wizard({ refData, devices, pickups = [] }) {
     setStep(step - 1);
   };
 
+  const normalizeCategoryCode = (code) => {
+    if (!code) return 'cables_accessories';
+    const clean = String(code).toLowerCase().trim().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    const map = {
+      smartphone: 'mobile_phone',
+      mobile: 'mobile_phone',
+      phone: 'mobile_phone',
+      mobile_phone: 'mobile_phone',
+      laptop: 'laptop',
+      tablet: 'tablet',
+      smartwatch: 'cables_accessories',
+      television: 'monitor_tv',
+      tv: 'monitor_tv',
+      monitor: 'monitor_tv',
+      monitor_tv: 'monitor_tv',
+      desktop: 'desktop_cpu',
+      cpu: 'desktop_cpu',
+      desktop_cpu: 'desktop_cpu',
+      printer: 'printer',
+      scanner: 'printer',
+      refrigerator: 'small_appliance',
+      washing_machine: 'small_appliance',
+      air_conditioner: 'small_appliance',
+      microwave: 'small_appliance',
+      camera: 'cables_accessories',
+      gaming_console: 'small_appliance',
+      speaker: 'cables_accessories',
+      speaker_headphones: 'cables_accessories',
+      cables_accessories: 'cables_accessories',
+      small_appliance: 'small_appliance',
+      other: 'cables_accessories',
+    };
+    return map[clean] || (clean.match(/^[a-z_]{2,40}$/) ? clean : 'cables_accessories');
+  };
+
   const handleSubmit = async () => {
     setPending(true);
     setError(null);
@@ -208,6 +243,7 @@ function Wizard({ refData, devices, pickups = [] }) {
       // Strip everything non-numeric, remove leading 91 country code if present, take last 10 digits
       const digits = form.contactPhone.replace(/\D/g, '');
       const sanitizedPhone = digits.startsWith('91') && digits.length === 12 ? digits.slice(2) : digits.slice(-10);
+      const catCode = normalizeCategoryCode(selectedDevice?.categoryCode || selectedDevice?.categoryName);
       const { pickup } = await pickupsApi.create({
         wardId: refData.wards[0]?.id ?? 1,
         addressLine: form.addressLine || 'Address not specified',
@@ -216,7 +252,7 @@ function Wizard({ refData, devices, pickups = [] }) {
         contactPhone: sanitizedPhone,
         preferredDate: form.preferredDate,
         preferredWindow: form.preferredWindow,
-        items: [{ categoryCode: selectedDevice.categoryCode, quantity: 1 }],
+        items: [{ categoryCode: catCode, quantity: 1 }],
       });
       navigate(`/pickups/${pickup.id}`, { replace: true });
     } catch (err) {

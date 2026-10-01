@@ -57,8 +57,13 @@ const tools = [
 export const processIncomingMessage = async (phone, text) => {
   if (!text) return; // Ignore non-text messages for now
 
-  // Check test mode from DB
+  // Check bot master switch and test mode from DB
   const settings = await getWhatsAppSettings(db);
+  if (settings && settings.bot_enabled === false) {
+    console.log(`[WAHA] WhatsApp Automation is DISABLED globally. Ignored message from ${phone}`);
+    return;
+  }
+
   if (settings?.test_mode) {
     if (!settings.test_numbers.includes(phone)) {
       console.log(`[WAHA] Ignored message from ${phone} (not in TEST_NUMBERS)`);

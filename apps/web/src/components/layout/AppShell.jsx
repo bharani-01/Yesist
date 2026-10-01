@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { PanelLeftClose, PanelLeftOpen, LogOut, User as UserIcon } from 'lucide-react';
 import { HOME_BY_WORKSPACE, WORKSPACE_LABELS, useAuth } from '../../features/auth/AuthProvider.jsx';
 import { Button } from '../ui/Button.jsx';
 import { Logo } from './Logo.jsx';
@@ -78,6 +79,22 @@ function Icon({ name }) {
       </svg>
     );
   }
+  if (name === 'requests' || name === 'inbox') {
+    return (
+      <svg className="nav-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M22 12h-6l-2 3h-4l-2-3H2" />
+        <path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" />
+      </svg>
+    );
+  }
+  if (name === 'id-card') {
+    return (
+      <svg className="nav-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect width="20" height="14" x="2" y="5" rx="2" />
+        <line x1="2" x2="22" y1="10" y2="10" />
+      </svg>
+    );
+  }
   if (name === 'oversight' || name === 'activity') {
     return (
       <svg className="nav-link__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -104,6 +121,10 @@ const NAV = {
   ],
   agent: [
     { to: '/agent', label: 'Dashboard', icon: 'dashboard', end: true },
+    { to: '/agent/requests', label: 'Open Requests', icon: 'requests' },
+    { to: '/agent/pickups', label: 'My Pickups', icon: 'shipments' },
+    { to: '/agent/lots', label: 'Sealed Lots', icon: 'lots' },
+    { to: '/agent/id-card', label: 'Agent ID Card', icon: 'id-card' },
   ],
   recycler: [
     { to: '/recycler', label: 'Inbound Lots', icon: 'lots', end: true },
@@ -126,10 +147,48 @@ const NAV = {
 
 export function AppShell() {
   const auth = useAuth();
+  const navigate = useNavigate();
   const user = auth.user;
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    try {
+      return localStorage.getItem('ecosure_sidebar_collapsed') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const links = user ? NAV[user.workspace] ?? [] : [];
+
+  const handleLogout = async () => {
+    try {
+      await auth.logout();
+    } finally {
+      navigate('/login', { replace: true });
+    }
+  };
+
+  const toggleCollapsed = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('ecosure_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
+        e.preventDefault();
+        toggleCollapsed();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const getInitials = (name) => {
     if (!name) return 'U';
@@ -178,12 +237,30 @@ export function AppShell() {
       )}
 
       {/* Vertical Sidebar */}
-      <aside className={`sidebar ${mobileOpen ? 'is-open' : ''}`}>
+      <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${mobileOpen ? 'is-open' : ''}`}>
         <div className="sidebar__header">
-          <Link to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} className="brand" onClick={() => setMobileOpen(false)}>
-            <Logo />
-          </Link>
-          {user && user.workspace !== 'citizen' && <span className="brand__workspace">{WORKSPACE_LABELS[user.workspace]}</span>}
+          <div className="sidebar__header-row">
+            <Link 
+              to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} 
+              className="brand" 
+              onClick={() => setMobileOpen(false)}
+              title="EcoSure Home"
+            >
+              <Logo />
+            </Link>
+            <button
+              type="button"
+              className="sidebar__toggle-btn"
+              onClick={toggleCollapsed}
+              aria-label={collapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
+              title={collapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
+            >
+              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+            </button>
+          </div>
+          {user && user.workspace !== 'citizen' && (
+            <span className="brand__workspace">{WORKSPACE_LABELS[user.workspace]}</span>
+          )}
         </div>
 
         <nav className="sidebar__nav" aria-label="Primary Navigation">
@@ -194,29 +271,34 @@ export function AppShell() {
               end={l.end}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
               onClick={() => setMobileOpen(false)}
+              title={collapsed ? l.label : undefined}
             >
               <Icon name={l.icon} />
-              <span>{l.label}</span>
+              <span className="nav-link__text">{l.label}</span>
+              {collapsed && <span className="nav-link__tooltip">{l.label}</span>}
             </NavLink>
           ))}
         </nav>
 
         <div className="sidebar__footer">
           {user ? (
-            <div className="user-card">
-              <div className="user-avatar" title={user.email}>
+            <div className={`user-card ${collapsed ? 'user-card--collapsed' : ''}`}>
+              <div className="user-avatar" title={`${displayName} (${user.orgs?.[0]?.name ?? user.email})`}>
                 {getInitials(displayName)}
               </div>
               <div className="user-details">
                 <span className="user-name" title={displayName}>{displayName}</span>
                 <span className="user-email">{user.orgs?.[0]?.name ?? user.email}</span>
               </div>
-              <Button variant="ghost" size="sm" onClick={auth.logout} title="Sign out">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-                  <polyline points="16 17 21 12 16 7" />
-                  <line x1="21" x2="9" y1="12" y2="12" />
-                </svg>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleLogout} 
+                title="Sign out"
+                aria-label="Sign out"
+                className="user-logout-btn"
+              >
+                <LogOut size={16} />
               </Button>
             </div>
           ) : auth.status === 'anonymous' ? (

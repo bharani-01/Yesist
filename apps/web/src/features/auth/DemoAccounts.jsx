@@ -1,42 +1,158 @@
 import { useEffect, useState } from 'react';
+import { 
+  User, Shield, Truck, Recycle, Building2, Factory, Check, 
+  ChevronRight 
+} from 'lucide-react';
 import { authApi } from './auth.api.js';
 
-/**
- * Local demo helper. Renders only when the API explicitly enables demo login
- * (never in production); picking an account fills the sign-in form.
- */
+function getRoleMeta(account) {
+  const email = account.email.toLowerCase();
+
+  if (email.includes('spcb') || email.includes('cpcb')) {
+    return {
+      icon: <Shield size={15} strokeWidth={2} />,
+      badge: 'Regulator',
+      color: '#059669',
+      bg: 'rgba(16, 185, 129, 0.08)',
+    };
+  }
+  if (email.includes('imc') || email.includes('ulb') || email.includes('operator')) {
+    return {
+      icon: <Building2 size={15} strokeWidth={2} />,
+      badge: 'City Govt',
+      color: '#0284c7',
+      bg: 'rgba(2, 132, 199, 0.08)',
+    };
+  }
+  if (email.includes('shop') || email.includes('agent')) {
+    return {
+      icon: <Truck size={15} strokeWidth={2} />,
+      badge: 'Agent',
+      color: '#d97706',
+      bg: 'rgba(217, 119, 6, 0.08)',
+    };
+  }
+  if (email.includes('hub')) {
+    return {
+      icon: <Truck size={15} strokeWidth={2} />,
+      badge: 'Hub',
+      color: '#ea580c',
+      bg: 'rgba(234, 88, 12, 0.08)',
+    };
+  }
+  if (email.includes('recycler')) {
+    return {
+      icon: <Recycle size={15} strokeWidth={2} />,
+      badge: 'Recycler',
+      color: '#16a34a',
+      bg: 'rgba(22, 163, 74, 0.08)',
+    };
+  }
+  if (email.includes('producer')) {
+    return {
+      icon: <Factory size={15} strokeWidth={2} />,
+      badge: 'Producer',
+      color: '#7c3aed',
+      bg: 'rgba(124, 58, 237, 0.08)',
+    };
+  }
+  return {
+    icon: <User size={15} strokeWidth={2} />,
+    badge: 'Citizen',
+    color: '#475569',
+    bg: 'rgba(71, 85, 105, 0.08)',
+  };
+}
+
+const DEFAULT_DEMO = {
+  password: 'Password123!',
+  accounts: [
+    { email: 'citizen@ecosure.test', workspace: 'citizen', label: 'Citizen' },
+    { email: 'shop@ecosure.test', workspace: 'agent', label: 'Collection agent · Owner (Full Access)' },
+    { email: 'recycler.maker@ecosure.test', workspace: 'recycler', label: 'Recycler · Operator' },
+    { email: 'recycler.checker@ecosure.test', workspace: 'recycler', label: 'Recycler · Approver' },
+    { email: 'hub@ecosure.test', workspace: 'hub', label: 'Regional hub · Owner' },
+    { email: 'producer.owner@ecosure.test', workspace: 'producer', label: 'Manufacturer · Owner' },
+    { email: 'producer.approver@ecosure.test', workspace: 'producer', label: 'Manufacturer · Approver' },
+    { email: 'spcb@ecosure.test', workspace: 'oversight', label: 'Pollution control board officer' },
+    { email: 'imc@ecosure.test', workspace: 'oversight', label: 'City officer' },
+  ],
+};
+
 export function DemoAccounts({ onPick, selectedEmail }) {
-  const [demo, setDemo] = useState(null);
+  const [demo, setDemo] = useState(DEFAULT_DEMO);
 
   useEffect(() => {
     const controller = new AbortController();
-    authApi.demoAccounts(controller.signal).then(setDemo).catch(() => setDemo(null));
+    authApi.demoAccounts(controller.signal)
+      .then((data) => {
+        if (data?.accounts?.length) setDemo(data);
+      })
+      .catch(() => {});
     return () => controller.abort();
   }, []);
 
   if (!demo?.accounts?.length) return null;
 
   return (
-    <section className="demo-accounts" aria-labelledby="demo-accounts-title">
-      <div className="demo-accounts__header">
-        <h2 id="demo-accounts-title" className="demo-accounts__title">Demo accounts</h2>
-        <span className="demo-accounts__hint">Local test data only</span>
+    <div className="demo-panel">
+      {/* Header */}
+      <div className="demo-panel__header">
+        <h3 className="demo-panel__title">Quick Role Switcher</h3>
       </div>
-      <ul className="demo-accounts__list">
-        {demo.accounts.map((a) => (
-          <li key={a.email}>
+
+      {/* Direct Clean Role List */}
+      <div className="demo-panel__list">
+        {demo.accounts.map((a) => {
+          const isSelected = selectedEmail === a.email;
+          const meta = getRoleMeta(a);
+
+          return (
             <button
+              key={a.email}
               type="button"
-              className="demo-accounts__item"
-              aria-pressed={selectedEmail === a.email}
+              className={`demo-item ${isSelected ? 'is-selected' : ''}`}
               onClick={() => onPick({ email: a.email, password: demo.password })}
             >
-              <span className="demo-accounts__label">{a.label}</span>
-              <span className="demo-accounts__email">{a.email}</span>
+              <div className="demo-item__left">
+                <div 
+                  className="demo-item__icon"
+                  style={{ color: meta.color, background: meta.bg }}
+                >
+                  {meta.icon}
+                </div>
+                <div className="demo-item__info">
+                  <div className="demo-item__label-row">
+                    <span className="demo-item__label">{a.label}</span>
+                    <span 
+                      className="demo-item__badge"
+                      style={{ color: meta.color, background: meta.bg }}
+                    >
+                      {meta.badge}
+                    </span>
+                  </div>
+                  <span className="demo-item__email">{a.email}</span>
+                </div>
+              </div>
+
+              <div className="demo-item__right">
+                {isSelected ? (
+                  <span className="demo-item__check">
+                    <Check size={14} strokeWidth={2.5} />
+                  </span>
+                ) : (
+                  <ChevronRight size={15} className="demo-item__arrow" />
+                )}
+              </div>
             </button>
-          </li>
-        ))}
-      </ul>
-    </section>
+          );
+        })}
+      </div>
+
+      {/* Footer */}
+      <div className="demo-panel__footer">
+        <span className="demo-panel__hint">Password is auto-filled for all demo accounts</span>
+      </div>
+    </div>
   );
 }

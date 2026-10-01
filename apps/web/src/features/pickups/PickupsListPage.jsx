@@ -63,12 +63,12 @@ export function PickupsListPage() {
   const totalMaterialsKg = completedPickups.reduce((acc, p) => acc + (Number(p.collectedNetKg) || 0), 0);
   const co2AvoidedKg = (totalMaterialsKg * 1.5).toFixed(1);
 
-  // Dynamic SOTA Greeting
+  // Dynamic Greeting
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
 
   const bookButton = (
-    <Link to="/pickups/new" className="btn btn--primary tap-effect" style={{ borderRadius: 'var(--radius-pill)', padding: '12px 24px', fontWeight: 600 }}>
+    <Link to="/pickups/new" className="btn btn--primary tap-effect" style={{ borderRadius: 'var(--radius-pill)', padding: '12px 24px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="5" x2="12" y2="19" />
         <line x1="5" y1="12" x2="19" y2="12" />
@@ -77,19 +77,83 @@ export function PickupsListPage() {
     </Link>
   );
 
+  // Calculate live stepper stage
+  let activeStep = 1;
+  let activeStepFill = '12%';
+  if (activePickup) {
+    if (activePickup.status === 'requested') {
+      activeStep = 1;
+      activeStepFill = '16%';
+    } else if (activePickup.status === 'scheduled') {
+      activeStep = 2;
+      activeStepFill = '48%';
+    } else if (activePickup.status === 'collected') {
+      activeStep = 3;
+      activeStepFill = '82%';
+    } else {
+      activeStep = 4;
+      activeStepFill = '100%';
+    }
+  }
+
   return (
     <div className="page">
-      {/* Top Greeting with user's real full name */}
+      {/* Top Greeting */}
       <PageHeader
         title={user?.fullName ?? 'Citizen'}
         eyebrow={greeting}
         actions={bookButton}
       />
 
-      {/* Main Dashboard Grid matching reference */}
+      {/* Main Dashboard Grid */}
       <div className="dashboard-grid">
-        {/* Left Column: Financial Card, Active Manifest, History */}
+        {/* Left Column: Live Progress, Financial Card, Quick Categories, How It Works, History & Hub */}
         <div className="stack">
+          {/* Active Pickups / Live Visual Tracking Widget */}
+          {activePickup ? (
+            <section className="pickup-live-card" aria-label="Active Pickup Progress">
+              <div className="pickup-live-card__header">
+                <div className="pickup-live-card__ref-wrap">
+                  <div className="pulse-dot" />
+                  <div>
+                    <span className="pickup-live-card__ref">Manifest: MF-{activePickup.reference}</span>
+                    <div className="pickup-live-card__meta">
+                      {activePickup.status === 'scheduled' 
+                        ? `Visit: ${formatDate(activePickup.scheduledFor)} (${WINDOW_LABELS[activePickup.scheduledWindow] ?? 'Window'})`
+                        : `Requested: ${formatDate(activePickup.preferredDate)} (${WINDOW_LABELS[activePickup.preferredWindow] ?? 'Window'})`}
+                    </div>
+                  </div>
+                </div>
+                <Link to={`/pickups/${activePickup.id}`} className="btn btn--secondary btn--sm tap-effect" style={{ borderRadius: 'var(--radius-pill)' }}>
+                  Track Live &rarr;
+                </Link>
+              </div>
+
+              {/* 4-Step Visual Progress Stepper */}
+              <div className="live-stepper">
+                <div className="live-stepper__bar-bg" />
+                <div className="live-stepper__bar-fill" style={{ width: activeStepFill }} />
+
+                <div className={`live-stepper__node ${activeStep >= 1 ? (activeStep === 1 ? 'is-active' : 'is-done') : ''}`}>
+                  <div className="live-stepper__circle">{activeStep > 1 ? '✓' : '1'}</div>
+                  <span className="live-stepper__label">Booked</span>
+                </div>
+                <div className={`live-stepper__node ${activeStep >= 2 ? (activeStep === 2 ? 'is-active' : 'is-done') : ''}`}>
+                  <div className="live-stepper__circle">{activeStep > 2 ? '✓' : '2'}</div>
+                  <span className="live-stepper__label">Agent Assigned</span>
+                </div>
+                <div className={`live-stepper__node ${activeStep >= 3 ? (activeStep === 3 ? 'is-active' : 'is-done') : ''}`}>
+                  <div className="live-stepper__circle">{activeStep > 3 ? '✓' : '3'}</div>
+                  <span className="live-stepper__label">Doorstep Visit</span>
+                </div>
+                <div className={`live-stepper__node ${activeStep >= 4 ? (activeStep === 4 ? 'is-active' : 'is-done') : ''}`}>
+                  <div className="live-stepper__circle">{activeStep >= 4 ? '✓' : '4'}</div>
+                  <span className="live-stepper__label">Paid & Recycled</span>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
           {/* Hero Financial & Impact Card */}
           <section className="hero-impact-card" aria-label="Total Paid Amount and Impact">
             <div className="hero-impact-card__header">
@@ -159,44 +223,6 @@ export function PickupsListPage() {
             </Link>
           </div>
 
-          {/* Active Pickups / Live Tracking Widget */}
-          <section className="manifest-card" aria-label="Active Pickups Status">
-            <div className="manifest-card__header">
-              <h3 className="manifest-card__title">Active Pickup</h3>
-            </div>
-            {activePickup ? (
-              <div className="manifest-card__item tap-effect">
-                <div className="manifest-card__info">
-                  <div className="pulse-dot" />
-                  <div>
-                    <div className="manifest-card__ref">
-                      Manifest: MF-{activePickup.reference}
-                    </div>
-                    <div className="manifest-card__status">
-                      Status: {activePickup.status === 'scheduled' ? `Scheduled for ${formatDate(activePickup.scheduledFor)} (${WINDOW_LABELS[activePickup.scheduledWindow] ?? 'window'})` : `Requested for ${formatDate(activePickup.preferredDate)} (${WINDOW_LABELS[activePickup.preferredWindow] ?? 'window'})`}
-                    </div>
-                  </div>
-                </div>
-                <Link to={`/pickups/${activePickup.id}`} className="btn btn--secondary btn--sm tap-effect">
-                  Track
-                </Link>
-              </div>
-            ) : (
-              <div style={{ textAlign: 'center', padding: 'var(--space-6) 0' }}>
-                <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(229, 229, 234, 0.4)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 'var(--space-3)' }}>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ color: 'var(--color-ink-muted)' }}>
-                    <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
-                    <path d="m3.3 7 8.7 5 8.7-5" />
-                    <path d="M12 22V12" />
-                  </svg>
-                </div>
-                <h4 style={{ fontSize: 'var(--text-md)', fontWeight: 500, margin: '0 0 4px' }}>No active pickups</h4>
-                <p className="subtle" style={{ maxWidth: '280px', margin: '0 auto var(--space-4)' }}>Schedule a pickup to responsibly dispose of your e-waste.</p>
-                <Link to="/pickups/new" className="btn btn--secondary btn--sm tap-effect">Schedule Now</Link>
-              </div>
-            )}
-          </section>
-
           {/* Link to Dedicated History Page */}
           <Link to="/pickups/history" className="panel tap-effect" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: 'var(--space-4)', background: 'var(--color-surface)', borderRadius: 'var(--radius-lg)' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
@@ -209,9 +235,18 @@ export function PickupsListPage() {
               <path d="m9 18 6-6-6-6" />
             </svg>
           </Link>
+
+          {/* Nearest Drop-off / Regional Hub Widget */}
+          <section className="dropoff-card">
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
+              <h3 className="dropoff-card__title" style={{ marginBottom: 0 }}>Nearest Drop-off</h3>
+              <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--color-ink-subtle)' }}>0.8 km</span>
+            </div>
+            <HubMap />
+          </section>
         </div>
 
-        {/* Right Column: My Products, Quick Action Tiles, Nearest Drop-off */}
+        {/* Right Column: My Products */}
         <div className="stack">
           {/* My Products Panel */}
           <aside className="products-panel">
@@ -267,15 +302,6 @@ export function PickupsListPage() {
               )}
             </AsyncView>
           </aside>
-
-          {/* Nearest Drop-off / Regional Hub Widget */}
-          <section className="dropoff-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-4)' }}>
-              <h3 className="dropoff-card__title" style={{ marginBottom: 0 }}>Nearest Drop-off</h3>
-              <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--color-ink-subtle)' }}>0.8 km</span>
-            </div>
-            <HubMap />
-          </section>
         </div>
       </div>
     </div>

@@ -8,6 +8,7 @@
   "scripts": {
     "db:setup": "npm run db:setup -w @ecosure/api",
     "onboard:pilot": "npm run onboard:pilot -w @ecosure/api --",
+    "dev": "node -e \"const { spawn } = require('child_process'); spawn('npm', ['run', 'dev:api'], { stdio: 'inherit', shell: true }); spawn('npm', ['run', 'dev:web'], { stdio: 'inherit', shell: true });\"",
     "dev:api": "npm run dev -w @ecosure/api",
     "dev:web": "npm run dev -w @ecosure/web",
     "build": "npm run build -w @ecosure/web",

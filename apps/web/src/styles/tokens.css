@@ -67,6 +67,7 @@
   --shadow-lg: 0 10px 30px -5px rgba(0, 0, 0, 0.08);
 
   --sidebar-width: 256px;
+  --sidebar-collapsed-width: 72px;
   --content-width: 1280px;
   --focus-ring: 0 0 0 3px rgba(0, 209, 94, 0.25);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);

@@ -8,9 +8,14 @@ import { productsApi } from './products.api.js';
 // ─── constants ────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
-  'Smartphone', 'Laptop', 'Tablet', 'Smartwatch', 'Television',
-  'Refrigerator', 'Washing machine', 'Air conditioner', 'Microwave',
-  'Camera', 'Printer', 'Gaming console', 'Speaker / headphones', 'Other',
+  { code: 'mobile_phone', label: 'Smartphone / Mobile' },
+  { code: 'laptop', label: 'Laptop' },
+  { code: 'tablet', label: 'Tablet / iPad' },
+  { code: 'desktop_cpu', label: 'Desktop Computer (CPU)' },
+  { code: 'monitor_tv', label: 'Television / Monitor' },
+  { code: 'printer', label: 'Printer / Scanner' },
+  { code: 'small_appliance', label: 'Small Appliance (Microwave, AC, Fan)' },
+  { code: 'cables_accessories', label: 'Cables / Gadgets / Other Electronics' },
 ];
 const CONDITIONS = [
   { value: 'working',           label: 'Working' },
@@ -479,7 +484,7 @@ export function AddDeviceModal({ onClose, onSuccess }) {
                       </label>
                       <select id="f-category" className="select" value={form.category} onChange={set('category')} required>
                         <option value="">Select a category…</option>
-                        {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+                        {CATEGORIES.map((c) => <option key={c.code} value={c.code}>{c.label}</option>)}
                       </select>
                     </div>
 

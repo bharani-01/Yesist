@@ -2,6 +2,9 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { EmptyState, LoadingState } from '../components/feedback/AsyncView.jsx';
 import { AppShell } from '../components/layout/AppShell.jsx';
 import { AgentHomePage } from '../features/agent/AgentHomePage.jsx';
+import { AgentRequestsPage } from '../features/agent/AgentRequestsPage.jsx';
+import { AgentPickupsPage } from '../features/agent/AgentPickupsPage.jsx';
+import { AgentLotsPage } from '../features/agent/AgentLotsPage.jsx';
 import { AgentIdCardPage } from '../features/agent/AgentIdCardPage.jsx';
 import { JobDetailPage } from '../features/agent/JobDetailPage.jsx';
 import { HOME_BY_WORKSPACE, useAuth } from '../features/auth/AuthProvider.jsx';
@@ -71,6 +74,9 @@ export const router = createBrowserRouter([
         element: <RequireWorkspace workspace="agent" />,
         children: [
           { path: 'agent', element: <AgentHomePage /> },
+          { path: 'agent/requests', element: <AgentRequestsPage /> },
+          { path: 'agent/pickups', element: <AgentPickupsPage /> },
+          { path: 'agent/lots', element: <AgentLotsPage /> },
           { path: 'agent/jobs/:id', element: <JobDetailPage /> },
           { path: 'agent/id-card', element: <AgentIdCardPage /> },
         ],

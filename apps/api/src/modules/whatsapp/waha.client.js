@@ -1,0 +1,27 @@
+import axios from 'axios';
+
+const WAHA_URL = process.env.WAHA_API_URL || 'http://16.113.27.11:3000';
+const SESSION = process.env.WAHA_SESSION_NAME || 'default';
+// Fallback to unauthenticated if WAHA_API_KEY is not set
+const API_KEY = process.env.WAHA_API_KEY || '';
+
+export const sendWhatsAppMessage = async (phone, text) => {
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (API_KEY) headers['X-Api-Key'] = API_KEY;
+
+    // WAHA expects phone number with country code, no + (e.g. 919876543210)
+    await axios.post(
+      `${WAHA_URL}/api/sendText`,
+      {
+        chatId: `${phone}@c.us`,
+        text: text,
+        session: SESSION,
+      },
+      { headers }
+    );
+    console.log(`[WAHA] Sent message to ${phone}`);
+  } catch (error) {
+    console.error(`[WAHA] Failed to send message to ${phone}:`, error?.response?.data || error.message);
+  }
+};

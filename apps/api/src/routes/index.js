@@ -13,6 +13,7 @@ import { pickupsRoutes } from '../modules/pickups/pickups.routes.js';
 import { producerRoutes } from '../modules/producer/producer.routes.js';
 import { referenceRoutes } from '../modules/reference/reference.routes.js';
 import { verificationRoutes } from '../modules/verification/verification.routes.js';
+import whatsappRoutes from '../modules/whatsapp/whatsapp.routes.js';
 
 /** Versioned API surface (mounted at /api/v1). */
 export function buildApiRouter() {
@@ -22,6 +23,7 @@ export function buildApiRouter() {
   api.use('/health', healthRoutes);
   api.use('/reference', referenceRoutes);
   api.use('/public', verificationRoutes);
+  api.use('/whatsapp', whatsappRoutes);
 
   // Authenticated (authorization is enforced per module)
   api.use('/auth', noStore, authRoutes);

@@ -1,9 +1,10 @@
-import { withTx } from '../../core/db.js';
+import { withTx, queryOne } from '../../core/db.js';
 import { Errors } from '../../core/errors.js';
 import { hashHandoverCode, newHandoverCode } from '../../core/security/hashing.js';
 import { writeAudit } from '../../shared/audit.js';
 import { loadSchemeSettings, recordCustodyEvent } from '../../shared/custody.js';
 import * as repo from './pickups.repository.js';
+import { sendWhatsAppMessage } from '../whatsapp/waha.client.js';
 
 const BOOKING_HORIZON_DAYS = 30;
 const CITIZEN_VISIBLE_DETAIL = ['scheduledFor', 'scheduledWindow', 'netKg', 'expiresAt', 'publicNumber', 'reason'];
@@ -25,10 +26,6 @@ export async function createPickup(input, ctx) {
     throw Errors.conflict('date_out_of_range', `Choose a date between today and ${BOOKING_HORIZON_DAYS} days from now.`);
   }
   return withTx(ctx.userId, async (tx) => {
-    // Removed active pickup restriction to allow multiple bookings for different devices
-    // if (await repo.hasActivePickup(tx, ctx.userId)) {
-    //   throw Errors.conflict('already_active', 'You already have an active pickup request.');
-    // }
     if (!(await repo.wardExists(tx, input.wardId))) throw Errors.conflict('unknown_ward', 'Select a ward from the list.');
     const codes = input.items.map((i) => i.categoryCode);
     if ((await repo.countActiveCategories(tx, codes)) !== codes.length) {
@@ -39,6 +36,13 @@ export async function createPickup(input, ctx) {
     for (const item of input.items) await repo.insertItem(tx, pickup.id, item);
     await recordCustodyEvent(tx, { pickupId: pickup.id, type: 'requested', actorId: ctx.userId });
     await writeAudit(tx, { actor: ctx, action: 'pickup.create', entity: 'pickup', entityId: pickup.id });
+    
+    // WAHA Notification
+    const user = await queryOne(tx, 'select phone from users where id = $1', [ctx.userId]);
+    if (user?.phone) {
+      sendWhatsAppMessage(user.phone, `EcoSure: Your pickup request (Ref: ${pickup.reference}) has been booked for ${input.preferredDate} (${input.preferredWindow}). Thank you for choosing to recycle!`);
+    }
+
     return pickup;
   });
 }
@@ -77,6 +81,12 @@ export async function cancelPickup(id, { reason }, ctx) {
     if (row) {
       await recordCustodyEvent(tx, { pickupId: id, type: 'cancelled', actorId: ctx.userId, detail: { reason } });
       await writeAudit(tx, { actor: ctx, action: 'pickup.cancel', entity: 'pickup', entityId: id });
+      
+      // WAHA Notification
+      const user = await queryOne(tx, 'select phone from users where id = $1', [ctx.userId]);
+      if (user?.phone) {
+        sendWhatsAppMessage(user.phone, `EcoSure: Your pickup request (Ref: ${row.reference}) has been cancelled. Reason: ${reason}`);
+      }
     }
     return row;
   });

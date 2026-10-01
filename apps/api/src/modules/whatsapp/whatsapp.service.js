@@ -1,5 +1,5 @@
 import { Groq } from 'groq-sdk';
-import { db } from '../../core/db.js';
+import { pool as db } from '../../core/db.js';
 import { 
   findUserByPhone, createCitizenUser, findUserDevices, addDevice, schedulePickup, 
   getWhatsAppSettings, getChatHistory, saveChatMessage 

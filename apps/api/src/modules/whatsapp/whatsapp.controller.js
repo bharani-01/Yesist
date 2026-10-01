@@ -1,5 +1,5 @@
 import { processIncomingMessage } from './whatsapp.service.js';
-import { db } from '../../core/db.js';
+import { pool as db } from '../../core/db.js';
 import { getWhatsAppSettings, updateWhatsAppSettings, getChatHistory } from './whatsapp.repository.js';
 import { Errors } from '../../core/errors.js';
 

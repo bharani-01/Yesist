@@ -55,6 +55,8 @@ async function request(method, path, body, { signal, silent401 = false } = {}) {
 export const http = {
   get: (path, opts) => request('GET', path, undefined, opts),
   post: (path, body = {}, opts) => request('POST', path, body, opts),
+  put: (path, body = {}, opts) => request('PUT', path, body, opts),
+  delete: (path, opts) => request('DELETE', path, undefined, opts),
   /** Multipart upload — body must be a FormData instance. */
   upload: async (path, formData) => {
     let res;

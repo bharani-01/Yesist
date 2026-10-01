@@ -115,207 +115,129 @@ export function ReferralPage() {
       <AsyncView query={referralQuery}>
         {() => (
           <div className="referral-container">
-            {/* Top KPI Stat Cards Grid */}
-            <div className="referral-stats-grid">
-              <div className="referral-stat-card">
-                <div className="referral-stat-card__top">
-                  <span className="referral-stat-card__icon-wrap">
-                    <Users size={18} />
-                  </span>
-                  <span className="referral-stat-card__pill">Invited</span>
-                </div>
-                <div className="referral-stat-card__body">
-                  <div className="referral-stat-card__value">
-                    {referral.totalInvites}
-                  </div>
-                  <div className="referral-stat-card__label">Friends Invited</div>
-                </div>
-                <div className="referral-stat-card__sub">
-                  Registered using your link
-                </div>
+            {/* Editorial Performance Metrics Strip */}
+            <section className="referral-metrics-strip" aria-label="Referral Performance">
+              <div className="referral-metric-item">
+                <span className="referral-metric-item__value">{referral.totalInvites}</span>
+                <span className="referral-metric-item__label">Friends Joined</span>
+                <span className="referral-metric-item__sub">Registered via your link</span>
               </div>
 
-              <div className="referral-stat-card">
-                <div className="referral-stat-card__top">
-                  <span className="referral-stat-card__icon-wrap referral-stat-card__icon-wrap--brand">
-                    <CheckCircle2 size={18} />
-                  </span>
-                  <span className="referral-stat-card__pill referral-stat-card__pill--brand">Verified</span>
-                </div>
-                <div className="referral-stat-card__body">
-                  <div className="referral-stat-card__value referral-stat-card__value--brand">
-                    {referral.successfulRecycles}
-                  </div>
-                  <div className="referral-stat-card__label">Verified Pickups</div>
-                </div>
-                <div className="referral-stat-card__sub">
-                  Completed e-waste handovers
-                </div>
+              <div className="referral-metric-item">
+                <span className="referral-metric-item__value referral-metric-item__value--brand">
+                  {referral.successfulRecycles}
+                </span>
+                <span className="referral-metric-item__label">Verified Pickups</span>
+                <span className="referral-metric-item__sub">Completed doorstep collections</span>
               </div>
 
-              <div className="referral-stat-card">
-                <div className="referral-stat-card__top">
-                  <span className="referral-stat-card__icon-wrap referral-stat-card__icon-wrap--brand">
-                    <Gift size={18} />
-                  </span>
-                  <span className="referral-stat-card__pill referral-stat-card__pill--brand">+100 / referral</span>
-                </div>
-                <div className="referral-stat-card__body">
-                  <div className="referral-stat-card__value referral-stat-card__value--brand">
-                    +{referral.pointsEarned.toLocaleString('en-IN')}
-                    <span className="referral-stat-card__unit">pts</span>
-                  </div>
-                  <div className="referral-stat-card__label">Points Earned</div>
-                </div>
-                <div className="referral-stat-card__sub">
-                  Direct referral rewards
-                </div>
+              <div className="referral-metric-item">
+                <span className="referral-metric-item__value referral-metric-item__value--brand">
+                  +{referral.pointsEarned.toLocaleString('en-IN')}
+                  <span style={{ fontSize: '1rem', fontWeight: 600, marginLeft: 3 }}>pts</span>
+                </span>
+                <span className="referral-metric-item__label">Points Earned</span>
+                <span className="referral-metric-item__sub">Direct referral rewards</span>
               </div>
+            </section>
 
-              <div className="referral-stat-card">
-                <div className="referral-stat-card__top">
-                  <span className="referral-stat-card__icon-wrap">
-                    <Award size={18} />
-                  </span>
-                  <span className="referral-stat-card__pill">Available</span>
-                </div>
-                <div className="referral-stat-card__body">
-                  <div className="referral-stat-card__value">
-                    {balance.balance.toLocaleString('en-IN')}
-                    <span className="referral-stat-card__unit">pts</span>
-                  </div>
-                  <div className="referral-stat-card__label">Live Balance</div>
-                </div>
-                <div className="referral-stat-card__sub">
-                  Spendable on vouchers
-                </div>
-              </div>
-            </div>
-
-            {/* Main Interactive Referral Card */}
-            <section className="referral-card-main" aria-label="Referral console">
+            {/* Main Unified Invite Console */}
+            <section className="referral-card-main" aria-label="Invite friends console">
               <header className="referral-card-main__header">
-                <div className="referral-card-main__badge">
-                  <ShieldCheck size={14} />
-                  <span>Eco-Ambassador Program · Dual Reward</span>
-                </div>
+                <span className="referral-card-main__eyebrow">Eco-Ambassador Reward</span>
                 <h2 className="referral-card-main__title">
-                  Invite Friends. Earn +100 Green Points.
+                  Give 100 pts. Get 100 pts.
                 </h2>
                 <p className="referral-card-main__description">
-                  Help friends declutter broken or obsolete gadgets safely through authorized zero-landfill channels. When they complete their first pickup, both of you are rewarded with 100 verified Green Points.
+                  Invite friends to safely recycle electronics through EcoSure doorstep collections. You both receive 100 Green Points once their first pickup is verified.
                 </p>
               </header>
 
-              <div className="referral-interactive-grid">
-                {/* Left Column: Share console */}
+              <div className="referral-interactive-layout">
+                {/* Left: Share Console */}
                 <div className="referral-console">
-                  {/* Unique Code Block */}
-                  <div className="referral-field-group">
-                    <label className="referral-field-label">Your Referral Code</label>
-                    <div className="referral-code-banner">
-                      <div className="referral-code-display">
-                        <span className="referral-code-text">{referralCode}</span>
-                        <span className="referral-code-sub">Unique ambassador ID</span>
-                      </div>
+                  {/* Share Bar */}
+                  <div className="referral-share-hub">
+                    <div className="referral-code-pill">
+                      <span className="referral-code-pill__label">Your Invite Code</span>
+                      <span className="referral-code-pill__value">{referralCode}</span>
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                       <button
                         type="button"
                         onClick={handleCopyCode}
-                        className={`btn ${copiedCode ? 'btn--success' : 'btn--secondary'} btn--sm tap-effect`}
+                        className="btn btn--secondary btn--sm tap-effect"
+                        title="Copy code only"
                       >
                         {copiedCode ? <Check size={14} /> : <Copy size={14} />}
-                        <span>{copiedCode ? 'Code Copied!' : 'Copy Code'}</span>
+                        <span>{copiedCode ? 'Code Copied' : 'Copy Code'}</span>
                       </button>
-                    </div>
-                  </div>
 
-                  {/* Direct Link Block */}
-                  <div className="referral-field-group">
-                    <label className="referral-field-label">Direct Registration Link</label>
-                    <div className="referral-input-action">
-                      <input
-                        type="text"
-                        readOnly
-                        value={shareUrl}
-                        className="referral-text-input"
-                        onClick={(e) => e.target.select()}
-                        aria-label="Direct registration URL"
-                      />
                       <button
                         type="button"
                         onClick={handleCopyLink}
                         className="btn btn--primary btn--sm tap-effect"
+                        style={{ background: '#000000', color: '#FFFFFF', border: '1px solid #000000' }}
                       >
                         {copiedLink ? <Check size={14} /> : <Copy size={14} />}
-                        <span>{copiedLink ? 'Copied!' : 'Copy Link'}</span>
+                        <span>{copiedLink ? 'Link Copied!' : 'Copy Invite Link'}</span>
                       </button>
                     </div>
                   </div>
 
-                  {/* Social & Channel Quick Sharing */}
-                  <div className="referral-field-group">
-                    <label className="referral-field-label">Quick Share</label>
-                    <div className="referral-buttons-row">
-                      <a
-                        href={whatsappUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="btn btn--whatsapp btn--sm tap-effect"
-                      >
-                        <Send size={14} />
-                        <span>Share on WhatsApp</span>
-                      </a>
+                  {/* Channels Bar */}
+                  <div className="referral-channels-bar">
+                    <span className="referral-channels-label">Direct share:</span>
+                    <a
+                      href={whatsappUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn-channel tap-effect"
+                      style={{ background: '#25D366', color: '#FFFFFF', borderColor: '#25D366' }}
+                    >
+                      <Send size={13} />
+                      <span>WhatsApp</span>
+                    </a>
 
-                      <a
-                        href={emailUrl}
-                        className="btn btn--secondary btn--sm tap-effect"
-                      >
-                        <Mail size={14} />
-                        <span>Email Invite</span>
-                      </a>
+                    <a href={emailUrl} className="btn-channel tap-effect">
+                      <Mail size={13} />
+                      <span>Email</span>
+                    </a>
 
-                      {typeof navigator !== 'undefined' && 'share' in navigator && (
-                        <button
-                          type="button"
-                          onClick={handleNativeShare}
-                          className="btn btn--secondary btn--sm tap-effect"
-                        >
-                          {shareSuccess ? <Check size={14} /> : <Share2 size={14} />}
-                          <span>{shareSuccess ? 'Shared!' : 'More Apps'}</span>
-                        </button>
-                      )}
-                    </div>
+                    {typeof navigator !== 'undefined' && 'share' in navigator && (
+                      <button
+                        type="button"
+                        onClick={handleNativeShare}
+                        className="btn-channel tap-effect"
+                      >
+                        {shareSuccess ? <Check size={13} /> : <Share2 size={13} />}
+                        <span>{shareSuccess ? 'Shared!' : 'More'}</span>
+                      </button>
+                    )}
                   </div>
                 </div>
 
-                {/* Right Column: QR Code Station */}
-                <div className="referral-qr-station">
-                  <div className="referral-qr-header">
-                    <QrIcon size={16} />
-                    <span>Instant Camera Scan</span>
-                  </div>
-                  <div className="referral-qr-box">
+                {/* Right: Clean QR Pass */}
+                <div className="referral-qr-pass">
+                  <div style={{ background: '#FFFFFF', padding: 10, borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', display: 'inline-flex' }}>
                     <QrCode
                       value={shareUrl}
                       label={`Scan to register with referral code ${referralCode}`}
-                      size={144}
+                      size={120}
                     />
                   </div>
-                  <p className="referral-qr-hint">
-                    Point any phone camera to register with your code pre-filled automatically.
-                  </p>
+                  <span className="referral-qr-pass__caption">
+                    Scan with phone camera to register
+                  </span>
                 </div>
               </div>
 
-              {/* Bottom Guarantee Banner */}
-              <footer className="referral-card-main__footer">
-                <div className="referral-footer-icon">
-                  <ShieldCheck size={16} />
-                </div>
-                <div className="referral-footer-text">
-                  <strong>CPCB-Aligned Verification:</strong> Points are automatically credited to your wallet the moment our certified collection executive scans and confirms the device handover.
-                </div>
-              </footer>
+              {/* Minimal Trust Footer */}
+              <div className="referral-trust-note">
+                <ShieldCheck size={15} style={{ color: '#1a7f4b', flexShrink: 0 }} />
+                <span>Points credit automatically upon verified device handover at doorstep.</span>
+              </div>
             </section>
           </div>
         )}

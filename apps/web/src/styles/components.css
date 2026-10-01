@@ -403,17 +403,40 @@
   justify-content: space-between;
   cursor: pointer;
   text-decoration: none;
-  transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease;
+  background: #FFFFFF;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, opacity 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.action-card:hover {
+  border-color: var(--color-ink-muted);
+  box-shadow: var(--shadow-md);
+  text-decoration: none;
 }
 .action-card--dark {
   background: #000000;
+  border: 1px solid #000000;
   color: #FFFFFF;
   box-shadow: var(--shadow-sm);
 }
 .action-card--dark:hover {
   background: #1A1A1A;
+  border-color: #1A1A1A;
+  box-shadow: var(--shadow-md);
   color: #FFFFFF;
   text-decoration: none;
+}
+.action-card--dark .action-card__title {
+  color: #FFFFFF;
+}
+.action-card--dark .action-card__sub {
+  color: rgba(255, 255, 255, 0.7);
+}
+.action-card--dark .action-card__icon {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #FFFFFF;
 }
 .action-card--light {
   background: #FFFFFF;
@@ -423,17 +446,19 @@
 }
 .action-card--light:hover {
   border-color: var(--color-ink-muted);
+  box-shadow: var(--shadow-md);
   text-decoration: none;
 }
 .action-card__title {
   font-size: var(--text-lg);
   font-weight: 600;
   line-height: 1.2;
+  color: var(--color-ink);
 }
 .action-card__sub {
   font-size: var(--text-xs);
-  opacity: 0.7;
-  margin-top: 2px;
+  color: var(--color-ink-muted);
+  margin-top: 4px;
 }
 .action-card__icon {
   width: 40px;
@@ -442,12 +467,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-.action-card--dark .action-card__icon {
-  background: rgba(255, 255, 255, 0.15);
+  background: #F4F4F6;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  flex-shrink: 0;
 }
 .action-card--light .action-card__icon {
-  background: rgba(229, 229, 234, 0.4);
+  background: #F4F4F6;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
 }
 
 /* SOTA Nearest Dropoff Widget */

@@ -28,17 +28,7 @@ export function RewardCard({ reward, userBalance = 0, onRedeem, isRedeeming = fa
         <p className="reward-card__desc">{reward.description}</p>
       </div>
 
-      {!canAfford && (
-        <div style={{ marginTop: 'auto', marginBottom: 'var(--space-3)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--color-ink-muted)', marginBottom: 4 }}>
-            <span>Progress ({progressPercent}%)</span>
-            <span>{userBalance} / {reward.pointsCost} pts</span>
-          </div>
-          <div style={{ height: 4, background: 'var(--color-surface-muted)', borderRadius: 2, overflow: 'hidden' }}>
-            <div style={{ width: `${progressPercent}%`, height: '100%', background: '#1a7f4b', borderRadius: 2 }} />
-          </div>
-        </div>
-      )}
+
 
       <div className="reward-card__footer" style={{ marginTop: canAfford ? 'auto' : 0 }}>
         <div className="reward-card__cost">

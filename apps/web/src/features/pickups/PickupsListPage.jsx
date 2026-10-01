@@ -13,40 +13,7 @@ import { pickupsApi } from './pickups.api.js';
 import { rewardsApi } from '../rewards/rewards.api.js';
 import { BalanceWidget } from '../rewards/components/BalanceWidget.jsx';
 
-function DeviceIcon({ categoryCode }) {
-  if (categoryCode === 'laptop' || categoryCode === 'desktop_cpu') {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="18" height="12" x="3" y="4" rx="2" />
-        <line x1="2" x2="22" y1="20" y2="20" />
-      </svg>
-    );
-  }
-  if (categoryCode === 'mobile_phone' || categoryCode === 'tablet') {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="14" height="20" x="5" y="2" rx="2" ry="2" />
-        <path d="M12 18h.01" />
-      </svg>
-    );
-  }
-  if (categoryCode === 'monitor_tv') {
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="20" height="14" x="2" y="3" rx="2" />
-        <line x1="8" x2="16" y1="21" y2="21" />
-        <line x1="12" x2="12" y1="17" y2="21" />
-      </svg>
-    );
-  }
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M7 19H4.815a1.83 1.83 0 0 1-1.57-.881 1.785 1.785 0 0 1-.044-1.771l1.97-3.474a1.812 1.812 0 0 1 1.57-.874H10" />
-      <path d="M11 19h6.185a1.83 1.83 0 0 0 1.57-.881 1.785 1.785 0 0 0 .044-1.771l-1.97-3.474a1.812 1.812 0 0 0-1.57-.874H13" />
-      <path d="M15.5 8 13.53 4.526a1.812 1.812 0 0 0-1.57-.874H8.04a1.83 1.83 0 0 0-1.57.881 1.785 1.785 0 0 0-.044 1.771L8.5 10" />
-    </svg>
-  );
-}
+
 
 export function PickupsListPage() {
   const { user } = useAuth();
@@ -73,17 +40,17 @@ export function PickupsListPage() {
   const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
 
   const bookButton = (
-    <Link to="/pickups/new" className="btn btn--primary tap-effect" style={{ borderRadius: 'var(--radius-pill)', padding: '12px 24px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <Link to="/pickups/new" className="btn-schedule-pill tap-effect">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <line x1="12" y1="5" x2="12" y2="19" />
         <line x1="5" y1="12" x2="19" y2="12" />
       </svg>
-      Schedule Pickup
+      <span>Schedule Pickup</span>
     </Link>
   );
 
   const headerActions = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+    <div className="header-actions-group">
       <BalanceWidget balance={points} rank={rank} />
       {bookButton}
     </div>
@@ -213,7 +180,7 @@ export function PickupsListPage() {
 
           {/* Quick Action Tiles */}
           <div className="action-cards">
-            <Link to="/rewards" className="action-card action-card--dark tap-effect">
+            <Link to="/rewards" className="action-card action-card--light tap-effect">
               <div>
                 <h4 className="action-card__title">Green Points & Rewards</h4>
                 <p className="action-card__sub">{points.toLocaleString('en-IN')} pts · Redeem perks &rarr;</p>
@@ -311,13 +278,11 @@ export function PickupsListPage() {
                 <ul className="products-list">
                   {deviceItems.map((d) => {
                     const srn = d.qrPublicId ? `SRN: ${d.qrPublicId.slice(-4).toUpperCase()}` : 'Manual Entry';
+                    const idOrQr = d.qrPublicId || d.id;
                     return (
-                      <li key={d.qrPublicId ?? d.id}>
-                        <Link to={d.qrPublicId ? `/p/${d.qrPublicId}` : '#'} className="product-item product-item--link tap-effect">
+                      <li key={idOrQr}>
+                        <Link to={`/devices/${idOrQr}`} className="product-item product-item--link tap-effect">
                           <div className="product-item__left">
-                            <div className="product-item__icon">
-                              <DeviceIcon categoryCode={d.categoryCode} />
-                            </div>
                             <div className="product-item__content">
                               <span className="product-item__title">
                                 {d.brand ? `${d.brand} ${d.modelName}` : d.categoryName}

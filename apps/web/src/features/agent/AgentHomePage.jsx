@@ -139,7 +139,7 @@ export function AgentHomePage() {
           <div className="action-cards">
             <Link 
               to="/agent/requests"
-              className="action-card action-card--dark tap-effect"
+              className="action-card action-card--light tap-effect"
             >
               <div>
                 <h4 className="action-card__title">Open Requests</h4>

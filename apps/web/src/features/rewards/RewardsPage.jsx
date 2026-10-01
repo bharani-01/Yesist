@@ -16,28 +16,7 @@ import { RewardCard } from './components/RewardCard.jsx';
 import { RedeemModal } from './components/RedeemModal.jsx';
 import { RewardIcon } from './components/RewardIcon.jsx';
 
-// ── Tier Calculation Helper ──────────────────────────────────────────────────
-
-function getLoyaltyTier(lifetimeEarned = 0) {
-  if (lifetimeEarned >= 5000) {
-    return { name: 'Eco Platinum', tier: 4, nextTarget: null, ptsToNext: 0, progress: 100 };
-  }
-  if (lifetimeEarned >= 1500) {
-    const nextTarget = 5000;
-    const progress = Math.round(((lifetimeEarned - 1500) / (nextTarget - 1500)) * 100);
-    return { name: 'Eco Gold', tier: 3, nextTarget, ptsToNext: nextTarget - lifetimeEarned, progress };
-  }
-  if (lifetimeEarned >= 500) {
-    const nextTarget = 1500;
-    const progress = Math.round(((lifetimeEarned - 500) / (nextTarget - 500)) * 100);
-    return { name: 'Eco Silver', tier: 2, nextTarget, ptsToNext: nextTarget - lifetimeEarned, progress };
-  }
-  const nextTarget = 500;
-  const progress = Math.round((lifetimeEarned / nextTarget) * 100);
-  return { name: 'Eco Starter', tier: 1, nextTarget, ptsToNext: nextTarget - lifetimeEarned, progress };
-}
-
-// ── Main SOTA Rewards Page ───────────────────────────────────────────────────
+// ── Main Rewards Page ────────────────────────────────────────────────────────
 
 export function RewardsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -63,8 +42,6 @@ export function RewardsPage() {
   const stats = statsQuery.data ?? { balance: 0, rank: 1, totalEarned: 0, totalRedeemed: 0 };
   const catalogue = catalogueQuery.data ?? [];
   const redemptions = redemptionsQuery.data ?? [];
-
-  const tier = useMemo(() => getLoyaltyTier(stats.totalEarned), [stats.totalEarned]);
 
   const filteredCatalogue = useMemo(() => {
     if (selectedCategory === 'all') return catalogue;
@@ -133,30 +110,19 @@ export function RewardsPage() {
       <AsyncView query={statsQuery}>
         {() => (
           <div className="stack stack--lg">
-            {/* SOTA Light-Theme Green Points Balance Hero Card */}
+            {/* Green Points Balance Hero Card */}
             <section className="rewards-hero-card" aria-label="Green Points Executive Summary">
               <div className="rewards-hero-card__main">
+                <span className="rewards-hero-card__eyebrow">Available Green Points</span>
                 <div className="rewards-hero-card__balance-wrap">
                   <span className="rewards-hero-card__points">
                     {stats.balance.toLocaleString('en-IN')}
                   </span>
                   <span className="rewards-hero-card__unit">pts</span>
                 </div>
-
-                {/* Tier Progress Bar */}
-                {tier.nextTarget && (
-                  <div className="rewards-tier-progress">
-                    <div className="rewards-tier-progress__meta" style={{ justifyContent: 'flex-end' }}>
-                      <span>{tier.ptsToNext.toLocaleString('en-IN')} pts to next tier</span>
-                    </div>
-                    <div className="rewards-tier-progress__track">
-                      <div
-                        className="rewards-tier-progress__bar"
-                        style={{ width: `${tier.progress}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
+                <p className="rewards-hero-card__sub" style={{ margin: 0, fontSize: 'var(--text-xs)', color: 'var(--color-ink-muted)' }}>
+                  Spendable on verified retail vouchers, platform perks, or certified tree plantations.
+                </p>
               </div>
             </section>
 

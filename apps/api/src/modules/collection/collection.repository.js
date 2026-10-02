@@ -141,3 +141,85 @@ export const insertIncentive = (tx, i) =>
      values ($1,$2,$3,$4,$5,$6,$7)`,
     [i.pickupId, i.payeeId, i.eligibleUnits, i.amount, i.status, i.holdReason, `incentive:${i.pickupId}`],
   );
+
+export const findCustomerByPhone = (tx, phone) =>
+  queryOne(
+    tx,
+    `select u.id, u.full_name as "fullName", u.email, u.phone,
+            coalesce((select balance_after from green_point_ledger where user_id = u.id order by id desc limit 1), 0)::int as "pointsBalance"
+       from users u
+      where u.phone = $1 and u.status = 'active'`,
+    [phone],
+  );
+
+export const createCitizenUser = async (tx, { phone, fullName }) => {
+  const cleanId = String(phone).replace(/[^a-zA-Z0-9]/g, '');
+  const email = `walkin_${cleanId}@ecosure.wa`;
+  const result = await queryOne(tx, 'select app.auth_register_citizen($1, $2, $3, $4) as id', [
+    email,
+    phone,
+    fullName,
+    'walkin_no_password',
+  ]);
+  return result?.id;
+};
+
+export const getOrCreateGuestCitizen = async (tx) => {
+  const email = 'guest_walkin@ecosure.wa';
+  let user = await queryOne(tx, 'select id from users where email = $1', [email]);
+  if (!user) {
+    const reg = await queryOne(tx, 'select app.auth_register_citizen($1, $2, $3, $4) as id', [
+      email,
+      '9999900000',
+      'Walk-in Guest',
+      'guest_no_password',
+    ]);
+    return reg?.id;
+  }
+  return user.id;
+};
+
+export const findAgentPrimaryWard = async (tx, agentOrgId) => {
+  const row = await queryOne(tx, 'select ward_id as "wardId" from agent_service_wards where agent_org_id = $1 limit 1', [agentOrgId]);
+  return row?.wardId ?? 1;
+};
+
+export const findOrgName = async (tx, orgId) => {
+  const row = await queryOne(tx, 'select name from organizations where id = $1', [orgId]);
+  return row?.name ?? 'Collection Partner';
+};
+
+export const insertDirectPickup = (tx, p) =>
+  queryOne(
+    tx,
+    `insert into pickup_requests (
+       requester_id, ward_id, status, preferred_date, preferred_window,
+       assigned_agent_org_id, principal_org_id, scheduled_for, scheduled_window,
+       collected_net_kg, material_paid_amount
+     ) values ($1, $2, 'collected', $3, $4, $5, $6, $3, $4, $7, $8)
+     returning id, reference, status, collected_net_kg as "collectedNetKg", material_paid_amount as "materialPaidAmount", created_at as "createdAt"`,
+    [p.requesterId, p.wardId, p.preferredDate, p.preferredWindow, p.agentOrgId, p.principalOrgId, p.netKg, p.materialPaidAmount],
+  );
+
+export const insertPickupAddress = (tx, pickupId, a) =>
+  tx.query(
+    'insert into pickup_addresses (pickup_id, contact_name, contact_phone, address_line, landmark) values ($1,$2,$3,$4,$5)',
+    [pickupId, a.contactName, a.contactPhone, a.addressLine, a.landmark || null],
+  );
+
+export const insertDirectItem = (tx, pickupId, item) =>
+  queryOne(
+    tx,
+    `insert into pickup_items (pickup_id, category_code, quantity, collected_quantity, battery_check, refused_reason)
+     values ($1, $2, $3, $4, $5, $6)
+     returning id, category_code as "categoryCode", quantity, collected_quantity as "collectedQuantity"`,
+    [pickupId, item.categoryCode, item.quantity, item.collectedQuantity, item.batteryCheck || null, item.refusedReason || null],
+  );
+
+export const listCategoriesByCodes = (tx, codes) =>
+  queryMany(
+    tx,
+    `select code, name, data_bearing as "dataBearing", has_battery as "hasBattery", typical_unit_kg as "typicalUnitKg"
+       from waste_categories where code = any($1)`,
+    [codes],
+  );

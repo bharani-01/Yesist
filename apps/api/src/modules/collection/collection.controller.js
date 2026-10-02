@@ -20,3 +20,15 @@ export async function accept(req, res) {
 export async function collect(req, res) {
   res.json({ result: await service.collectJob(req.valid.params.id, req.valid.body, contextOf(req)) });
 }
+
+export async function lookupCustomer(req, res) {
+  res.json(await service.lookupCustomer(req.valid.query.phone, contextOf(req)));
+}
+
+export async function getRatesAndCategories(req, res) {
+  res.json(await service.getAgentRatesAndCategories(contextOf(req)));
+}
+
+export async function walkInIntake(req, res) {
+  res.json(await service.walkInIntake(req.valid.body, contextOf(req)));
+}

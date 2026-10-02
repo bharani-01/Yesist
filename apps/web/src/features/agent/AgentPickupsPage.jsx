@@ -7,6 +7,7 @@ import { useAsync } from '../../hooks/useAsync.js';
 import { formatDate, formatInr, formatKg, WINDOW_LABELS } from '../../lib/format.js';
 import { PICKUP_STATUS } from '../../lib/status.js';
 import { agentApi } from './agent.api.js';
+import { WalkInIntakeModal } from './components/WalkInIntakeModal.jsx';
 
 function DeviceIcon({ categoryCode }) {
   if (categoryCode === 'laptop' || categoryCode === 'desktop_cpu') {
@@ -48,6 +49,7 @@ const itemsSummary = (items = []) => items.map((i) => `${i.quantity ?? 1} × ${i
 export function AgentPickupsPage() {
   const query = useAsync((s) => agentApi.myJobs(s).then((r) => r.jobs), []);
   const [filter, setFilter] = useState('all');
+  const [showWalkInModal, setShowWalkInModal] = useState(false);
 
   const jobs = query.data ?? [];
   const scheduled = jobs.filter((j) => j.status === 'scheduled');
@@ -61,9 +63,30 @@ export function AgentPickupsPage() {
         title="My Pickups"
         eyebrow="ASSIGNED & COLLECTED E-WASTE"
         actions={
-          <Link to="/agent/requests" className="btn btn--primary tap-effect" style={{ borderRadius: 'var(--radius-pill)', fontWeight: 600 }}>
-            Find Open Requests &rarr;
-          </Link>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+            <button
+              type="button"
+              className="btn btn--primary tap-effect"
+              style={{
+                borderRadius: 'var(--radius-pill)',
+                fontWeight: 600,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+              }}
+              onClick={() => setShowWalkInModal(true)}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Walk-in Intake
+            </button>
+            <Link to="/agent/requests" className="btn btn--secondary tap-effect" style={{ borderRadius: 'var(--radius-pill)', fontWeight: 600 }}>
+              Find Open Requests &rarr;
+            </Link>
+          </div>
         }
       />
 
@@ -170,6 +193,12 @@ export function AgentPickupsPage() {
           </aside>
         )}
       </AsyncView>
+
+      <WalkInIntakeModal
+        isOpen={showWalkInModal}
+        onClose={() => setShowWalkInModal(false)}
+        onSuccess={() => query.reload()}
+      />
     </div>
   );
 }

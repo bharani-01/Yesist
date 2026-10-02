@@ -1,0 +1,242 @@
+/* ═══════════════════════════════════════════════════════════
+   EcoSure Walk-in Intake Modal Styles
+   Matches core EcoSure design system (tokens, radius, fonts)
+   STRICTLY NO EMOJIS
+   ═══════════════════════════════════════════════════════════ */
+
+.walkin-modal {
+  max-width: 680px;
+}
+
+.walkin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.walkin-badge--verified {
+  background: rgba(52, 199, 89, 0.12);
+  color: #1f7a35;
+  border: 1px solid rgba(52, 199, 89, 0.28);
+}
+
+.walkin-badge--new {
+  background: rgba(0, 113, 227, 0.1);
+  color: var(--color-brand);
+  border: 1px solid rgba(0, 113, 227, 0.25);
+}
+
+.walkin-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.walkin-lookup-box {
+  background: var(--color-surface-sunken);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-4);
+  transition: all 0.2s ease;
+}
+
+.walkin-customer-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: rgba(52, 199, 89, 0.08);
+  border: 1px solid rgba(52, 199, 89, 0.22);
+  border-radius: var(--radius-md);
+  margin-top: 10px;
+  animation: walkinFadeIn 0.2s ease-out;
+}
+
+.walkin-item-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+  position: relative;
+  transition: border-color 0.2s ease;
+}
+
+.walkin-item-card:hover {
+  border-color: rgba(0, 113, 227, 0.35);
+}
+
+.walkin-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.walkin-category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 8px;
+  margin-bottom: var(--space-4);
+}
+
+.walkin-cat-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 8px;
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  transition: all 0.15s ease;
+  text-align: center;
+}
+
+.walkin-cat-btn:hover {
+  border-color: var(--color-brand);
+  background: rgba(0, 113, 227, 0.04);
+}
+
+.walkin-cat-btn.is-selected {
+  border-color: var(--color-brand);
+  background: rgba(0, 113, 227, 0.09);
+  color: var(--color-brand);
+  font-weight: 600;
+}
+
+.walkin-triage-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.walkin-triage-pill {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8rem;
+  font-weight: 500;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.walkin-triage-pill:hover {
+  border-color: var(--color-ink-muted);
+}
+
+.walkin-triage-pill.is-active-green {
+  background: rgba(52, 199, 89, 0.12);
+  border-color: #34c759;
+  color: #1f7a35;
+  font-weight: 600;
+}
+
+.walkin-triage-pill.is-active-gray {
+  background: rgba(142, 142, 147, 0.12);
+  border-color: #8e8e93;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.walkin-triage-pill.is-active-danger {
+  background: rgba(255, 59, 48, 0.1);
+  border-color: #ff3b30;
+  color: #d70015;
+  font-weight: 600;
+}
+
+.walkin-rate-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(0, 113, 227, 0.06) 0%, rgba(52, 199, 89, 0.06) 100%);
+  border: 1px solid rgba(0, 113, 227, 0.18);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-top: var(--space-3);
+}
+
+.walkin-receipt-container {
+  background: var(--color-surface);
+  border: 1.5px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-4);
+  position: relative;
+}
+
+.walkin-receipt-header {
+  text-align: center;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.walkin-receipt-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 0.88rem;
+}
+
+.walkin-receipt-total {
+  border-top: 1px solid var(--color-border);
+  margin-top: 8px;
+  padding-top: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.btn-whatsapp-outline {
+  background: #25D366 !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-pill);
+}
+
+.btn-whatsapp-outline:hover {
+  background: #1eb855 !important;
+}
+
+@keyframes walkinFadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .walkin-receipt-container,
+  .walkin-receipt-container * {
+    visibility: visible;
+  }
+  .walkin-receipt-container {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: 1px solid #000;
+  }
+}

@@ -9,6 +9,7 @@ import { formatDate, formatInr, formatKg, WINDOW_LABELS } from '../../lib/format
 import { PICKUP_STATUS } from '../../lib/status.js';
 import { agentApi } from './agent.api.js';
 import { LotsPanel } from './components/LotsPanel.jsx';
+import { WalkInIntakeModal } from './components/WalkInIntakeModal.jsx';
 
 function DeviceIcon({ categoryCode }) {
   if (categoryCode === 'laptop' || categoryCode === 'desktop_cpu') {
@@ -68,18 +69,42 @@ export function AgentHomePage() {
   const greeting = hour < 12 ? 'Good Morning' : hour < 18 ? 'Good Afternoon' : 'Good Evening';
   const displayName = user?.fullName ?? user?.orgs?.[0]?.name ?? 'Collection Partner';
 
-  const idCardButton = (
-    <Link 
-      to="/agent/id-card" 
-      className="btn btn--primary tap-effect" 
-      style={{ borderRadius: 'var(--radius-pill)', padding: '12px 24px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-    >
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect width="20" height="14" x="2" y="5" rx="2" />
-        <line x1="2" x2="22" y1="10" y2="10" />
-      </svg>
-      Show Agent ID Card
-    </Link>
+  const [showWalkInModal, setShowWalkInModal] = useState(false);
+
+  const headerActions = (
+    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+      <button 
+        type="button" 
+        className="btn btn--primary tap-effect" 
+        style={{
+          borderRadius: 'var(--radius-pill)',
+          padding: '12px 20px',
+          fontWeight: 600,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          cursor: 'pointer',
+        }}
+        onClick={() => setShowWalkInModal(true)}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Walk-in Intake
+      </button>
+      <Link 
+        to="/agent/id-card" 
+        className="btn btn--secondary tap-effect" 
+        style={{ borderRadius: 'var(--radius-pill)', padding: '12px 20px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect width="20" height="14" x="2" y="5" rx="2" />
+          <line x1="2" x2="22" y1="10" y2="10" />
+        </svg>
+        Agent ID Card
+      </Link>
+    </div>
   );
 
   return (
@@ -88,7 +113,7 @@ export function AgentHomePage() {
       <PageHeader
         title={displayName}
         eyebrow={greeting}
-        actions={idCardButton}
+        actions={headerActions}
       />
 
       {/* 2-Column Dashboard Grid Matching Citizen Page */}
@@ -171,6 +196,26 @@ export function AgentHomePage() {
                 </svg>
               </div>
             </Link>
+
+            <button
+              type="button"
+              onClick={() => setShowWalkInModal(true)}
+              className="action-card action-card--light tap-effect"
+              style={{ textAlign: 'left', font: 'inherit', cursor: 'pointer' }}
+            >
+              <div>
+                <h4 className="action-card__title">Walk-in Intake</h4>
+                <p className="action-card__sub">Counter drop-off</p>
+              </div>
+              <div className="action-card__icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <line x1="19" y1="8" x2="19" y2="14" />
+                  <line x1="22" y1="11" x2="16" y2="11" />
+                </svg>
+              </div>
+            </button>
           </div>
 
           {/* Active Job / Live Task Widget */}
@@ -302,6 +347,15 @@ export function AgentHomePage() {
           </aside>
         </div>
       </div>
+
+      <WalkInIntakeModal
+        isOpen={showWalkInModal}
+        onClose={() => setShowWalkInModal(false)}
+        onSuccess={() => {
+          mine.reload();
+          open.reload();
+        }}
+      />
     </div>
   );
 }

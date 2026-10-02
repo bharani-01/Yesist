@@ -10,4 +10,7 @@ export const agentApi = {
   destinations: (signal) => http.get('/agent/lots/destinations', { signal }),
   createLot: (body) => http.post('/agent/lots', body),
   dispatchLot: (id, body) => http.post(`/agent/lots/${id}/dispatch`, body),
+  lookupCustomer: (phone, signal) => http.get(`/agent/jobs/customers/lookup?phone=${encodeURIComponent(phone)}`, { signal }),
+  rates: (signal) => http.get('/agent/jobs/rates', { signal }),
+  walkIn: (body) => http.post('/agent/jobs/walk-in', body),
 };

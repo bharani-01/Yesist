@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle, Copy, Check, ShieldCheck } from 'lucide-react';
 import { RewardIcon } from './RewardIcon.jsx';
+import { REWARD_IMAGES } from './RewardCard.jsx';
 
 export function RedeemModal({ reward, userBalance, isOpen, onClose, onConfirm, result, isSubmitting }) {
   const [copied, setCopied] = useState(false);
@@ -19,16 +20,24 @@ export function RedeemModal({ reward, userBalance, isOpen, onClose, onConfirm, r
   };
 
   const balanceAfter = userBalance - reward.pointsCost;
+  const imageUrl = reward.imageUrl || REWARD_IMAGES[reward.key];
 
   return (
     <div className="modal-backdrop" onClick={onClose} role="dialog" aria-modal="true">
       <div className="modal-dialog redeem-modal" onClick={(e) => e.stopPropagation()}>
         {!result ? (
           <>
-            <div className="redeem-modal__header">
-              <div className="redeem-modal__icon">
-                <RewardIcon name={reward.key || reward.iconEmoji} size={28} />
+            {imageUrl && (
+              <div className="redeem-modal__media">
+                <img src={imageUrl} alt={reward.label} className="redeem-modal__img" />
               </div>
+            )}
+            <div className="redeem-modal__header">
+              {!imageUrl && (
+                <div className="redeem-modal__icon">
+                  <RewardIcon name={reward.key || reward.iconEmoji} size={28} />
+                </div>
+              )}
               <h3 className="redeem-modal__title">Redeem {reward.label}?</h3>
               <p className="redeem-modal__desc">{reward.description}</p>
             </div>
@@ -85,9 +94,18 @@ export function RedeemModal({ reward, userBalance, isOpen, onClose, onConfirm, r
           </>
         ) : (
           <div className="redeem-modal__success">
-            <div className="redeem-success-icon" style={{ color: '#1a7f4b', background: '#e8f5e9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <CheckCircle size={32} />
-            </div>
+            {imageUrl ? (
+              <div className="redeem-success-thumb">
+                <img src={imageUrl} alt="" className="redeem-success-img" />
+                <div className="redeem-success-check-badge">
+                  <CheckCircle size={20} />
+                </div>
+              </div>
+            ) : (
+              <div className="redeem-success-icon" style={{ color: '#1a7f4b', background: '#e8f5e9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <CheckCircle size={32} />
+              </div>
+            )}
             <h3 className="redeem-modal__title">Redemption Successful</h3>
             <p className="redeem-modal__desc">
               You redeemed <strong>{reward.label}</strong> for {reward.pointsCost.toLocaleString('en-IN')} Green Points.

@@ -12,7 +12,7 @@ import { PageHeader } from '../../components/ui/PageHeader.jsx';
 import { useAsync } from '../../hooks/useAsync.js';
 import { formatDate } from '../../lib/format.js';
 import { rewardsApi } from './rewards.api.js';
-import { RewardCard } from './components/RewardCard.jsx';
+import { RewardCard, REWARD_IMAGES } from './components/RewardCard.jsx';
 import { RedeemModal } from './components/RedeemModal.jsx';
 import { RewardIcon } from './components/RewardIcon.jsx';
 
@@ -289,8 +289,12 @@ export function RewardsPage() {
                   <div className="my-vouchers-grid">
                     {redemptions.map((r) => (
                       <div key={r.id} className="voucher-ticket">
-                        <div className="voucher-ticket__icon" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <RewardIcon name={r.rewardKey || r.iconEmoji} size={24} />
+                        <div className="voucher-ticket__thumb">
+                          {REWARD_IMAGES[r.rewardKey] ? (
+                            <img src={REWARD_IMAGES[r.rewardKey]} alt="" className="voucher-ticket__img" />
+                          ) : (
+                            <RewardIcon name={r.rewardKey || r.iconEmoji} size={24} />
+                          )}
                         </div>
                         <div className="voucher-ticket__info">
                           <h4 className="voucher-ticket__title">{r.rewardLabel}</h4>

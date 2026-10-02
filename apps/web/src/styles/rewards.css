@@ -304,30 +304,75 @@
 .reward-card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  position: relative;
 }
 
 .reward-card:hover {
-  transform: translateY(-2px);
+  transform: translateY(-3px);
   border-color: var(--color-border-strong);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
 }
 
 .reward-card--locked {
   opacity: 0.85;
 }
 
+.reward-card__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--color-surface-muted);
+  overflow: hidden;
+}
+
+.reward-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.reward-card:hover .reward-card__img {
+  transform: scale(1.05);
+}
+
+.reward-card__media-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 45%, rgba(0, 0, 0, 0.2) 100%);
+  pointer-events: none;
+}
+
+.reward-card__tag-float {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 2;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.8);
+  color: #FFFFFF !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
 .reward-card__top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--space-4);
+  padding: var(--space-4) var(--space-4) 0;
 }
 
 .reward-card__icon-badge {
@@ -365,7 +410,10 @@
 }
 
 .reward-card__body {
-  margin-bottom: var(--space-5);
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .reward-card__title {
@@ -381,14 +429,19 @@
   color: var(--color-ink-muted);
   margin: 0;
   line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .reward-card__footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: var(--space-4);
+  padding: var(--space-3) var(--space-4) var(--space-4);
   border-top: 1px solid var(--color-border-subtle);
+  margin-top: auto;
 }
 
 .reward-card__cost {
@@ -447,6 +500,26 @@
   border-radius: var(--radius-md);
   background: var(--color-brand-weak);
   flex-shrink: 0;
+}
+
+.voucher-ticket__thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-surface-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border-subtle);
+}
+
+.voucher-ticket__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .voucher-ticket__info {
@@ -855,6 +928,22 @@
   }
 }
 
+.redeem-modal__media {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: var(--space-4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.redeem-modal__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .redeem-modal__header {
   text-align: center;
   margin-bottom: var(--space-5);
@@ -914,6 +1003,38 @@
 
 .redeem-modal__success {
   text-align: center;
+}
+
+.redeem-success-thumb {
+  position: relative;
+  width: 140px;
+  aspect-ratio: 16 / 9;
+  margin: 0 auto var(--space-3);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+}
+
+.redeem-success-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.redeem-success-check-badge {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #1a7f4b;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #FFFFFF;
 }
 
 .redeem-success-icon {

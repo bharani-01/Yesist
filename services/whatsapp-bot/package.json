@@ -1,0 +1,17 @@
+{
+  "name": "ecosure-whatsapp-bot",
+  "version": "1.0.0",
+  "description": "Standalone EcoSure WhatsApp AI Webhook Service for WAHA",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "groq-sdk": "^0.15.0",
+    "pg": "^8.13.1"
+  }
+}

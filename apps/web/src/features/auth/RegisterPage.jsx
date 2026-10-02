@@ -53,7 +53,7 @@ export function RegisterPage() {
           hint={form.referralCode ? 'Bonus points will be unlocked on your first completed pickup!' : 'Have a friend’s invite code? Enter it here to earn bonus points.'}
         />
         <Button type="submit" block loading={pending}>Create account</Button>
-        <p className="subtle">We never ask for Aadhaar. Your address is shared only with the collector who accepts your pickup.</p>
+        <p className="subtle">We never ask for Aadhaar. Your address is shared only with the Kabadi Wala who accepts your pickup.</p>
       </form>
     </AuthLayout>
   );

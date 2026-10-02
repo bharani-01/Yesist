@@ -39,7 +39,7 @@ function PickupDetail({ pickup, onChange }) {
       <div className="split">
         <div className="stack">
           {pickup.status === 'requested' && (
-            <Alert tone="info">Waiting for a collector in {pickup.wardName} to accept. You’ll see their name and time here.</Alert>
+            <Alert tone="info">Waiting for a local Kabadi Wala in {pickup.wardName} to accept. You’ll see their name and time here.</Alert>
           )}
           {pickup.status === 'cancelled' && <Alert tone="warning" title="Cancelled">{pickup.cancelReason}</Alert>}
           {pickup.attestation && (
@@ -95,7 +95,7 @@ function PickupDetail({ pickup, onChange }) {
 
           <Panel title="Details">
             <dl className="dl">
-              <dt>Collector</dt><dd>{pickup.agentName ?? 'Not assigned yet'}</dd>
+              <dt>Kabadi Wala</dt><dd>{pickup.agentName ?? 'Not assigned yet'}</dd>
               <dt>Recycler</dt><dd>{pickup.recyclerName ?? '—'}</dd>
               <dt>{pickup.scheduledFor ? 'Scheduled' : 'Preferred'}</dt>
               <dd>{formatDate(pickup.scheduledFor ?? pickup.preferredDate)} · {WINDOW_LABELS[pickup.scheduledWindow ?? pickup.preferredWindow]}</dd>

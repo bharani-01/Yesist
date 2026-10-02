@@ -31,8 +31,8 @@ export function VerifyAgentPage() {
       <div className="page">
         <PageHeader title="Verification Failed" />
         <ErrorState 
-          title="Agent Not Found" 
-          text="We could not verify this collection agent. Please ensure you scanned the correct QR code."
+          title="Kabadi Wala Not Found" 
+          text="We could not verify this Local Kabadi Wala. Please ensure you scanned the correct QR code."
         />
         <div style={{ marginTop: '2rem', textAlign: 'center' }}>
           <Link to="/" className="btn btn--primary">Return Home</Link>
@@ -57,8 +57,8 @@ export function VerifyAgentPage() {
         }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check"><path d="M20 6 9 17l-5-5"/></svg>
         </div>
-        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a', margin: '0' }}>Verified Collector</h1>
-        <p style={{ color: '#64748b', marginTop: '0.5rem', fontSize: '0.875rem' }}>This person is authorized to collect e-waste on behalf of EcoSure.</p>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#16a34a', margin: '0' }}>Verified Kabadi Wala</h1>
+        <p style={{ color: '#64748b', marginTop: '0.5rem', fontSize: '0.875rem' }}>This person is an authorized Local Kabadi Wala on EcoSure.</p>
       </div>
 
       <Panel>
@@ -69,7 +69,7 @@ export function VerifyAgentPage() {
           </div>
 
           <div>
-            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>Agent Name</div>
+            <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: '#64748b', fontWeight: 600, letterSpacing: '0.05em' }}>Kabadi Wala Name</div>
             <div style={{ fontSize: '1.125rem', fontWeight: 600, color: '#0f172a', marginTop: '0.25rem' }}>{agent.fullName}</div>
           </div>
         </div>

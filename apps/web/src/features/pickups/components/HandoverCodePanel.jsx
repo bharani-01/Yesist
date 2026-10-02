@@ -35,7 +35,7 @@ export function HandoverCodePanel({ pickupId, lastExpiresAt, onIssued }) {
           </>
         ) : (
           <p className="muted" style={{ fontSize: 'var(--text-sm)' }}>
-            Generate the code when the collector is at your door. It confirms the handover and makes your incentive eligible.
+            Generate the code when the Kabadi Wala is at your door. It confirms the handover and makes your incentive eligible.
             {lastExpiresAt && <> A code was generated earlier (valid until {formatDateTime(lastExpiresAt)}); a new one replaces it.</>}
           </p>
         )}

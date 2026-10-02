@@ -132,7 +132,7 @@ export function AgentHomePage() {
                 to="/agent/lots" 
                 className="hero-impact-card__link tap-effect"
               >
-                <span>Manage sealed lots</span>
+                <span>Packed Bags &amp; Dispatches</span>
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                   <path d="M5 12h14" />
                   <path d="m12 5 7 7-7 7" />
@@ -272,9 +272,9 @@ export function AgentHomePage() {
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
               <div>
-                <h3 style={{ fontSize: 'var(--text-md)', margin: 0, color: 'var(--color-ink)' }}>Sealed Lots & Dispatches</h3>
+                <h3 style={{ fontSize: 'var(--text-md)', margin: 0, color: 'var(--color-ink)' }}>Packed Bags &amp; Dispatches</h3>
                 <p style={{ margin: 0, fontSize: 'var(--text-sm)', color: 'var(--color-ink-subtle)' }}>
-                  {collectedJobs.length > 0 ? `${collectedJobs.length} collected pickups ready to seal` : 'View and track all consolidated lots'}
+                  {collectedJobs.length > 0 ? `${collectedJobs.length} collected pickups ready to pack &amp; dispatch` : 'View and track all packed bags &amp; dispatches'}
                 </p>
               </div>
             </div>

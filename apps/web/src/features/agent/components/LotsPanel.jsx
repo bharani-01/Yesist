@@ -11,31 +11,36 @@ import { formatDate, formatDateTime, formatKg, relativeFromNow } from '../../../
 import { LOT_STATUS } from '../../../lib/status.js';
 import { agentApi } from '../agent.api.js';
 
+function generateBagTag() {
+  const rand = Math.random().toString(36).substring(2, 6).toUpperCase();
+  return `BAG-${rand}`;
+}
+
 export function LotsPanel({ collectedJobs, onChanged }) {
   const lots = useAsync((s) => agentApi.lots(s).then((r) => r.lots), []);
   const destinations = useAsync((s) => agentApi.destinations(s), []);
   const hubs = destinations.data?.hubs ?? [];
   const [notice, setNotice] = useState(null);
   const onCreated = (lot) => {
-    setNotice(<>Lot <span className="mono">{lot.sealTag}</span> sealed. Dispatch it below once it is weighed.</>);
+    setNotice(<>Bag <span className="mono">{lot.sealTag}</span> packed &amp; sealed. Dispatch it below once it is weighed.</>);
     lots.refresh();
     onChanged();
   };
   const onDispatched = (lot, hub) => {
-    setNotice(<>Lot <span className="mono">{lot.sealTag}</span> dispatched{hub ? ` to ${hub.name}` : ''}. {hub ? 'The hub' : 'Your recycler'} will confirm the seal and weight on arrival.</>);
+    setNotice(<>Bag <span className="mono">{lot.sealTag}</span> dispatched{hub ? ` to ${hub.name}` : ''}. {hub ? 'The hub' : 'Your recycler'} will confirm on arrival.</>);
     lots.refresh();
   };
   return (
     <div className="stack">
       {notice && <Alert tone="success">{notice}</Alert>}
       <CreateLotForm jobs={collectedJobs} onCreated={onCreated} />
-      <Panel title="Your lots" flush>
-        <AsyncView query={lots} isEmpty={(d) => !d.length} empty={<EmptyState title="No lots yet" text="Seal collected pickups into a lot with a numbered tamper-evident tag, then dispatch it to your recycler." />}>
+      <Panel title="Your Packed Bags &amp; Dispatches" flush>
+        <AsyncView query={lots} isEmpty={(d) => !d.length} empty={<EmptyState title="No packed bags yet" text="Pack collected pickups into a bag or box with a tag number, then dispatch it to your recycler." />}>
           {(rows) => (
             <div className="table-wrap">
               <table className="table">
                 <thead>
-                  <tr><th>Seal tag</th><th>Status</th><th>Destination</th><th className="num">Pickups</th><th className="num">Units</th><th className="num">Sent</th><th>Deadline or attestation</th><th /></tr>
+                  <tr><th>Bag Tag</th><th>Status</th><th>Destination</th><th className="num">Pickups</th><th className="num">Units</th><th className="num">Sent</th><th>Deadline or attestation</th><th /></tr>
                 </thead>
                 <tbody>
                   {rows.map((l) => (
@@ -66,7 +71,7 @@ export function LotsPanel({ collectedJobs, onChanged }) {
 
 function CreateLotForm({ jobs, onCreated }) {
   const [selected, setSelected] = useState(() => new Set());
-  const [sealTag, setSealTag] = useState('');
+  const [sealTag, setSealTag] = useState(() => generateBagTag());
   const [pending, setPending] = useState(false);
   const [error, setError] = useState(null);
 
@@ -83,9 +88,14 @@ function CreateLotForm({ jobs, onCreated }) {
     setPending(true);
     setError(null);
     try {
-      const { lot } = await agentApi.createLot({ sealTag, pickupIds: [...selected] });
+      let cleanTag = (sealTag || generateBagTag()).trim().toUpperCase().replace(/[^A-Z0-9-]/g, '-');
+      // If user typed a short number/tag (e.g. "1" or "BAG1"), pad to BAG-001 so DB constraint (>= 6 chars) passes
+      if (cleanTag.length < 6) {
+        cleanTag = `BAG-${cleanTag.replace(/^BAG-?/i, '').padStart(3, '0')}`;
+      }
+      const { lot } = await agentApi.createLot({ sealTag: cleanTag, pickupIds: [...selected] });
       setSelected(new Set());
-      setSealTag('');
+      setSealTag(generateBagTag());
       onCreated(lot);
     } catch (err) {
       setError(err);
@@ -95,10 +105,10 @@ function CreateLotForm({ jobs, onCreated }) {
   };
 
   return (
-    <Panel title="Seal a new lot">
+    <Panel title="Pack &amp; Seal a Bag / Lot">
       <form className="form-grid" onSubmit={submit}>
         <fieldset className="stack stack--sm" style={{ border: 0, padding: 0, margin: 0 }}>
-          <legend className="field__label" style={{ marginBottom: 6 }}>Collected pickups ({jobs.length})</legend>
+          <legend className="field__label" style={{ marginBottom: 6 }}>Collected pickups to pack ({jobs.length})</legend>
           {jobs.map((j) => (
             <label key={j.id} className="checkbox">
               <input type="checkbox" checked={selected.has(j.id)} onChange={() => toggle(j.id)} />
@@ -106,10 +116,34 @@ function CreateLotForm({ jobs, onCreated }) {
             </label>
           ))}
         </fieldset>
-        <TextField label="Seal tag number" value={sealTag} onChange={(e) => setSealTag(e.target.value.toUpperCase())} hint="As printed on the tamper-evident tag (6–30 letters, digits, dashes)" />
+        
+        <div className="field">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+            <label className="field__label" style={{ margin: 0 }}>Bag / Box Tag Number</label>
+            <button 
+              type="button" 
+              onClick={() => setSealTag(generateBagTag())}
+              className="btn btn--ghost btn--sm tap-effect" 
+              style={{ fontSize: '12px', height: '28px', padding: '0 8px', color: 'var(--color-primary, #16a34a)', fontWeight: 600 }}
+            >
+              Generate New Tag
+            </button>
+          </div>
+          <input 
+            type="text" 
+            className="input mono" 
+            value={sealTag} 
+            onChange={(e) => setSealTag(e.target.value.toUpperCase())} 
+            placeholder="e.g. BAG-01 or use generated tag"
+          />
+          <span className="field__hint">
+            Tag or marker number written on your bag/box (auto-generated for you, or type your own marker).
+          </span>
+        </div>
+
         <ErrorAlert error={error} />
         <div className="form-actions">
-          <Button type="submit" loading={pending} disabled={!selected.size || sealTag.trim().length < 6}>Seal lot ({selected.size})</Button>
+          <Button type="submit" loading={pending} disabled={!selected.size || !sealTag.trim()}>Pack &amp; Seal Bag ({selected.size})</Button>
         </div>
       </form>
     </Panel>

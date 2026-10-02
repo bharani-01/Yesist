@@ -143,8 +143,8 @@ const NAV = {
     { to: '/agent', label: 'Dashboard', icon: 'dashboard', end: true },
     { to: '/agent/requests', label: 'Open Requests', icon: 'requests' },
     { to: '/agent/pickups', label: 'My Pickups', icon: 'shipments' },
-    { to: '/agent/lots', label: 'Sealed Lots', icon: 'lots' },
-    { to: '/agent/id-card', label: 'Agent ID Card', icon: 'id-card' },
+    { to: '/agent/lots', label: 'Packed Bags', icon: 'lots' },
+    { to: '/agent/id-card', label: 'Kabadi Wala ID', icon: 'id-card' },
   ],
   recycler: [
     { to: '/recycler', label: 'Inbound Lots', icon: 'lots', end: true },

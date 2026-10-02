@@ -365,7 +365,7 @@ function Wizard({ refData, devices, pickups = [] }) {
         {step === 3 && (
           <div className="wizard-panel fade-in">
             <h2 className="wizard-title">Schedule &amp; Contact</h2>
-            <p className="wizard-desc">When should the collector arrive, and who should they contact?</p>
+            <p className="wizard-desc">When should the Kabadi Wala arrive, and who should they contact?</p>
             <div className="form-grid">
               <TextField 
                 label="Preferred date" 
@@ -460,7 +460,7 @@ function Wizard({ refData, devices, pickups = [] }) {
                 value={form.addressLine} 
                 onChange={set('addressLine')} 
                 error={fieldErrors.addressLine} 
-                hint="Make sure the collector can find your exact door" 
+                hint="Make sure the Kabadi Wala can find your exact door" 
               />
               <TextField 
                 label="Landmark & additional instructions (optional)" 
@@ -504,10 +504,10 @@ function Wizard({ refData, devices, pickups = [] }) {
               </div>
               <h3 style={{ margin: '0 0 var(--space-2) 0', fontSize: 'var(--text-md)', color: 'var(--color-ink)' }}>Handover Instructions</h3>
               <ul style={{ margin: 0, paddingLeft: 'var(--space-4)', color: 'var(--color-ink-subtle)', fontSize: 'var(--text-sm)', lineHeight: 1.6 }}>
-                <li>A verified EcoSure collector will arrive at your location.</li>
+                <li>A verified EcoSure Kabadi Wala will arrive at your location.</li>
                 <li>They will verify the device condition you reported.</li>
                 <li>Please ensure the device is wiped of any personal data.</li>
-                <li>You will receive the payment directly from the collector.</li>
+                <li>You will receive the payment directly from the Kabadi Wala.</li>
               </ul>
             </div>
 

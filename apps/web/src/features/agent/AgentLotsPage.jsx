@@ -12,8 +12,8 @@ export function AgentLotsPage() {
   return (
     <div className="page">
       <PageHeader
-        title="Sealed Lots & Dispatches"
-        eyebrow="AGGREGATE & DISPATCH TO RECYCLER"
+        title="Packed Bags & Dispatches"
+        eyebrow="PACK & DISPATCH TO RECYCLER"
         actions={
           <Link to="/agent/pickups" className="btn btn--secondary tap-effect" style={{ borderRadius: 'var(--radius-pill)', fontWeight: 600 }}>
             &larr; View My Pickups

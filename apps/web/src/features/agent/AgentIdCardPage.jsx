@@ -79,7 +79,7 @@ export function AgentIdCardPage() {
                   {user.fullName.charAt(0).toUpperCase()}
                 </div>
                 <div className="agent-details">
-                  <div className="agent-label">COLLECTOR AGENT</div>
+                  <div className="agent-label">LOCAL KABADI WALA</div>
                   <div className="agent-name">{user.fullName}</div>
                   <div className="agent-role">Official EcoSure Representative</div>
                 </div>
@@ -105,7 +105,7 @@ export function AgentIdCardPage() {
                     <div className="grid-icon"><ShieldCheck size={14} strokeWidth={2.5} /></div>
                     <div className="grid-text-wrap">
                       <div className="grid-label">STATUS</div>
-                      <div className="grid-value">Authorized Agent</div>
+                      <div className="grid-value">Authorized Kabadi Wala</div>
                     </div>
                   </div>
                 </div>
@@ -125,7 +125,7 @@ export function AgentIdCardPage() {
               <div className="card-footer">
                 <LeafLogoSvg className="footer-icon" />
                 <div className="footer-text">
-                  This digital ID verifies that the bearer is an authorized collection agent for the EcoSure e-waste recycling program.
+                  This digital ID verifies that the bearer is an authorized Local Kabadi Wala for the EcoSure e-waste recycling program.
                 </div>
               </div>
             </div>
@@ -138,7 +138,7 @@ export function AgentIdCardPage() {
                 <LeafLogoSvg className="logo-icon" />
                 <div className="logo-text">
                   <span className="logo-title">EcoSure</span>
-                  <span className="logo-subtitle">Collection Agent</span>
+                  <span className="logo-subtitle">Local Kabadi Wala</span>
                 </div>
               </div>
               <div className="back-header-badge">

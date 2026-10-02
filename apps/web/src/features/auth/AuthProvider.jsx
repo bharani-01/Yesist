@@ -15,7 +15,7 @@ export const HOME_BY_WORKSPACE = {
 
 export const WORKSPACE_LABELS = {
   citizen: 'Citizen',
-  agent: 'Collection agent',
+  agent: 'Local Kabadi Wala',
   recycler: 'Recycler',
   hub: 'Regional hub',
   producer: 'Manufacturer',

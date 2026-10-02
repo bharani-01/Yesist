@@ -27,7 +27,7 @@ function getRoleMeta(account) {
   if (email.includes('shop') || email.includes('agent')) {
     return {
       icon: <Truck size={15} strokeWidth={2} />,
-      badge: 'Agent',
+      badge: 'Kabadi Wala',
       color: '#d97706',
       bg: 'rgba(217, 119, 6, 0.08)',
     };
@@ -68,7 +68,7 @@ const DEFAULT_DEMO = {
   password: 'Password123!',
   accounts: [
     { email: 'citizen@ecosure.test', workspace: 'citizen', label: 'Citizen' },
-    { email: 'shop@ecosure.test', workspace: 'agent', label: 'Collection agent' },
+    { email: 'shop@ecosure.test', workspace: 'agent', label: 'Local Kabadi Wala' },
     { email: 'recycler.maker@ecosure.test', workspace: 'recycler', label: 'Recycler' },
     { email: 'hub@ecosure.test', workspace: 'hub', label: 'Regional hub' },
     { email: 'producer.owner@ecosure.test', workspace: 'producer', label: 'Manufacturer' },

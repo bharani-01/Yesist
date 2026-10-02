@@ -41,14 +41,16 @@ const tools = [
     type: 'function',
     function: {
       name: 'schedulePickup',
-      description: 'Schedule a pickup for the e-waste. Ask the user for the preferred date (YYYY-MM-DD) and window (morning/afternoon/evening).',
+      description: 'Schedule a doorstep pickup for e-waste. You MUST ask the user for preferred date, time window, and full pickup address before calling this tool.',
       parameters: {
         type: 'object',
         properties: {
-          preferredDate: { type: 'string', description: 'Date in YYYY-MM-DD format' },
-          preferredWindow: { type: 'string', enum: ['morning', 'afternoon', 'evening'] }
+          preferredDate: { type: 'string', description: 'Date in YYYY-MM-DD format (e.g., 2026-10-05 or tomorrow\'s date)' },
+          preferredWindow: { type: 'string', enum: ['morning', 'afternoon', 'evening'], description: 'Time window: morning (9am-12pm), afternoon (12pm-4pm), evening (4pm-7pm)' },
+          address: { type: 'string', description: 'Full doorstep pickup address including house/flat no., street, and area' },
+          items: { type: 'string', description: 'Devices or items to collect (e.g. laptop, smartphone, TV)' }
         },
-        required: ['preferredDate', 'preferredWindow'],
+        required: ['preferredDate', 'preferredWindow', 'address'],
       },
     },
   }
@@ -75,7 +77,7 @@ WHATSAPP FORMATTING RULES (STRICT):
 2. Use clean WhatsApp formatting:
    - *Bold* for important labels, categories, dates, and actions.
    - _Italics_ for examples, hints, and notes.
-   - Clean bullet points (•) and emojis (📱, 💻, 🏷️, ⚙️, 📅, ⏰, 📦, ✅).
+   - Clean bullet points (•) and emojis (📱, 💻, 🏷️, ⚙️, 📅, ⏰, 📦, 📍, ✅).
    - Use double line breaks between sections for high readability.
 3. When asking the user for device details to add, ALWAYS format cleanly like:
    📱 *Category:* (e.g. Smartphone, Laptop, TV)
@@ -83,9 +85,14 @@ WHATSAPP FORMATTING RULES (STRICT):
    ⚙️ *Condition:* (Working, Partially Working, or Not Working)
 
    _Example: "Dell laptop, working"_
-4. When scheduling a pickup, format cleanly like:
-   📅 *Preferred Date:* (YYYY-MM-DD or e.g. Tomorrow)
-   ⏰ *Time Window:* (Morning, Afternoon, Evening)
+4. When scheduling a pickup:
+   You MUST ask the user for all of the following details before booking:
+   📅 *Preferred Date:* (e.g. 2026-10-04 or Tomorrow)
+   ⏰ *Time Window:* (Morning 9–12, Afternoon 12–4, or Evening 4–7)
+   📍 *Pickup Address:* (House/Flat no., Street, Area, Indore)
+   📦 *Items to Collect:* (Devices to collect)
+
+   If any of Date, Window, or Address is missing, ask for the missing details before calling schedulePickup!
 5. NEVER repeat yourself. Never add filler like "I'll be here when you're ready" or restate the same question.`
 };
 
@@ -211,8 +218,13 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
             if (devices.length === 0) functionResult = "The user has no devices added yet.";
             else functionResult = `User devices: ${JSON.stringify(devices.map(d => ({ category: d.category, brand: d.brand, condition: d.condition })))}`;
           } else if (functionName === 'schedulePickup') {
-            const ref = await withTx(user.id, tx => schedulePickup(tx, { userId: user.id, ...args }));
-            functionResult = `Pickup scheduled successfully. Booking Reference: ${ref}. Preferred Date: ${args.preferredDate}, Window: ${args.preferredWindow}`;
+            const ref = await withTx(user.id, tx => schedulePickup(tx, { 
+              userId: user.id, 
+              ...args,
+              contactName: user.fullName,
+              contactPhone: user.phone || phone,
+            }));
+            functionResult = `Pickup scheduled successfully. Booking Reference: ${ref}. Preferred Date: ${args.preferredDate}, Window: ${args.preferredWindow}, Address: ${args.address}`;
           }
         } catch (dbErr) {
           console.error(`Tool execution error [${functionName}]:`, dbErr);

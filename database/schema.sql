@@ -309,7 +309,7 @@ create index if not exists pickup_requests_lot_idx on pickup_requests (lot_id);
 create table if not exists pickup_addresses (
   pickup_id      uuid primary key references pickup_requests(id) on delete cascade,
   contact_name   text not null check (length(contact_name) between 2 and 120),
-  contact_phone  text not null check (contact_phone ~ '^[6-9][0-9]{9}$'),
+  contact_phone  text not null check (contact_phone ~ '^[0-9]{10,16}$'),
   address_line   text not null check (length(address_line) between 5 and 300),
   landmark       text check (landmark is null or length(landmark) <= 160)
 );

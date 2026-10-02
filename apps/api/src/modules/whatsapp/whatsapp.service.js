@@ -1,5 +1,5 @@
 import { Groq } from 'groq-sdk';
-import { pool as db } from '../../core/db.js';
+import { pool as db, withTx } from '../../core/db.js';
 import { 
   findUserByPhone, createCitizenUser, findUserDevices, addDevice, schedulePickup, 
   getWhatsAppSettings, getChatHistory, saveChatMessage 
@@ -135,7 +135,7 @@ export const processIncomingMessage = async (phone, text) => {
 
   try {
     const response = await groq.chat.completions.create({
-      model: process.env.GROQ_MODEL || 'llama3-70b-8192',
+      model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
       messages: history,
       tools: tools,
       tool_choice: 'auto',
@@ -162,14 +162,14 @@ export const processIncomingMessage = async (phone, text) => {
 
         try {
           if (functionName === 'addDevice') {
-            const id = await addDevice(db, { userId: user.id, ...args });
+            const id = await withTx(user.id, tx => addDevice(tx, { userId: user.id, ...args }));
             functionResult = `Device added successfully. DB ID: ${id}`;
           } else if (functionName === 'viewDevices') {
-            const devices = await findUserDevices(db, user.id);
+            const devices = await withTx(user.id, tx => findUserDevices(tx, user.id));
             if (devices.length === 0) functionResult = "The user has no devices.";
             else functionResult = `User devices: ${JSON.stringify(devices)}`;
           } else if (functionName === 'schedulePickup') {
-            const ref = await schedulePickup(db, { userId: user.id, ...args });
+            const ref = await withTx(user.id, tx => schedulePickup(tx, { userId: user.id, ...args }));
             functionResult = `Pickup scheduled successfully. Booking Reference: ${ref}`;
           }
         } catch (dbErr) {

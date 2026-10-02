@@ -1,7 +1,7 @@
 import { queryOne, queryMany } from '../../core/db.js';
 
 export const findUserByPhone = (tx, phone) =>
-  queryOne(tx, 'select id, full_name as "fullName", email, phone from users where phone = $1', [phone]);
+  queryOne(tx, 'select id, full_name as "fullName", email, phone from app.auth_lookup_by_phone($1)', [phone]);
 
 export const createCitizenUser = async (tx, { phone, fullName }) => {
   // We use a dummy email since WhatsApp only gives us phone, unless they provide an email.

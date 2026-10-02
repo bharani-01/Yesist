@@ -702,6 +702,12 @@ begin
   return v_id; -- null when email or phone already exists
 end $$;
 
+create or replace function app.auth_lookup_by_phone(p_phone text)
+returns table (id uuid, full_name text, email text, phone text)
+language sql stable security definer set search_path = public, pg_temp as $
+  select id, full_name, email, phone from users where phone = p_phone and status = 'active';
+$;
+
 create or replace function app.auth_credentials(p_email text)
 returns table (user_id uuid, password_hash text, status text)
 language sql stable security definer set search_path = public, pg_temp as $$

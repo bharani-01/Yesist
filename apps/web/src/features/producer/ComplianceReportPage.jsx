@@ -88,7 +88,7 @@ export function ComplianceReportPage() {
     }
   };
 
-  // 2. High-res vector print dialog: sends real vector PDF to print engine (ZERO blank pages)
+  // 2. High-res vector print dialog: opens the real vector PDF in viewer (ZERO blank pages)
   const handlePrintDocument = async (reportData) => {
     if (!reportData) return;
     try {
@@ -97,39 +97,19 @@ export function ComplianceReportPage() {
       const blob = doc.output('blob');
       const blobUrl = URL.createObjectURL(blob);
 
-      // Open print directly via hidden iframe to ensure 100% full-document vector print
-      const iframe = document.createElement('iframe');
-      iframe.style.position = 'fixed';
-      iframe.style.right = '0';
-      iframe.style.bottom = '0';
-      iframe.style.width = '0';
-      iframe.style.height = '0';
-      iframe.style.border = '0';
-      iframe.src = blobUrl;
-      document.body.appendChild(iframe);
-
-      iframe.onload = () => {
-        setTimeout(() => {
-          try {
-            iframe.contentWindow.focus();
-            iframe.contentWindow.print();
-          } catch {
-            // Fallback for strict browser sandboxes
-            window.open(blobUrl, '_blank');
-          } finally {
-            setIsPrinting(false);
-            setTimeout(() => {
-              try { document.body.removeChild(iframe); } catch {}
-              URL.revokeObjectURL(blobUrl);
-            }, 60000);
-          }
-        }, 150);
-      };
+      // Open in a new tab with native browser PDF print controls
+      const printWin = window.open(blobUrl, '_blank');
+      if (!printWin) {
+        // If popup blocked, auto-download the PDF
+        const fileName = `CPCB_Compliance_Report_${(reportData.filing?.producer?.orgName || 'OEM').replace(/\s+/g, '_')}_FY2026.pdf`;
+        doc.save(fileName);
+      }
     } catch (err) {
-      console.error('Vector print fallback to window.print', err);
-      setIsPrinting(false);
+      console.error('Vector print fallback', err);
       setActiveTab('overview');
       setTimeout(() => window.print(), 100);
+    } finally {
+      setIsPrinting(false);
     }
   };
 
@@ -358,7 +338,7 @@ export function ComplianceReportPage() {
                                   <div className="subtle">{c.unitCount} units</div>
                                 </td>
                                 <td>
-                                  <Link to={`/verify/${c.attestationNumber}`} className="mono" style={{ color: 'var(--color-brand)', fontWeight: 600 }}>
+                                  <Link to={`/verify/${c.attestationNumber}`} className="compliance-table-link">
                                     {c.attestationNumber}
                                   </Link>
                                 </td>
@@ -375,14 +355,14 @@ export function ComplianceReportPage() {
                     <div style={{ marginTop: 'var(--space-6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 'var(--space-4)' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                         <QrCode
-                          value={filing.verificationUrl || `${window.location.origin}/verify/${filing.reportNumber}`}
+                          value={filing.verificationUrl || `${typeof window !== 'undefined' && window.location ? window.location.origin : ''}/verify/${filing.reportNumber}`}
                           size={64}
                           label="Regulatory Verification QR"
                         />
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: '700', color: 'var(--color-ink)' }}>Instant Regulatory Verification</div>
                           <div style={{ fontSize: '12px', color: 'var(--color-ink-muted)' }}>Scan with smartphone to verify entry on central ledger.</div>
-                          <div className="mono" style={{ fontSize: '11px', color: 'var(--color-brand)', marginTop: '2px', fontWeight: 700 }}>{filing.reportNumber}</div>
+                          <div className="mono doc-ref-code" style={{ marginTop: '2px' }}>{filing.reportNumber}</div>
                         </div>
                       </div>
 
@@ -433,7 +413,7 @@ export function ComplianceReportPage() {
                               <div className="subtle">{c.categoryName}</div>
                             </td>
                             <td className="num">
-                              <span style={{ fontSize: '14px', fontWeight: '700', color: 'var(--color-brand)' }}>
+                              <span className="compliance-weight-val">
                                 {((c.quantityKg || 0) / 1000).toFixed(2)} MT
                               </span>
                               <div className="subtle">{c.unitCount} physical units</div>
@@ -445,7 +425,7 @@ export function ComplianceReportPage() {
                               </span>
                             </td>
                             <td>
-                              <Link to={`/verify/${c.attestationNumber}`} className="mono" style={{ color: 'var(--color-brand)', fontWeight: '600' }}>
+                              <Link to={`/verify/${c.attestationNumber}`} className="compliance-table-link">
                                 {c.attestationNumber}
                               </Link>
                               <div className="subtle mono" style={{ fontSize: '10px' }}>
@@ -504,7 +484,7 @@ export function ComplianceReportPage() {
                               </span>
                             </td>
                             <td>
-                              <Link to={`/verify/${row.recyclerAttestation}`} className="mono" style={{ color: 'var(--color-brand)', fontWeight: '600' }}>
+                              <Link to={`/verify/${row.recyclerAttestation}`} className="compliance-table-link">
                                 {row.recyclerAttestation}
                               </Link>
                               <div className="subtle" style={{ fontSize: '11.5px' }}>

@@ -220,7 +220,7 @@ export async function getComplianceReportData(signal) {
       ruleReference: 'Form 1(a) · E-Waste (Management) Rules, 2022',
       issuedAt: new Date().toISOString(),
       auditStatus: 'VERIFIED & CRYPTOGRAPHICALLY AUDITABLE',
-      verificationUrl: `${window.location.origin}/verify/ECS-CPCB-CMP-2026-90421`,
+      verificationUrl: `${typeof window !== 'undefined' && window.location ? window.location.origin : 'https://ecosure.org'}/verify/ECS-CPCB-CMP-2026-90421`,
       sha256Hash: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
       producer: {
         orgName: `${primaryBrand} Corporation Ltd.`,

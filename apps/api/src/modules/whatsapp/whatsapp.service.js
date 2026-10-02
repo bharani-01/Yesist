@@ -54,6 +54,41 @@ const tools = [
   }
 ];
 
+// Formatting helper for clean WhatsApp text
+export const formatWhatsAppText = (text) => {
+  if (!text) return '';
+  return text
+    .replace(/([.!?])([A-Z])/g, '$1 $2') // Ensure space after punctuation if touching capital letter
+    .replace(/\n{3,}/g, '\n\n')          // Max 2 consecutive linebreaks
+    .trim();
+};
+
+const SYSTEM_PROMPT = {
+  role: 'system',
+  content: `You are the EcoSure WhatsApp Assistant 🌿 — a friendly, efficient e-waste recycling concierge for Indian citizens.
+
+MISSION:
+Help citizens easily register e-waste devices (smartphones, laptops, TVs, appliances, batteries) and schedule door-to-door pickups.
+
+WHATSAPP FORMATTING RULES (STRICT):
+1. Keep replies SHORT, CRISP, and VISUALLY ATTRACTIVE. Never write long paragraphs or repeat sentences.
+2. Use clean WhatsApp formatting:
+   - *Bold* for important labels, categories, dates, and actions.
+   - _Italics_ for examples, hints, and notes.
+   - Clean bullet points (•) and emojis (📱, 💻, 🏷️, ⚙️, 📅, ⏰, 📦, ✅).
+   - Use double line breaks between sections for high readability.
+3. When asking the user for device details to add, ALWAYS format cleanly like:
+   📱 *Category:* (e.g. Smartphone, Laptop, TV)
+   🏷️ *Brand:* (e.g. Apple, Dell, Samsung)
+   ⚙️ *Condition:* (Working, Partially Working, or Not Working)
+
+   _Example: "Dell laptop, working"_
+4. When scheduling a pickup, format cleanly like:
+   📅 *Preferred Date:* (YYYY-MM-DD or e.g. Tomorrow)
+   ⏰ *Time Window:* (Morning, Afternoon, Evening)
+5. NEVER repeat yourself. Never add filler like "I'll be here when you're ready" or restate the same question.`
+};
+
 export const processIncomingMessage = async (phone, text, replyTarget = null) => {
   if (!text) return; // Ignore non-text messages for now
   const target = replyTarget || phone;
@@ -93,23 +128,13 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
     return m;
   });
 
-  if (history.length === 0) {
-    const sysMsg = { 
-      role: 'system', 
-      content: `You are the EcoSure WhatsApp Assistant. You help citizens manage their e-waste by adding devices and scheduling pickups. 
-      Always be polite, concise, and helpful. Use the provided tools when necessary.` 
-    };
-    history.push(sysMsg);
-    await saveChatMessage(db, phone, sysMsg);
-  }
-
   // Handle Registration manually before handing off to AI
   if (!user) {
     const lastMsg = history[history.length - 1];
-    if (lastMsg?.role === 'assistant' && lastMsg?.content?.includes('reply with your Full Name')) {
+    if (lastMsg?.role === 'assistant' && lastMsg?.content?.includes('Full Name')) {
       const cleanName = (text || '').trim();
       if (cleanName.length < 2) {
-        const retryPrompt = 'Please reply with your full name (at least 2 letters) to register your account.';
+        const retryPrompt = `⚠️ *Name Too Short*\n\nPlease reply with your *Full Name* (at least 2 letters) to complete your EcoSure registration.\n\n_Example: "G L Swaminathan"_`;
         await saveChatMessage(db, phone, { role: 'user', content: text });
         await saveChatMessage(db, phone, { role: 'assistant', content: retryPrompt });
         await sendWhatsAppMessage(target, retryPrompt);
@@ -118,7 +143,7 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
       try {
         await createCitizenUser(db, { phone, fullName: cleanName });
         user = await findUserByPhone(db, phone);
-        const welcomeText = `Thanks ${user?.fullName || cleanName}! Your EcoSure account is ready.\n\nHow can I help you today? You can:\n- Add a device\n- View your devices\n- Schedule a pickup`;
+        const welcomeText = `🎉 *Welcome to EcoSure!* 🌿\nThanks *${user?.fullName || cleanName}*, your citizen account is ready!\n\nHow can I help you today?\n1️⃣ ➕ *Add e-waste device* (Laptop, Phone, TV, etc.)\n2️⃣ 📦 *View my devices*\n3️⃣ 📅 *Schedule a doorstep pickup*\n\n_Just reply with what you'd like to do!_`;
         
         await saveChatMessage(db, phone, { role: 'user', content: text });
         await saveChatMessage(db, phone, { role: 'assistant', content: welcomeText });
@@ -131,7 +156,7 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
         return;
       }
     } else {
-      const prompt = `Welcome to EcoSure! We don't recognize this number. To register an account, please reply with your Full Name.`;
+      const prompt = `🌿 *Welcome to EcoSure!* 🌿\n\nWe don't recognize this WhatsApp number yet.\nTo create your free citizen account, please reply with your *Full Name*.\n\n_Example: "G L Swaminathan"_`;
       await saveChatMessage(db, phone, { role: 'assistant', content: prompt });
       await sendWhatsAppMessage(target, prompt);
       return;
@@ -140,13 +165,20 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
 
   // Process with AI
   const userMsg = { role: 'user', content: text };
-  history.push(userMsg);
   await saveChatMessage(db, phone, userMsg);
+
+  // Construct fresh Groq message thread with SYSTEM_PROMPT at head
+  const recentHistory = history.filter(m => m.role !== 'system').slice(-10);
+  const groqMessages = [
+    SYSTEM_PROMPT,
+    ...recentHistory,
+    userMsg
+  ];
 
   try {
     const response = await groq.chat.completions.create({
       model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
-      messages: history,
+      messages: groqMessages,
       tools: tools,
       tool_choice: 'auto',
     });
@@ -155,7 +187,7 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
     
     // Handle Tool Calls
     if (responseMessage.tool_calls) {
-      history.push(responseMessage);
+      groqMessages.push(responseMessage);
       
       // Save assistant's tool call to DB
       await saveChatMessage(db, phone, {
@@ -173,14 +205,14 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
         try {
           if (functionName === 'addDevice') {
             const id = await withTx(user.id, tx => addDevice(tx, { userId: user.id, ...args }));
-            functionResult = `Device added successfully. DB ID: ${id}`;
+            functionResult = `Device added successfully. DB ID: ${id}. Details: ${args.category} (${args.brand || 'No brand specified'}), condition: ${args.condition || 'working'}`;
           } else if (functionName === 'viewDevices') {
             const devices = await withTx(user.id, tx => findUserDevices(tx, user.id));
-            if (devices.length === 0) functionResult = "The user has no devices.";
-            else functionResult = `User devices: ${JSON.stringify(devices)}`;
+            if (devices.length === 0) functionResult = "The user has no devices added yet.";
+            else functionResult = `User devices: ${JSON.stringify(devices.map(d => ({ category: d.category, brand: d.brand, condition: d.condition })))}`;
           } else if (functionName === 'schedulePickup') {
             const ref = await withTx(user.id, tx => schedulePickup(tx, { userId: user.id, ...args }));
-            functionResult = `Pickup scheduled successfully. Booking Reference: ${ref}`;
+            functionResult = `Pickup scheduled successfully. Booking Reference: ${ref}. Preferred Date: ${args.preferredDate}, Window: ${args.preferredWindow}`;
           }
         } catch (dbErr) {
           console.error(`Tool execution error [${functionName}]:`, dbErr);
@@ -194,31 +226,29 @@ export const processIncomingMessage = async (phone, text, replyTarget = null) =>
           content: functionResult,
         };
 
-        history.push(toolResultMsg);
+        groqMessages.push(toolResultMsg);
         await saveChatMessage(db, phone, toolResultMsg);
       }
 
       // Send the results back to Groq to generate a final text response
       const finalResponse = await groq.chat.completions.create({
         model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
-        messages: history,
+        messages: groqMessages,
       });
 
-      const finalText = finalResponse.choices[0].message.content;
-      history.push({ role: 'assistant', content: finalText });
+      const finalText = formatWhatsAppText(finalResponse.choices[0].message.content);
       await saveChatMessage(db, phone, { role: 'assistant', content: finalText });
       await sendWhatsAppMessage(target, finalText);
 
     } else {
       // Standard text response
-      const replyText = responseMessage.content;
-      history.push({ role: 'assistant', content: replyText });
+      const replyText = formatWhatsAppText(responseMessage.content);
       await saveChatMessage(db, phone, { role: 'assistant', content: replyText });
       await sendWhatsAppMessage(target, replyText);
     }
   } catch (error) {
     console.error('[Groq Error]:', error);
-    await sendWhatsAppMessage(target, 'Sorry, I am having trouble processing your request right now.');
+    await sendWhatsAppMessage(target, 'Sorry, I am having trouble processing your request right now. Please try again in a moment.');
   }
 };
 

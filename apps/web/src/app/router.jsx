@@ -28,6 +28,7 @@ import { LabelsPage } from '../features/producer/LabelsPage.jsx';
 import { ModelsPage } from '../features/producer/ModelsPage.jsx';
 import { ProducerOverviewPage } from '../features/producer/ProducerOverviewPage.jsx';
 import { UnitsPage } from '../features/producer/UnitsPage.jsx';
+import { ComplianceReportPage } from '../features/producer/ComplianceReportPage.jsx';
 import { MyDevicesPage } from '../features/products/MyDevicesPage.jsx';
 import { ProductPage } from '../features/products/ProductPage.jsx';
 import { CertificatePage } from '../features/products/CertificatePage.jsx';
@@ -116,6 +117,7 @@ export const router = createBrowserRouter([
           { path: 'producer/batches/:id', element: <BatchDetailPage /> },
           { path: 'producer/batches/:id/labels', element: <LabelsPage /> },
           { path: 'producer/units', element: <UnitsPage /> },
+          { path: 'producer/compliance', element: <ComplianceReportPage /> },
         ],
       },
       {

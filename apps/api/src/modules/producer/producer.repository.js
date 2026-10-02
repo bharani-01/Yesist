@@ -111,3 +111,34 @@ export const processedByModel = (tx, orgId) =>
       group by m.id order by processed desc, units desc limit 20`,
     [orgId],
   );
+
+export const complianceReportData = async (tx, orgId) => {
+  const org = await queryOne(tx, 'select id, name, registration_no as "registrationNo" from organizations where id = $1', [orgId]);
+  const models = await listModels(tx, orgId);
+  const batches = await listBatches(tx, orgId);
+  const totals = await registryTotals(tx, orgId);
+  const units = await queryMany(
+    tx,
+    `select u.id, u.qr_public_id as "qrPublicId", u.identifier_type as "identifierType", u.last4, u.state,
+            m.brand, m.model_name as "modelName", m.category_code as "categoryCode",
+            b.batch_ref as "batchRef",
+            (select a.public_number from pickup_item_units piu
+               join pickup_items i on i.id = piu.pickup_item_id
+               join pickup_requests p on p.id = i.pickup_id
+               join attestations a on a.lot_id = p.lot_id and a.status = 'issued'
+              where piu.unit_id = u.id and not piu.duplicate limit 1) as "attestationNumber",
+            (select l.seal_tag from pickup_item_units piu
+               join pickup_items i on i.id = piu.pickup_item_id
+               join pickup_requests p on p.id = i.pickup_id
+               join lots l on l.id = p.lot_id
+              where piu.unit_id = u.id and not piu.duplicate limit 1) as "sealTag"
+       from product_units u
+       join product_models m on m.id = u.model_id
+       join market_batches b on b.id = u.batch_id
+      where u.producer_org_id = $1
+      order by u.updated_at desc
+      limit 200`,
+    [orgId],
+  );
+  return { org, models, batches, totals, units };
+};

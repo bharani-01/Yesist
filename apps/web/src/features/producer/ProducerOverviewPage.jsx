@@ -6,6 +6,7 @@ import { Panel } from '../../components/ui/Panel.jsx';
 import { useAsync } from '../../hooks/useAsync.js';
 import { formatCount, formatInt } from '../../lib/format.js';
 import { producerApi } from './producer.api.js';
+import './ComplianceReportPage.css';
 
 const COLLECTED_STATES = ['collected', 'in_lot', 'at_hub', 'received_at_recycler', 'processed'];
 
@@ -16,7 +17,12 @@ export function ProducerOverviewPage() {
       <PageHeader
         title="End-of-life outcomes"
         description="What happened to the units you placed on the market. Collector, hub, and recycler identities are never shown here."
-        actions={<Link to="/producer/batches" className="btn btn--secondary">Batches</Link>}
+        actions={
+          <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' }}>
+            <Link to="/producer/batches" className="btn btn--secondary">Batches</Link>
+            <Link to="/producer/compliance" className="btn btn--primary">Compliance & CPCB Filing</Link>
+          </div>
+        }
       />
       <AsyncView
         query={query}

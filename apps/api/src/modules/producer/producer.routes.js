@@ -15,6 +15,7 @@ const approve = requireOrg(PRODUCER_ORG_TYPES, { roles: STAFF.approve });
 const bulkJson = express.json({ limit: '2mb' });
 
 producerRoutes.get('/overview', controller.overview);
+producerRoutes.get('/compliance', controller.complianceReport);
 producerRoutes.get('/models', controller.listModels);
 producerRoutes.post('/models', work, validate({ body: createModelBody }), controller.createModel);
 producerRoutes.get('/batches', controller.listBatches);

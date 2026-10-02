@@ -5,6 +5,10 @@ export async function overview(req, res) {
   res.json(await service.overview(contextOf(req)));
 }
 
+export async function complianceReport(req, res) {
+  res.json({ report: await service.complianceReport(contextOf(req)) });
+}
+
 export async function listModels(req, res) {
   res.json({ models: await service.listModels(contextOf(req)) });
 }

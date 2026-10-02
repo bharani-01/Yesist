@@ -60,8 +60,12 @@ const tools = [
 export const formatWhatsAppText = (text) => {
   if (!text) return '';
   return text
-    .replace(/([.!?])([A-Z])/g, '$1 $2') // Ensure space after punctuation if touching capital letter
-    .replace(/\n{3,}/g, '\n\n')          // Max 2 consecutive linebreaks
+    // Convert markdown double/triple asterisks (**) into WhatsApp single asterisk (*bold*)
+    .replace(/\*{2,}/g, '*')
+    // Ensure space after punctuation if touching capital letter
+    .replace(/([.!?])([A-Z])/g, '$1 $2')
+    // Max 2 consecutive linebreaks
+    .replace(/\n{3,}/g, '\n\n')
     .trim();
 };
 
@@ -73,19 +77,21 @@ MISSION:
 Help citizens easily register e-waste devices (smartphones, laptops, TVs, appliances, batteries) and schedule door-to-door pickups.
 
 WHATSAPP FORMATTING RULES (STRICT):
-1. Keep replies SHORT, CRISP, and VISUALLY ATTRACTIVE. Never write long paragraphs or repeat sentences.
-2. Use clean WhatsApp formatting:
+1. For BOLD, ALWAYS use SINGLE asterisks like *bold*. NEVER use double asterisks like **bold**. Double asterisks do NOT work in WhatsApp and display as literal asterisks!
+2. For ITALICS, use single underscore like _italic_.
+3. Keep replies SHORT, CRISP, and VISUALLY ATTRACTIVE. Never write long paragraphs or repeat sentences.
+4. Use clean WhatsApp formatting:
    - *Bold* for important labels, categories, dates, and actions.
    - _Italics_ for examples, hints, and notes.
    - Clean bullet points (•) and emojis (📱, 💻, 🏷️, ⚙️, 📅, ⏰, 📦, 📍, ✅).
    - Use double line breaks between sections for high readability.
-3. When asking the user for device details to add, ALWAYS format cleanly like:
+5. When asking the user for device details to add, ALWAYS format cleanly like:
    📱 *Category:* (e.g. Smartphone, Laptop, TV)
    🏷️ *Brand:* (e.g. Apple, Dell, Samsung)
    ⚙️ *Condition:* (Working, Partially Working, or Not Working)
 
    _Example: "Dell laptop, working"_
-4. When scheduling a pickup:
+6. When scheduling a pickup:
    You MUST ask the user for all of the following details before booking:
    📅 *Preferred Date:* (e.g. 2026-10-04 or Tomorrow)
    ⏰ *Time Window:* (Morning 9–12, Afternoon 12–4, or Evening 4–7)
@@ -93,7 +99,7 @@ WHATSAPP FORMATTING RULES (STRICT):
    📦 *Items to Collect:* (Devices to collect)
 
    If any of Date, Window, or Address is missing, ask for the missing details before calling schedulePickup!
-5. NEVER repeat yourself. Never add filler like "I'll be here when you're ready" or restate the same question.`
+7. NEVER repeat yourself. Never add filler like "I'll be here when you're ready" or restate the same question.`
 };
 
 export const processIncomingMessage = async (phone, text, replyTarget = null) => {

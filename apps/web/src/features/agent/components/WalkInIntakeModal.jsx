@@ -292,7 +292,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
         <div className="modal__header">
           <div>
             <p className="modal__eyebrow">Counter Drop-off</p>
-            <h2 className="modal__title">Direct Walk-in Intake</h2>
+            <h2 className="modal__title">Walk-in Intake</h2>
           </div>
           <button
             type="button"

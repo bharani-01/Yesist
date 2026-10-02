@@ -4,40 +4,67 @@ import { getWhatsAppSettings, updateWhatsAppSettings, getChatHistory } from './w
 import { Errors } from '../../core/errors.js';
 import { contextOf } from '../../shared/context.js';
 
+// In-memory deduplication cache with 2-minute TTL
+const processedMessageIds = new Map();
+const isDuplicateMessage = (msgId) => {
+  if (!msgId) return false;
+  const now = Date.now();
+  for (const [id, time] of processedMessageIds.entries()) {
+    if (now - time > 120000) processedMessageIds.delete(id);
+  }
+  if (processedMessageIds.has(msgId)) return true;
+  processedMessageIds.set(msgId, now);
+  return false;
+};
+
 export const handleWebhook = async (req, res, next) => {
   try {
-    // WAHA webhook payload structure
     const payload = req.body;
     
-    // WAHA sends events like message, message.any
-    if (payload.event === 'message') {
-      const message = payload.payload;
-      
-      // Ignore group messages
-      if (message.from.endsWith('@g.us')) {
-        return res.status(200).send('OK');
-      }
-
-      // Ignore messages sent by the bot itself
-      if (message.fromMe) {
-        return res.status(200).send('OK');
-      }
-
-      let phone = message.from.replace('@c.us', '');
-      
-      // The database schema requires 10-digit Indian numbers (^[6-9][0-9]{9}$)
-      // WAHA provides it with the country code (e.g., 919876543210). Strip the '91' prefix.
-      if (phone.startsWith('91') && phone.length === 12) {
-        phone = phone.substring(2);
-      }
-
-      const text = message.body;
-
-      // Process asynchronously so we don't block the webhook response
-      processIncomingMessage(phone, text).catch(err => {
-        console.error('Error processing WAHA message:', err);
-      });
+    // WAHA sends events like message, message.any, message.ack, presence.update
+    // Strictly accept only the primary 'message' event to prevent duplicate processing
+    if (payload?.event !== 'message') {
+      return res.status(200).send('OK');
     }
+
+    const message = payload.payload;
+    if (!message) {
+      return res.status(200).send('OK');
+    }
+    
+    // Deduplicate incoming messages using WAHA message ID or event ID
+    const msgId = (typeof message.id === 'object' ? (message.id._serialized || message.id.id) : message.id) || payload.id;
+    if (msgId && isDuplicateMessage(msgId)) {
+      console.log(`[WAHA] Duplicate message ignored: ${msgId}`);
+      return res.status(200).send('OK');
+    }
+
+    // Ignore group messages
+    if (message.from && message.from.endsWith('@g.us')) {
+      return res.status(200).send('OK');
+    }
+
+    // Ignore messages sent by the bot itself
+    if (message.fromMe) {
+      return res.status(200).send('OK');
+    }
+
+    const fromJid = message.from;
+    let phone = message.from.replace(/@(c\.us|s\.whatsapp\.net|lid)$/, '');
+    phone = phone.replace(/\D/g, '');
+    
+    // The database schema supports 10-digit Indian numbers (or LIDs / international numbers)
+    // If WAHA provides it with the 91 country code (e.g., 919876543210), strip the '91' prefix.
+    if (phone.startsWith('91') && phone.length === 12) {
+      phone = phone.substring(2);
+    }
+
+    const text = message.body;
+
+    // Process asynchronously so we don't block the webhook response
+    processIncomingMessage(phone, text, fromJid).catch(err => {
+      console.error('Error processing WAHA message:', err);
+    });
 
     res.status(200).send('OK');
   } catch (error) {

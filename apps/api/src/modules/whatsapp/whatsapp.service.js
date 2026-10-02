@@ -54,8 +54,9 @@ const tools = [
   }
 ];
 
-export const processIncomingMessage = async (phone, text) => {
+export const processIncomingMessage = async (phone, text, replyTarget = null) => {
   if (!text) return; // Ignore non-text messages for now
+  const target = replyTarget || phone;
 
   // Check bot master switch and test mode from DB
   const settings = await getWhatsAppSettings(db);
@@ -65,7 +66,8 @@ export const processIncomingMessage = async (phone, text) => {
   }
 
   if (settings?.test_mode) {
-    if (!settings.test_numbers.includes(phone)) {
+    const isAllowed = settings.test_numbers.some(n => phone.includes(n) || n.includes(phone));
+    if (!isAllowed) {
       console.log(`[WAHA] Ignored message from ${phone} (not in TEST_NUMBERS)`);
       return;
     }
@@ -104,26 +106,34 @@ export const processIncomingMessage = async (phone, text) => {
   // Handle Registration manually before handing off to AI
   if (!user) {
     const lastMsg = history[history.length - 1];
-    if (lastMsg.role === 'assistant' && lastMsg.content.includes('reply with your Full Name')) {
+    if (lastMsg?.role === 'assistant' && lastMsg?.content?.includes('reply with your Full Name')) {
+      const cleanName = (text || '').trim();
+      if (cleanName.length < 2) {
+        const retryPrompt = 'Please reply with your full name (at least 2 letters) to register your account.';
+        await saveChatMessage(db, phone, { role: 'user', content: text });
+        await saveChatMessage(db, phone, { role: 'assistant', content: retryPrompt });
+        await sendWhatsAppMessage(target, retryPrompt);
+        return;
+      }
       try {
-        await createCitizenUser(db, { phone, fullName: text });
+        await createCitizenUser(db, { phone, fullName: cleanName });
         user = await findUserByPhone(db, phone);
-        const welcomeText = `Thanks ${text}! Your EcoSure account is ready.\n\nHow can I help you today? You can:\n- Add a device\n- View your devices\n- Schedule a pickup`;
+        const welcomeText = `Thanks ${user?.fullName || cleanName}! Your EcoSure account is ready.\n\nHow can I help you today? You can:\n- Add a device\n- View your devices\n- Schedule a pickup`;
         
         await saveChatMessage(db, phone, { role: 'user', content: text });
         await saveChatMessage(db, phone, { role: 'assistant', content: welcomeText });
         
-        await sendWhatsAppMessage(phone, welcomeText);
+        await sendWhatsAppMessage(target, welcomeText);
         return;
       } catch (err) {
         console.error('Registration error:', err);
-        await sendWhatsAppMessage(phone, 'Sorry, there was an error registering your account. Please try again later.');
+        await sendWhatsAppMessage(target, 'Sorry, there was an error registering your account. Please try again later.');
         return;
       }
     } else {
       const prompt = `Welcome to EcoSure! We don't recognize this number. To register an account, please reply with your Full Name.`;
       await saveChatMessage(db, phone, { role: 'assistant', content: prompt });
-      await sendWhatsAppMessage(phone, prompt);
+      await sendWhatsAppMessage(target, prompt);
       return;
     }
   }
@@ -190,24 +200,25 @@ export const processIncomingMessage = async (phone, text) => {
 
       // Send the results back to Groq to generate a final text response
       const finalResponse = await groq.chat.completions.create({
-        model: process.env.GROQ_MODEL || 'llama3-70b-8192',
+        model: process.env.GROQ_MODEL || 'openai/gpt-oss-120b',
         messages: history,
       });
 
       const finalText = finalResponse.choices[0].message.content;
       history.push({ role: 'assistant', content: finalText });
       await saveChatMessage(db, phone, { role: 'assistant', content: finalText });
-      await sendWhatsAppMessage(phone, finalText);
+      await sendWhatsAppMessage(target, finalText);
 
     } else {
       // Standard text response
       const replyText = responseMessage.content;
       history.push({ role: 'assistant', content: replyText });
       await saveChatMessage(db, phone, { role: 'assistant', content: replyText });
-      await sendWhatsAppMessage(phone, replyText);
+      await sendWhatsAppMessage(target, replyText);
     }
   } catch (error) {
     console.error('[Groq Error]:', error);
-    await sendWhatsAppMessage(phone, 'Sorry, I am having trouble processing your request right now.');
+    await sendWhatsAppMessage(target, 'Sorry, I am having trouble processing your request right now.');
   }
 };
+

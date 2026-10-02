@@ -5,7 +5,8 @@ export const findUserByPhone = (tx, phone) =>
 
 export const createCitizenUser = async (tx, { phone, fullName }) => {
   // We use a dummy email since WhatsApp only gives us phone, unless they provide an email.
-  const email = `${phone}@ecosure.wa`;
+  const cleanId = String(phone).replace(/[^a-zA-Z0-9]/g, '');
+  const email = `wa_${cleanId}@ecosure.wa`;
   const result = await queryOne(tx, 'select app.auth_register_citizen($1, $2, $3, $4) as id', [
     email,
     phone,
@@ -14,6 +15,7 @@ export const createCitizenUser = async (tx, { phone, fullName }) => {
   ]);
   return result?.id;
 };
+
 
 // Functions to interact with user's devices
 export const findUserDevices = (tx, userId) =>

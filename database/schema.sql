@@ -66,7 +66,7 @@ create table if not exists scheme_settings (
 create table if not exists users (
   id             uuid primary key default gen_random_uuid(),
   email          text not null check (email = lower(email) and email ~ '^[^@\s]+@[^@\s]+\.[^@\s]+$'),
-  phone          text check (phone ~ '^[6-9][0-9]{9}$'),
+  phone          text check (phone is null or phone ~ '^[0-9]{10,16}$'),
   full_name      text not null check (length(full_name) between 2 and 120),
   password_hash  text not null,
   platform_role  text not null default 'citizen'

@@ -286,9 +286,15 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={(e) => { if (e.target === e.currentTarget && !submitting) onClose(); }} role="dialog" aria-modal="true">
+    <div
+      className="modal-backdrop"
+      onClick={(e) => { if (e.target === e.currentTarget && !submitting) onClose(); }}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Walk-in Intake"
+    >
       <div className="modal walkin-modal">
-        {/* Header */}
+        {/* ── Header ── */}
         <div className="modal__header">
           <div>
             <p className="modal__eyebrow">Counter Drop-off</p>
@@ -296,44 +302,46 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
           </div>
           <button
             type="button"
-            className="btn btn--ghost"
-            style={{ padding: '6px', borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+            className="modal__close"
             onClick={onClose}
             disabled={submitting}
             aria-label="Close"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <line x1="18" y1="6" x2="6" y2="18" />
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="modal__body" style={{ padding: 'var(--space-5)' }}>
+        {/* ── Modal Body ── */}
+        <div className="modal__body">
           {receiptResult ? (
             /* ════ RECEIPT SUCCESS VIEW ════ */
             <div>
-              <div style={{ textAlign: 'center', marginBottom: 'var(--space-4)' }}>
+              {/* Success header */}
+              <div style={{ textAlign: 'center', marginBottom: 'var(--space-5)' }}>
                 <div style={{
-                  width: '52px',
-                  height: '52px',
+                  width: '56px',
+                  height: '56px',
                   borderRadius: '50%',
-                  background: 'rgba(52, 199, 89, 0.12)',
-                  color: '#34c759',
+                  background: 'rgba(0, 209, 94, 0.12)',
+                  color: 'var(--color-brand)',
                   display: 'inline-flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginBottom: '8px',
+                  marginBottom: '10px',
                 }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 </div>
-                <h3 style={{ margin: '0 0 4px', fontSize: 'var(--text-lg)' }}>Intake Confirmed</h3>
-                <p className="subtle" style={{ margin: 0 }}>Reference: <strong className="mono">{receiptResult.pickup.reference}</strong></p>
+                <h3 style={{ margin: '0 0 4px', fontSize: 'var(--text-lg)', fontWeight: 700, letterSpacing: '-0.02em' }}>Intake Confirmed</h3>
+                <p className="subtle" style={{ margin: 0 }}>
+                  Reference: <strong className="mono">{receiptResult.pickup.reference}</strong>
+                </p>
                 {receiptResult.pointsAwarded > 0 && (
-                  <div style={{ marginTop: '8px' }}>
+                  <div style={{ marginTop: '10px' }}>
                     <span className="walkin-badge walkin-badge--verified" style={{ fontSize: '0.85rem', padding: '6px 14px' }}>
                       <span className="walkin-badge-dot" />
                       +{receiptResult.pointsAwarded} Green Points Credited
@@ -345,21 +353,24 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
               {/* Printable Receipt Card */}
               <div className="walkin-receipt-container">
                 <div className="walkin-receipt-header">
-                  <h4 style={{ margin: '0 0 2px' }}>EcoSure E-Waste Intake Receipt</h4>
+                  <h4 style={{ margin: '0 0 2px', fontWeight: 700 }}>EcoSure E-Waste Intake Receipt</h4>
                   <p className="subtle" style={{ margin: 0, fontSize: '0.8rem' }}>{receiptResult.receipt.agentOrgName} · Indore</p>
                   <p className="subtle" style={{ margin: 0, fontSize: '0.75rem' }}>{new Date().toLocaleString()}</p>
                 </div>
 
                 <div className="walkin-receipt-row">
-                  <span className="subtle">Customer</span>
-                  <strong>{receiptResult.receipt.customerName} {receiptResult.receipt.customerPhone ? `(${receiptResult.receipt.customerPhone})` : ''}</strong>
+                  <span>Customer</span>
+                  <strong>
+                    {receiptResult.receipt.customerName}
+                    {receiptResult.receipt.customerPhone ? ` (${receiptResult.receipt.customerPhone})` : ''}
+                  </strong>
                 </div>
 
                 <div style={{ borderTop: '1px solid var(--color-border)', margin: '8px 0', paddingTop: '8px' }}>
                   {receiptResult.receipt.items.map((item, idx) => (
                     <div key={idx} className="walkin-receipt-row">
                       <span>{item.quantity}× {item.name}</span>
-                      <span className="subtle">{item.batteryCheck === 'swollen_or_damaged_refused' ? 'Refused' : 'Accepted'}</span>
+                      <span>{item.batteryCheck === 'swollen_or_damaged_refused' ? 'Refused' : 'Accepted'}</span>
                     </div>
                   ))}
                 </div>
@@ -375,8 +386,8 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
               </div>
 
               {/* Action Buttons */}
-              <div className="stack stack--sm">
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div className="walkin-receipt-actions">
+                <div className="walkin-receipt-actions-row">
                   <Button type="button" variant="secondary" onClick={() => window.print()}>
                     Print Receipt
                   </Button>
@@ -394,10 +405,10 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                     </a>
                   )}
                 </div>
-                <Button type="button" variant="primary" onClick={handleReset}>
+                <Button type="button" variant="primary" onClick={handleReset} style={{ width: '100%' }}>
                   Intake Another Customer
                 </Button>
-                <Button type="button" variant="ghost" onClick={onClose}>
+                <Button type="button" variant="ghost" onClick={onClose} style={{ width: '100%' }}>
                   Done (View Pickups)
                 </Button>
               </div>
@@ -405,11 +416,15 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
           ) : (
             /* ════ INTAKE FORM VIEW ════ */
             <form onSubmit={handleSubmit} className="form-grid" noValidate>
-              {/* SECTION 1: CUSTOMER IDENTIFICATION */}
+
+              {/* ── SECTION 1: CUSTOMER IDENTIFICATION ── */}
               <div className="walkin-lookup-box">
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '0.88rem', fontWeight: 600 }}>1. Customer Details</label>
-                  <label style={{ fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+                <div className="walkin-section-header">
+                  <label className="walkin-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="walkin-section-num">1</span>
+                    Customer Details
+                  </label>
+                  <label className="walkin-anon-label">
                     <input
                       type="checkbox"
                       checked={isAnonymous}
@@ -424,16 +439,18 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
 
                 {!isAnonymous ? (
                   <>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px' }}>
+                    <div className="walkin-customer-fields">
                       <TextField
                         label="10-Digit Mobile Number"
                         type="tel"
+                        inputMode="numeric"
                         maxLength={10}
                         placeholder="e.g. 9826012345"
                         value={phone}
                         onChange={(e) => setPhone(sanitizePhone(e.target.value))}
                         hint={customerLookup.searching ? 'Checking citizen records…' : 'Enter 10-digit Indian mobile'}
                         required
+                        autoComplete="tel"
                       />
                       <TextField
                         label="Customer Full Name"
@@ -441,6 +458,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
                         required={!customerLookup.found}
+                        autoComplete="name"
                       />
                     </div>
 
@@ -467,11 +485,14 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                 )}
               </div>
 
-              {/* SECTION 2: ITEMS & TRIAGE */}
+              {/* ── SECTION 2: ITEMS & TRIAGE ── */}
               <div style={{ marginBottom: 'var(--space-4)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <label style={{ fontSize: '0.88rem', fontWeight: 600 }}>2. Devices & Battery Triage</label>
-                  <span className="subtle" style={{ fontSize: '0.78rem' }}>{items.length} line item(s)</span>
+                <div className="walkin-section-header" style={{ marginBottom: 'var(--space-3)' }}>
+                  <label className="walkin-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="walkin-section-num">2</span>
+                    Devices &amp; Battery Triage
+                  </label>
+                  <span className="subtle" style={{ fontSize: '0.78rem' }}>{items.length} line item{items.length !== 1 ? 's' : ''}</span>
                 </div>
 
                 {items.map((line, idx) => {
@@ -489,8 +510,9 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                           <button
                             type="button"
                             className="btn btn--ghost btn--sm"
-                            style={{ color: '#ff3b30', padding: '2px 8px' }}
+                            style={{ color: 'var(--color-danger)', padding: '0 10px', minHeight: '36px' }}
                             onClick={() => removeItemLine(idx)}
+                            aria-label={`Remove ${cat?.name || 'device'}`}
                           >
                             Remove
                           </button>
@@ -505,6 +527,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                             type="button"
                             className={`walkin-cat-btn ${line.categoryCode === c.code ? 'is-selected' : ''}`}
                             onClick={() => updateItem(idx, { categoryCode: c.code })}
+                            aria-pressed={line.categoryCode === c.code}
                           >
                             <CategoryIcon code={c.code} />
                             <span>{c.name}</span>
@@ -512,11 +535,12 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                         ))}
                       </div>
 
-                      {/* Quantity & Refusal Row */}
-                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+                      {/* Quantity & Battery Triage */}
+                      <div className="walkin-qty-triage-row">
                         <TextField
-                          label="Quantity"
+                          label="Qty"
                           type="number"
+                          inputMode="numeric"
                           min={1}
                           max={50}
                           value={line.quantity}
@@ -525,7 +549,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
 
                         {cat?.hasBattery && (
                           <div>
-                            <label style={{ fontSize: '0.82rem', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                            <label style={{ fontSize: '0.82rem', fontWeight: 600, display: 'block', marginBottom: '6px', color: 'var(--color-ink)' }}>
                               Battery Safety Triage
                             </label>
                             <div className="walkin-triage-pills">
@@ -533,6 +557,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                                 type="button"
                                 className={`walkin-triage-pill ${line.batteryCheck === 'intact_embedded' ? 'is-active-green' : ''}`}
                                 onClick={() => updateItem(idx, { batteryCheck: 'intact_embedded' })}
+                                aria-pressed={line.batteryCheck === 'intact_embedded'}
                               >
                                 Battery intact
                               </button>
@@ -540,6 +565,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                                 type="button"
                                 className={`walkin-triage-pill ${line.batteryCheck === 'no_battery' ? 'is-active-gray' : ''}`}
                                 onClick={() => updateItem(idx, { batteryCheck: 'no_battery' })}
+                                aria-pressed={line.batteryCheck === 'no_battery'}
                               >
                                 No battery
                               </button>
@@ -547,6 +573,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                                 type="button"
                                 className={`walkin-triage-pill ${line.batteryCheck === 'swollen_or_damaged_refused' ? 'is-active-danger' : ''}`}
                                 onClick={() => updateItem(idx, { batteryCheck: 'swollen_or_damaged_refused' })}
+                                aria-pressed={line.batteryCheck === 'swollen_or_damaged_refused'}
                               >
                                 Swollen / Damaged (Refuse)
                               </button>
@@ -570,11 +597,12 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                             value={line.identifiersText}
                             onChange={(e) => updateItem(idx, { identifiersText: e.target.value })}
                             hint="Only the last 4 digits are revealed. Used to check duplicate and custody records."
+                            inputMode="numeric"
                           />
 
                           {/* QR Code Scanner for Pre-tagged devices */}
-                          <div style={{ marginTop: '8px' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ marginTop: '10px' }}>
+                            <div className="walkin-qr-row">
                               <span className="subtle" style={{ fontSize: '0.8rem' }}>
                                 {line.qrIds.length ? `${line.qrIds.length} EcoSure label(s) scanned` : 'Has EcoSure QR tag?'}
                               </span>
@@ -588,14 +616,15 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                               </Button>
                             </div>
                             {line.qrIds.length > 0 && (
-                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '6px' }}>
+                              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '8px' }}>
                                 {line.qrIds.map((qr) => (
                                   <span key={qr} className="walkin-badge walkin-badge--verified" style={{ fontFamily: 'var(--font-mono)' }}>
                                     …{qr.slice(-6)}
                                     <button
                                       type="button"
-                                      style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 2px' }}
+                                      style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 2px', lineHeight: 1 }}
                                       onClick={() => updateItem(idx, { qrIds: line.qrIds.filter((q) => q !== qr) })}
+                                      aria-label={`Remove QR ${qr.slice(-6)}`}
                                     >
                                       ×
                                     </button>
@@ -604,7 +633,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                               </div>
                             )}
                             {line.scanning && (
-                              <div style={{ marginTop: '8px' }}>
+                              <div style={{ marginTop: '10px' }}>
                                 <QrScanner
                                   label={`Scan ${cat.name} QR code`}
                                   continuous
@@ -629,16 +658,20 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                 </button>
               </div>
 
-              {/* SECTION 3: SCALE WEIGHT & PAYOUT */}
+              {/* ── SECTION 3: SCALE WEIGHT & PAYOUT ── */}
               <div className="walkin-lookup-box" style={{ background: 'var(--color-surface)' }}>
-                <label style={{ fontSize: '0.88rem', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
-                  3. Scale Weight & Customer Payout
-                </label>
+                <div className="walkin-section-header" style={{ marginBottom: 'var(--space-4)' }}>
+                  <label className="walkin-section-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="walkin-section-num">3</span>
+                    Scale Weight &amp; Payout
+                  </label>
+                </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div className="walkin-scale-row">
                   <TextField
                     label="Net Weight (kg)"
                     type="number"
+                    inputMode="decimal"
                     step="0.001"
                     min="0.001"
                     placeholder="e.g. 1.850"
@@ -651,6 +684,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                   <TextField
                     label="Payout to Customer (INR)"
                     type="number"
+                    inputMode="numeric"
                     step="1"
                     min="0"
                     placeholder="e.g. 450"
@@ -660,8 +694,8 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                   />
                 </div>
 
-                <div style={{ marginTop: '10px' }}>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 500, display: 'block', marginBottom: '4px' }}>
+                <div style={{ marginTop: '14px' }}>
+                  <label style={{ fontSize: '0.82rem', fontWeight: 600, display: 'block', marginBottom: '8px', color: 'var(--color-ink)' }}>
                     Payout Method
                   </label>
                   <div className="walkin-triage-pills">
@@ -669,6 +703,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                       type="button"
                       className={`walkin-triage-pill ${payoutMethod === 'cash' ? 'is-active-green' : ''}`}
                       onClick={() => setPayoutMethod('cash')}
+                      aria-pressed={payoutMethod === 'cash'}
                     >
                       Cash
                     </button>
@@ -676,6 +711,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                       type="button"
                       className={`walkin-triage-pill ${payoutMethod === 'upi' ? 'is-active-green' : ''}`}
                       onClick={() => setPayoutMethod('upi')}
+                      aria-pressed={payoutMethod === 'upi'}
                     >
                       UPI / QR
                     </button>
@@ -683,6 +719,7 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                       type="button"
                       className={`walkin-triage-pill ${payoutMethod === 'none' ? 'is-active-gray' : ''}`}
                       onClick={() => setPayoutMethod('none')}
+                      aria-pressed={payoutMethod === 'none'}
                     >
                       Free Drop-off
                     </button>
@@ -692,12 +729,12 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
                 {suggestedPayout > 0 && (
                   <div className="walkin-rate-banner">
                     <div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--color-ink-muted)' }}>Recycler Rate Recommendation</span>
-                      <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--color-brand)' }}>
+                      <span style={{ fontSize: '0.78rem', color: 'var(--color-ink-muted)', fontWeight: 500 }}>Recycler Rate Recommendation</span>
+                      <div style={{ fontWeight: 700, fontSize: '1.1rem', color: 'var(--color-brand)', letterSpacing: '-0.02em' }}>
                         {formatInr(suggestedPayout)}
                       </div>
                     </div>
-                    <span className="walkin-badge walkin-badge--verified" style={{ fontSize: '0.78rem' }}>
+                    <span className="walkin-badge walkin-badge--verified" style={{ fontSize: '0.76rem' }}>
                       Active Recycler Rates
                     </span>
                   </div>
@@ -706,15 +743,15 @@ export function WalkInIntakeModal({ isOpen, onClose, onSuccess }) {
 
               <ErrorAlert error={submitError} />
 
-              {/* Submit Button */}
-              <div className="form-actions" style={{ marginTop: 'var(--space-4)' }}>
+              {/* ── Submit — sticky on mobile ── */}
+              <div className="walkin-submit-bar">
                 <Button
                   type="submit"
                   loading={submitting}
                   disabled={!(parseFloat(netKg) > 0) || (!isAnonymous && sanitizePhone(phone).length !== 10)}
-                  style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 600 }}
+                  style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 700 }}
                 >
-                  Confirm Walk-in Drop-off & Issue Receipt
+                  Confirm Walk-in Drop-off &amp; Issue Receipt
                 </Button>
               </div>
             </form>

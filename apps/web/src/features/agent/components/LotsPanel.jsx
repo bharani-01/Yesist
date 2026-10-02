@@ -110,30 +110,34 @@ function CreateLotForm({ jobs, onCreated }) {
         <fieldset className="stack stack--sm" style={{ border: 0, padding: 0, margin: 0 }}>
           <legend className="field__label" style={{ marginBottom: 6 }}>Collected pickups to pack ({jobs.length})</legend>
           {jobs.map((j) => (
-            <label key={j.id} className="checkbox">
-              <input type="checkbox" checked={selected.has(j.id)} onChange={() => toggle(j.id)} />
-              <span><span className="mono">{j.reference}</span> · {j.items.map((i) => `${i.collectedQuantity ?? 0} × ${i.name}`).join(', ')} · {formatKg(j.collectedNetKg)}</span>
+            <label key={j.id} className="checkbox" style={{ alignItems: 'flex-start', gap: '10px' }}>
+              <input type="checkbox" checked={selected.has(j.id)} onChange={() => toggle(j.id)} style={{ marginTop: '3px', flexShrink: 0 }} />
+              <span style={{ lineHeight: 1.5 }}>
+                <span className="mono" style={{ fontWeight: 600 }}>{j.reference}</span>
+                {' · '}{j.items.map((i) => `${i.collectedQuantity ?? 0} × ${i.name}`).join(', ')}
+                {' · '}{formatKg(j.collectedNetKg)}
+              </span>
             </label>
           ))}
         </fieldset>
-        
+
         <div className="field">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6, gap: '8px' }}>
             <label className="field__label" style={{ margin: 0 }}>Bag / Box Tag Number</label>
-            <button 
-              type="button" 
+            <button
+              type="button"
               onClick={() => setSealTag(generateBagTag())}
-              className="btn btn--ghost btn--sm tap-effect" 
-              style={{ fontSize: '12px', height: '28px', padding: '0 8px', color: 'var(--color-primary, #16a34a)', fontWeight: 600 }}
+              className="btn btn--ghost btn--sm tap-effect"
+              style={{ fontSize: '12px', height: '28px', padding: '0 8px', color: 'var(--color-primary, #16a34a)', fontWeight: 600, flexShrink: 0 }}
             >
               Generate New Tag
             </button>
           </div>
-          <input 
-            type="text" 
-            className="input mono" 
-            value={sealTag} 
-            onChange={(e) => setSealTag(e.target.value.toUpperCase())} 
+          <input
+            type="text"
+            className="input mono"
+            value={sealTag}
+            onChange={(e) => setSealTag(e.target.value.toUpperCase())}
             placeholder="e.g. BAG-01 or use generated tag"
           />
           <span className="field__hint">
@@ -142,8 +146,16 @@ function CreateLotForm({ jobs, onCreated }) {
         </div>
 
         <ErrorAlert error={error} />
-        <div className="form-actions">
-          <Button type="submit" loading={pending} disabled={!selected.size || !sealTag.trim()}>Pack &amp; Seal Bag ({selected.size})</Button>
+        {/* Full-width submit on mobile */}
+        <div className="form-actions" style={{ display: 'flex' }}>
+          <Button
+            type="submit"
+            loading={pending}
+            disabled={!selected.size || !sealTag.trim()}
+            style={{ width: '100%' }}
+          >
+            Pack &amp; Seal Bag ({selected.size})
+          </Button>
         </div>
       </form>
     </Panel>
@@ -168,14 +180,33 @@ function DispatchForm({ lot, recyclerName, hubs, onDone }) {
     }
   };
   return (
-    <form className="row" onSubmit={submit} style={{ flexWrap: 'nowrap' }}>
+    <form
+      className="dispatch-form"
+      onSubmit={submit}
+    >
       {hubs.length > 0 && (
-        <select className="select" style={{ minHeight: 32, width: 'auto' }} aria-label={`Destination for lot ${lot.sealTag}`} value={hubId} onChange={(e) => setHubId(e.target.value)}>
+        <select
+          className="select"
+          style={{ minHeight: 36, flex: 1, minWidth: 0 }}
+          aria-label={`Destination for lot ${lot.sealTag}`}
+          value={hubId}
+          onChange={(e) => setHubId(e.target.value)}
+        >
           <option value="">Direct to {recyclerName}</option>
           {hubs.map((h) => <option key={h.id} value={h.id}>Via hub: {h.name}</option>)}
         </select>
       )}
-      <input className="input" style={{ width: 110, minHeight: 32 }} type="number" step="0.001" min="0.001" placeholder="Net kg" aria-label="Net weight at loading (kg)" value={kg} onChange={(e) => setKg(e.target.value)} />
+      <input
+        className="input"
+        style={{ width: 90, minWidth: 80, minHeight: 36, flexShrink: 0 }}
+        type="number"
+        step="0.001"
+        min="0.001"
+        placeholder="kg"
+        aria-label="Net weight at loading (kg)"
+        value={kg}
+        onChange={(e) => setKg(e.target.value)}
+      />
       <Button type="submit" size="sm" loading={pending} disabled={!(Number(kg) > 0)}>Dispatch</Button>
       {error && <span className="field__error" role="alert">{error.message}</span>}
     </form>

@@ -114,28 +114,32 @@ export function AgentRequestsPage() {
         }
       >
         {() => (
-          <aside className="products-panel" style={{ padding: 'var(--space-6) var(--space-8)' }}>
+          <aside className="products-panel">
             <ul className="products-list">
               {filtered.map((j) => {
                 const firstItem = j.items?.[0];
                 return (
                   <li key={j.id}>
-                    <Link to={`/agent/jobs/${j.id}`} className="product-item product-item--link tap-effect">
-                      <div className="product-item__left">
-                        <div className="product-item__icon">
-                          <DeviceIcon categoryCode={firstItem?.categoryCode} />
-                        </div>
-                        <div className="product-item__content">
-                          <span className="product-item__title">
-                            {itemsSummary(j.items)}
-                          </span>
-                          <span className="product-item__sub">
-                            {j.wardName} • Preferred: {formatDate(j.preferredDate)} ({WINDOW_LABELS[j.preferredWindow] ?? 'Window'}) • MF-{j.reference}
-                          </span>
-                        </div>
+                    <Link to={`/agent/jobs/${j.id}`} className="request-item tap-effect">
+                      {/* Icon */}
+                      <div className="product-item__icon" style={{ flexShrink: 0 }}>
+                        <DeviceIcon categoryCode={firstItem?.categoryCode} />
                       </div>
-                      <span className="btn btn--primary btn--sm tap-effect" style={{ borderRadius: 'var(--radius-pill)' }}>
-                        Review & Accept &rarr;
+                      {/* Info — grows to fill space */}
+                      <div className="request-item__info">
+                        <span className="product-item__title">
+                          {itemsSummary(j.items)}
+                        </span>
+                        <span className="product-item__sub">
+                          {j.wardName} · {formatDate(j.preferredDate)} ({WINDOW_LABELS[j.preferredWindow] ?? 'Any'})
+                        </span>
+                        <span className="product-item__sub" style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', opacity: 0.6 }}>
+                          MF-{j.reference}
+                        </span>
+                      </div>
+                      {/* CTA — compact pill */}
+                      <span className="request-item__cta">
+                        Accept
                       </span>
                     </Link>
                   </li>

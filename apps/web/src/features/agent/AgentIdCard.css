@@ -1,22 +1,21 @@
 .id-card-page {
-  padding: 2rem 1rem;
+  /* Remove min-height: 100vh — bottom tab bar already handles scrolling */
+  padding: 1.5rem 1rem 6rem; /* bottom padding for tab bar */
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   background-color: #f8fafc;
-  min-height: 100vh;
 }
 
 .top-nav-bar {
   width: 100%;
-  max-width: 360px;
-  margin-bottom: 32px;
+  max-width: 800px;
+  margin-bottom: 24px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
 }
 
@@ -68,8 +67,8 @@
 
 .id-card-face {
   position: relative;
-  width: 100%;
-  max-width: 360px;
+  /* Scale card to fit any viewport: min 280px, max 360px */
+  width: min(360px, calc(100vw - 2rem));
   height: 560px;
   background: #ffffff;
   border-radius: 20px;
@@ -77,6 +76,7 @@
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  overflow: hidden; /* clip decorative backgrounds to card border */
 }
 
 .id-card-front {
@@ -191,11 +191,12 @@
 }
 
 .org-name {
-  font-size: 1.6rem;
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
   font-weight: 900;
   color: #0f172a;
   line-height: 1.1;
   letter-spacing: -0.02em;
+  word-break: break-word;
 }
 
 .org-subtext {
@@ -240,11 +241,13 @@
 }
 
 .agent-name {
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 4vw, 1.25rem);
   font-weight: 800;
   color: #0f172a;
   margin: 2px 0 0 0;
   letter-spacing: -0.01em;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
 .agent-role {
@@ -376,6 +379,7 @@
 }
 
 .back-header-badge {
+  /* Prevent text overflow — constrain and clip */
   position: relative;
   z-index: 1;
   color: #64748b;
@@ -384,6 +388,12 @@
   font-weight: 800;
   letter-spacing: 0.15em;
   line-height: 1.5;
+  /* Prevent it from growing past 80px on narrow cards */
+  max-width: 80px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
+  flex-shrink: 0;
 }
 
 

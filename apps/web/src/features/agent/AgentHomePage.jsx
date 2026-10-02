@@ -72,33 +72,47 @@ export function AgentHomePage() {
   const [showWalkInModal, setShowWalkInModal] = useState(false);
 
   const headerActions = (
-    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
-      <button 
-        type="button" 
-        className="btn btn--primary tap-effect" 
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', width: '100%' }}>
+      <button
+        type="button"
+        className="btn btn--primary"
         style={{
           borderRadius: 'var(--radius-pill)',
-          padding: '12px 20px',
+          padding: '11px 20px',
           fontWeight: 600,
           display: 'inline-flex',
           alignItems: 'center',
           gap: '8px',
-          cursor: 'pointer',
+          flex: '1 1 auto',
+          minWidth: '150px',
+          justifyContent: 'center',
+          WebkitTapHighlightColor: 'transparent',
         }}
         onClick={() => setShowWalkInModal(true)}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
         Walk-in Intake
       </button>
-      <Link 
-        to="/agent/id-card" 
-        className="btn btn--secondary tap-effect" 
-        style={{ borderRadius: 'var(--radius-pill)', padding: '12px 20px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+      <Link
+        to="/agent/id-card"
+        className="btn btn--secondary"
+        style={{
+          borderRadius: 'var(--radius-pill)',
+          padding: '11px 20px',
+          fontWeight: 600,
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '8px',
+          flex: '1 1 auto',
+          minWidth: '140px',
+          justifyContent: 'center',
+          textDecoration: 'none',
+        }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <rect width="20" height="14" x="2" y="5" rx="2" />
           <line x1="2" x2="22" y1="10" y2="10" />
         </svg>

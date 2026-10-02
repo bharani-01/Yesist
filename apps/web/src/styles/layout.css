@@ -399,35 +399,54 @@
   width: 100%;
   max-width: var(--content-width);
   margin: 0 auto;
-  padding: var(--space-10) var(--space-10) var(--space-12);
+  /* Mobile: compact padding */
+  padding: var(--space-5) var(--space-4) var(--space-8);
+}
+@media (min-width: 640px) {
+  .main { padding: var(--space-8) var(--space-6) var(--space-10); }
+}
+@media (min-width: 900px) {
+  .main { padding: var(--space-10) var(--space-10) var(--space-12); }
 }
 
 .page {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-8);
+  gap: var(--space-5);
+}
+@media (min-width: 640px) {
+  .page { gap: var(--space-8); }
 }
 
 .page-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-4);
-  flex-wrap: wrap;
+  /* Stack on mobile: title → actions */
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
   margin-bottom: var(--space-2);
+}
+@media (min-width: 640px) {
+  .page-header {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
 }
 .page-header__text { display: flex; flex-direction: column; gap: 2px; }
 .page-header__back { font-size: var(--text-sm); color: var(--color-ink-muted); margin-bottom: 4px; }
 .page-header__eyebrow {
   font-size: var(--text-xs);
-  font-weight: 500;
-  letter-spacing: 0.12em;
+  font-weight: 600;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
   margin-bottom: 2px;
 }
 .page-header h1 {
-  font-size: var(--text-3xl);
+  font-size: clamp(1.6rem, 6vw, var(--text-3xl));
   font-weight: 600;
   letter-spacing: -0.03em;
   line-height: 1.15;
@@ -476,29 +495,115 @@
   }
 }
 
+/* ── Mobile layout: sidebar hidden, bottom tab bar shown ── */
 @media (max-width: 800px) {
+  /* Sidebar completely off-screen on mobile — replaced by bottom tabs */
   .sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    transform: translateX(-100%);
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.15);
+    display: none;
   }
-  .sidebar.is-open {
-    transform: translateX(0);
-  }
-  .sidebar-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.4);
-    backdrop-filter: blur(4px);
-    z-index: 35;
-  }
+
   .mobile-header {
     display: flex;
   }
+
+  /* Content breathing room above bottom tab bar */
   .main {
-    padding: var(--space-6) var(--space-4) var(--space-8);
+    padding-bottom: calc(68px + env(safe-area-inset-bottom));
   }
 }
+
+/* ═══════════════════════════════════════════════
+   BOTTOM TAB BAR (mobile only)
+═══════════════════════════════════════════════ */
+.bottom-tab-bar {
+  /* Hidden on desktop */
+  display: none;
+}
+
+@media (max-width: 800px) {
+  .bottom-tab-bar {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid var(--color-border);
+    /* iPhone safe area */
+    padding-bottom: env(safe-area-inset-bottom);
+    box-shadow: 0 -1px 0 var(--color-border), 0 -8px 24px rgba(0, 0, 0, 0.06);
+  }
+}
+
+.bottom-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  /* 60px tab height */
+  min-height: 60px;
+  padding: 8px 4px 6px;
+  color: var(--color-ink-muted);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  transition: color 0.15s var(--ease);
+  position: relative;
+}
+
+.bottom-tab:active {
+  opacity: 0.7;
+}
+
+.bottom-tab--active {
+  color: var(--color-brand);
+}
+
+/* Active indicator dot above icon */
+.bottom-tab--active::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-brand);
+}
+
+.bottom-tab__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* Reuse nav-link__icon sizing inside tabs */
+.bottom-tab .nav-link__icon {
+  width: 22px;
+  height: 22px;
+}
+
+.bottom-tab__label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 64px;
+  text-align: center;
+}
+
+.bottom-tab--active .bottom-tab__label {
+  font-weight: 700;
+}
+

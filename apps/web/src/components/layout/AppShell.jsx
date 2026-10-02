@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { PanelLeftClose, PanelLeftOpen, LogOut, User as UserIcon } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, LogOut } from 'lucide-react';
 import { HOME_BY_WORKSPACE, WORKSPACE_LABELS, useAuth } from '../../features/auth/AuthProvider.jsx';
 import { Button } from '../ui/Button.jsx';
 import { Logo } from './Logo.jsx';
@@ -133,35 +133,35 @@ function Icon({ name }) {
 
 const NAV = {
   citizen: [
-    { to: '/pickups', label: 'Dashboard', icon: 'dashboard', end: true },
-    { to: '/devices', label: 'My Products', icon: 'devices' },
-    { to: '/rewards', label: 'Green Points', icon: 'rewards' },
-    { to: '/referral', label: 'Referral Hub', icon: 'referral', badge: '+100 pts' },
-    { to: '/pickups/new', label: 'Book a Pickup', icon: 'plus' },
+    { to: '/pickups', label: 'Home', icon: 'dashboard', end: true },
+    { to: '/devices', label: 'Products', icon: 'devices' },
+    { to: '/pickups/new', label: 'Book', icon: 'plus' },
+    { to: '/rewards', label: 'Rewards', icon: 'rewards' },
+    { to: '/referral', label: 'Refer', icon: 'referral', badge: '+100 pts' },
   ],
   agent: [
-    { to: '/agent', label: 'Dashboard', icon: 'dashboard', end: true },
-    { to: '/agent/requests', label: 'Open Requests', icon: 'requests' },
-    { to: '/agent/pickups', label: 'My Pickups', icon: 'shipments' },
-    { to: '/agent/lots', label: 'Packed Bags', icon: 'lots' },
-    { to: '/agent/id-card', label: 'Kabadi Wala ID', icon: 'id-card' },
+    { to: '/agent', label: 'Home', icon: 'dashboard', end: true },
+    { to: '/agent/requests', label: 'Requests', icon: 'requests' },
+    { to: '/agent/pickups', label: 'Pickups', icon: 'shipments' },
+    { to: '/agent/lots', label: 'Bags', icon: 'lots' },
+    { to: '/agent/id-card', label: 'My ID', icon: 'id-card' },
   ],
   recycler: [
     { to: '/recycler', label: 'Inbound Lots', icon: 'lots', end: true },
   ],
   hub: [
-    { to: '/hub', label: 'Lots Inventory', icon: 'lots', end: true },
+    { to: '/hub', label: 'Lots', icon: 'lots', end: true },
     { to: '/hub/shipments', label: 'Shipments', icon: 'shipments' },
   ],
   producer: [
-    { to: '/producer', label: 'Outcomes', icon: 'dashboard', end: true },
+    { to: '/producer', label: 'Overview', icon: 'dashboard', end: true },
     { to: '/producer/models', label: 'Models', icon: 'models' },
     { to: '/producer/batches', label: 'Batches', icon: 'batches' },
     { to: '/producer/units', label: 'Units', icon: 'units' },
   ],
   oversight: [
-    { to: '/oversight', label: 'Overview & Flags', icon: 'oversight', end: true },
-    { to: '/oversight/whatsapp', label: 'WhatsApp Bot', icon: 'activity' },
+    { to: '/oversight', label: 'Overview', icon: 'oversight', end: true },
+    { to: '/oversight/whatsapp', label: 'WhatsApp', icon: 'activity' },
   ],
 };
 
@@ -170,7 +170,6 @@ export function AppShell() {
   const navigate = useNavigate();
   const user = auth.user;
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     try {
       return localStorage.getItem('ecosure_sidebar_collapsed') === 'true';
@@ -212,12 +211,7 @@ export function AppShell() {
 
   const getInitials = (name) => {
     if (!name) return 'U';
-    return name
-      .split(' ')
-      .map((w) => w[0])
-      .slice(0, 2)
-      .join('')
-      .toUpperCase();
+    return name.split(' ').map((w) => w[0]).slice(0, 2).join('').toUpperCase();
   };
 
   const displayName = user?.fullName ?? user?.orgs?.[0]?.name ?? 'User';
@@ -226,53 +220,13 @@ export function AppShell() {
     <div className="shell">
       <a href="#main" className="visually-hidden">Skip to content</a>
 
-      {/* Mobile Top Bar */}
-      <div className="mobile-header">
-        <Link to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} className="brand">
-          <Logo />
-        </Link>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {user?.workspace === 'citizen' && (
-            <Link to="/referral" className="mobile-referral-chip">
-              <Icon name="referral" />
-              <span>Refer</span>
-              <span className="chip-badge">+100</span>
-            </Link>
-          )}
-          <button
-            type="button"
-            className="btn btn--secondary btn--sm"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle navigation"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      {mobileOpen && (
-        <div
-          className="sidebar-backdrop"
-          onClick={() => setMobileOpen(false)}
-          onKeyDown={(e) => e.key === 'Escape' && setMobileOpen(false)}
-          role="button"
-          tabIndex={0}
-          aria-label="Close menu"
-        />
-      )}
-
-      {/* Vertical Sidebar */}
-      <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''} ${mobileOpen ? 'is-open' : ''}`}>
+      {/* ── Desktop Sidebar (hidden on mobile via CSS) ── */}
+      <aside className={`sidebar ${collapsed ? 'sidebar--collapsed' : ''}`}>
         <div className="sidebar__header">
           <div className="sidebar__header-row">
-            <Link 
-              to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} 
-              className="brand" 
-              onClick={() => setMobileOpen(false)}
+            <Link
+              to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'}
+              className="brand"
               title="EcoSure Home"
             >
               <Logo />
@@ -282,7 +236,6 @@ export function AppShell() {
               className="sidebar__toggle-btn"
               onClick={toggleCollapsed}
               aria-label={collapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
-              title={collapsed ? 'Expand sidebar (Ctrl+B)' : 'Collapse sidebar (Ctrl+B)'}
             >
               {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
             </button>
@@ -299,7 +252,6 @@ export function AppShell() {
               to={l.to}
               end={l.end}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              onClick={() => setMobileOpen(false)}
               title={collapsed ? l.label : undefined}
             >
               <Icon name={l.icon} />
@@ -321,7 +273,7 @@ export function AppShell() {
             <p className="sidebar__referral-text">
               Invite friends to recycle electronics. Earn 100 pts per completed pickup.
             </p>
-            <Link to="/referral" className="sidebar__referral-link" onClick={() => setMobileOpen(false)}>
+            <Link to="/referral" className="sidebar__referral-link">
               Invite Friends →
             </Link>
           </div>
@@ -337,10 +289,10 @@ export function AppShell() {
                 <span className="user-name" title={displayName}>{displayName}</span>
                 <span className="user-email">{user.orgs?.[0]?.name ?? user.email}</span>
               </div>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleLogout} 
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
                 title="Sign out"
                 aria-label="Sign out"
                 className="user-logout-btn"
@@ -354,13 +306,51 @@ export function AppShell() {
         </div>
       </aside>
 
-      {/* Main Content Area */}
+      {/* ── Main Wrapper ── */}
       <div className="main-wrapper">
+        {/* Mobile Top Bar */}
+        <div className="mobile-header">
+          <Link to={user ? HOME_BY_WORKSPACE[user.workspace] ?? '/' : '/'} className="brand">
+            <Logo />
+            {user && user.workspace !== 'citizen' && (
+              <span className="brand__workspace" style={{ marginLeft: '8px' }}>
+                {WORKSPACE_LABELS[user.workspace]}
+              </span>
+            )}
+          </Link>
+          {user?.workspace === 'citizen' && (
+            <Link to="/referral" className="mobile-referral-chip">
+              <Icon name="referral" />
+              <span>Refer</span>
+              <span className="chip-badge">+100</span>
+            </Link>
+          )}
+        </div>
+
+        {/* Page content */}
         <main id="main" className="main">
           <Outlet />
         </main>
+
+        {/* ── Mobile Bottom Tab Bar ── */}
+        {user && links.length > 0 && (
+          <nav className="bottom-tab-bar" aria-label="Navigation">
+            {links.slice(0, 5).map((l) => (
+              <NavLink
+                key={l.to}
+                to={l.to}
+                end={l.end}
+                className={({ isActive }) => `bottom-tab${isActive ? ' bottom-tab--active' : ''}`}
+              >
+                <span className="bottom-tab__icon">
+                  <Icon name={l.icon} />
+                </span>
+                <span className="bottom-tab__label">{l.label}</span>
+              </NavLink>
+            ))}
+          </nav>
+        )}
       </div>
     </div>
   );
 }
-

@@ -149,39 +149,45 @@ export function AgentPickupsPage() {
         }
       >
         {() => (
-          <aside className="products-panel" style={{ padding: 'var(--space-6) var(--space-8)' }}>
+          <aside className="products-panel">
             <ul className="products-list">
               {displayed.map((j) => {
                 const firstItem = j.items?.[0];
                 const isScheduled = j.status === 'scheduled';
                 return (
                   <li key={j.id}>
-                    <Link to={`/agent/jobs/${j.id}`} className="product-item product-item--link tap-effect">
-                      <div className="product-item__left">
-                        <div className="product-item__icon">
+                    <Link to={`/agent/jobs/${j.id}`} className="pickup-item tap-effect">
+                      {/* Row 1: icon + text */}
+                      <div className="pickup-item__top">
+                        <div className="product-item__icon" style={{ flexShrink: 0 }}>
                           <DeviceIcon categoryCode={firstItem?.categoryCode} />
                         </div>
-                        <div className="product-item__content">
+                        <div className="request-item__info">
                           <span className="product-item__title">
                             {itemsSummary(j.items)}
                           </span>
                           <span className="product-item__sub">
                             {j.wardName}
-                            {isScheduled && ` • Visit: ${formatDate(j.scheduledFor)} (${WINDOW_LABELS[j.scheduledWindow] ?? 'Window'})`}
-                            {j.collectedNetKg && ` • ${formatKg(j.collectedNetKg)}`}
-                            {j.addressLine && ` • ${j.addressLine}`}
+                            {isScheduled && ` · ${formatDate(j.scheduledFor)} · ${WINDOW_LABELS[j.scheduledWindow] ?? 'Any window'}`}
+                            {j.collectedNetKg && ` · ${formatKg(j.collectedNetKg)}`}
                           </span>
+                          {j.addressLine && (
+                            <span className="product-item__sub" style={{ opacity: 0.6 }}>
+                              {j.addressLine}
+                            </span>
+                          )}
                         </div>
                       </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      {/* Row 2: status badge + action */}
+                      <div className="pickup-item__actions">
                         <StatusBadge map={PICKUP_STATUS} value={j.status} />
                         {isScheduled ? (
-                          <span className="btn btn--primary btn--sm tap-effect" style={{ borderRadius: 'var(--radius-pill)' }}>
-                            Collect &rarr;
+                          <span className="request-item__cta">
+                            Collect →
                           </span>
                         ) : (
-                          <span className="btn btn--secondary btn--sm">
-                            View &rarr;
+                          <span className="pickup-item__view">
+                            View →
                           </span>
                         )}
                       </div>

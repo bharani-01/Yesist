@@ -32,7 +32,6 @@ export function buildApiRouter() {
   api.use('/devices', noStore, devicesRoutes);
   api.use('/rewards', noStore, rewardsRoutes);
   api.use('/agent/jobs', noStore, collectionRoutes);
-  api.use('/agent', noStore, collectionRoutes);
   api.use('/agent/lots', noStore, lotsRoutes);
   api.use('/recycler/lots', noStore, intakeRoutes);
   api.use('/recycler/attestations', noStore, attestationsRoutes);
